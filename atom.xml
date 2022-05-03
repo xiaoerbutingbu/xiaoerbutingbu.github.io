@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-02T12:20:44.114Z</updated>
+  <updated>2022-05-03T04:15:53.159Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>redis理解和分布式锁</title>
+    <link href="http://example.com/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
+    <id>http://example.com/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</id>
+    <published>2022-05-03T04:15:52.889Z</published>
+    <updated>2022-05-03T04:15:53.159Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="对redis的理解"><a href="#对redis的理解" class="headerlink" title="对redis的理解"></a>对redis的理解</h1><p>redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部分都采用redis实现分布式缓存，从而去提高数据的的检索效率。</p><p>redis流行的原因：</p><p>​1 基于内存存储，在进行数据IO操作的时候能达到很高的QPS（官方给的10w）</p><p>​2 提供了非常丰富的数据存储结构，比如String、list、hash、set、zset</p><p>​3 底层采用单线程实现数据的IO，所以在数据算法层面不需要考虑并发安全性，从而让底层算法的时间复杂度基本都是常量复杂度</p><p>​4 虽然是内存存储，但却可以支持持久化，避免因服务器故障而导致的数据丢失问题</p><p>综上，redis一般是用来实现分布式缓存，从而降低应用程序对关系型数据库检索带来的性能影响，redis还可以实现分布式锁、分布式队列、排行榜、查找附近的人等功能，为复杂应用提供了解决方案</p><h1 id="实现分布式锁中-zookeeper和redis的比较"><a href="#实现分布式锁中-zookeeper和redis的比较" class="headerlink" title="实现分布式锁中 zookeeper和redis的比较"></a>实现分布式锁中 zookeeper和redis的比较</h1><p>分布式锁：核心目的是为了解决在同一个时刻有多个进程或线程来访问共享资源所带来的安全性问题。锁又分为共享锁（在同一个时刻允许多个线程或进程访问共享资源，适用于幂等性场景，从而避免重复加锁的性能开销）和排它锁（同一个时刻只允许一个线程或进程访问该共享资源，适用于非幂等性场景）</p><p>实现分布式锁的最常用中间件就是zookeeper和redis</p><p>redis实现分布式锁方式：</p><p>​1 基于redis本身提供的指令：SET key value NX PX millisecounds。设置key的时候，若key已经存在与服务器上了会返回一个0，表示无法设置，否则就返回1表示设置成功。程序就根据0和1判断状态，从而表示去获得锁</p><p>​2 基于redission客户端实现，redission提供了分布式锁的封装方法，只需要调用封装好的api，<em><strong>lock()</strong></em> 和 ***unlock()***方法，就可以实现锁的抢占和释放。redission的所有指令都是通过lua脚本去实现，该脚本可以保证所有执行指令的原则性。另外，redission提供了一个watchdog，它会在我们获取锁后每隔10s去把key的时间延长，就避免锁的过期。</p><p>redis的缺点：</p><p>​在获得锁的时候，很简单，若获取不到锁就一直去尝试获取，会影响程序性能</p><p>​是一个&#x3D;&#x3D;AP模型&#x3D;&#x3D;，也就是可用性模型，集群模式中，存在数据一致性，会导致锁出现问题。即使使用了redlock算法实现分布式锁，但在某些复杂的场景下也不能保证锁的一定可用</p><p>zookeeper实现分布式锁：</p><p>​1 有序节点实现：每个线程或进程都到zookeeper上的<em><strong>lock</strong></em>目录下去创建一个临时有序节点，去表示抢占锁，所有创建的节点都会按照先后顺序生成带有有序编号的节点，线程创建节点后获取<em><strong>lock</strong></em>节点下的所有子节点，判断当前线程创建的节点是否是所有子节点里序号最小的，若是就获取锁成功。反之就需要对当前线程的前一个节点建立事件监听，当被监听的节点释放后，则触发回调告诉当前线程从而再次去尝试抢占锁</p><p> 使用redis还是比较常见，因为实际开发中极端情况少，redis本身的性能又高，在高并发中比较合适。</p><p>zookeeper是一个分布的协调组件，是&#x3D;&#x3D;一个CP模型&#x3D;&#x3D;所以更适合实现分布式锁。当获取不到锁就添加监听器，不用一直获取，就减少了性能。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;对redis的理解&quot;&gt;&lt;a href=&quot;#对redis的理解&quot; class=&quot;headerlink&quot; title=&quot;对redis的理解&quot;&gt;&lt;/a&gt;对redis的理解&lt;/h1&gt;&lt;p&gt;redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>Java不可变类</title>
