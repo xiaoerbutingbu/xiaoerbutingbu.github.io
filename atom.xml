@@ -2,11 +2,11 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>小二小二不停步</title>
   
-  
+  <subtitle>xiaoerxiaoerbutingbu</subtitle>
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-03T17:15:38.243Z</updated>
+  <updated>2022-05-05T02:53:42.742Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>redis内存淘汰</title>
+    <link href="http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/"/>
+    <id>http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/</id>
+    <published>2022-05-05T02:52:26.015Z</published>
+    <updated>2022-05-05T02:53:42.742Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>内存淘汰： 当内存的使用率到达了maxMemory的上限的时候，进行内存的释放。</p><p>redis提供了许多内存淘汰算法，主要分为4种：</p><p>​随机：随机移除某个key</p><p>​TTL算法：，在设置了过期时间的键里面去找更早过期时间的key进行有限的移除</p><p>​LRU算法：去移除最近很少使用的key。</p><p>​LFU算法：与LRU算法类似                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </p><h1 id="LRU算法"><a href="#LRU算法" class="headerlink" title="LRU算法"></a>LRU算法</h1><p>​LRU算法会维护一个大小为16的侯选池，里面的数据会随着时间排序，每一次随机抽取5个key放入侯选池，当侯选池满了后，访问的时间间隔最大的key就从侯选池里面取出来并淘汰。这样就可以把真实的最少访问的key从内存里面淘汰。</p><p>​存在问题：若一个key很长时间没有访问，突然偶尔被访问，那LRU就会认为这是一个热点key就不会被淘汰。</p><h1 id="LFU算法"><a href="#LFU算法" class="headerlink" title="LFU算法"></a>LFU算法</h1><p>​相比于LRU算法，LFU增加了访问频率来统计数据的热点情况。</p><p>​主要设置是使用了两个双向链表形成了一个二维的双向链表，一个链表来保存访问频率，另一个保存访问频率相同的所有元素。当添加元素的时候，访问频次默认为1，找到相同频次的节点，然后添加到相同的频率节点对应的双向链表的头部，当元素被访问的时候，就增加对应key的访问频率，并把当前访问的节点移动到下一个频次的节点。</p><p>​可能出现某个数据前期的访问次数很多，但后续不再使用。若单纯按照这样的一个访问频次来进行淘汰的话，那这个key就很难被淘汰掉。该算法通过使用频率和上次访问的时间来标记数据的热度。若某个数据有读和写，那增加访问的频率；若一段时间内该数据没有读写，那就减少访问频率。</p><p>​经过LFU算法改进后就可以实现真正达到非热点数据的淘汰</p><p>​缺点：与LRU相比，增加了访问频次的维护以及实现的复杂度要比LRU更高</p><h1 id="过期删除"><a href="#过期删除" class="headerlink" title="过期删除"></a>过期删除</h1><p>定时策略：创建一个定时器，过期时间到，逻辑对键的删除</p><p>​对内存友好而CPU时间不好，redis还没有使用</p><p>惰性删除：过期键不管，每次从键空间获取键的时候，该键过期了删了，没过期就返回该键</p><p>​对内存不友好而CPU时间友好</p><p>定期删除：每隔一段时间就检查，删除过期键，由算法决定</p><p>​较为折中</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;内存淘汰： 当内存的使用率到达了maxMemory的上限的时候，进行内存的释放。&lt;/p&gt;
+&lt;p&gt;redis提供了许多内存淘汰算法，主要分为4</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>redis和数据库的数据一致性</title>
