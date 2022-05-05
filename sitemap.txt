@@ -1,3 +1,5 @@
+http://example.com/tags/test.html
+http://example.com/categories/test.html
 http://example.com/tags/index.html
 http://example.com/categories/index.html
 http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/
