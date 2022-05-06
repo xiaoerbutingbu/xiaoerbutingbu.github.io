@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-06T08:30:04.673Z</updated>
+  <updated>2022-05-06T10:50:43.799Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>redis基础</title>
+    <link href="http://example.com/2022/05/06/redis%E5%9F%BA%E7%A1%80/"/>
+    <id>http://example.com/2022/05/06/redis%E5%9F%BA%E7%A1%80/</id>
+    <published>2022-05-06T10:27:26.449Z</published>
+    <updated>2022-05-06T10:50:43.799Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="redis的基本性质"><a href="#redis的基本性质" class="headerlink" title="redis的基本性质"></a>redis的基本性质</h1><p>redis是&#x3D;&#x3D;完全基于内存&#x3D;&#x3D;，绝大部分请求是都是纯粹的内存操作</p><p>基于Reactor模式开发的网络处理器单多线程</p><p>6.0以前是单线程，利用队列技术将并发访问变为了串行访问，消除了传统数据库串行控制的开销</p><h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>支持数据持久化，可以将内存的数据保存在磁盘中，重启的时候可以再次舒勇</p><p>提供各种数据结构进行存储</p><p>支持数据的备份</p><p>高性能、高并发，所以可以作为缓存</p><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>五种基础：</p><p>String：最基本的，动态字符串，存数字时底层是int；长字符串（长度&gt;39字节）raw；短字符串（长度&lt;39字节）embstr</p><p>利用key的生命周期做投票系统；String特点数据刷新；利用数值操作特征为分布式数据库自增。访问次数、点赞、转发量</p><hr><p>Hash：是一个键值对集合，是一个String类型的key和value的映射表。相当于hashmap。存放对象类型的数据，可避免键名冲突。 用户的购物车；hash作为商品秒杀技术对象完成商品秒杀系统</p><p>底层：ziplist（元素数量&lt;512，所有元素长度&lt;64字节）和哈希表。</p><hr><p>List：简单的字符串列表，底层是顺序的双向链表和ziplist（元素数量&lt;512，所有对象元素长度小于64字节）。可用于消息队列；顺序特性实现朋友圈点赞；顺序特性进行分布式日志顺序性展示</p><hr><p>Set:String类型的无序集合，底层哈希表和inset（所有元素是整数，元素数量小于512）</p><p>比如标签；黑白名单；获取所有业务的权限</p><hr><p>Zset（SortedSet）：ziplist（元素数量小于128，所有元素长度&lt;64）和跳表结合，value保证唯一性，又可为每个value代表权重的值。排行榜系统；带权重任务队列；根据权重进行排序</p><p>三种高级：</p><p>Bitmaps:String类型上的一组面向bit操作的集合，不是真的数据结构，优点就是存储信息可节省大量空间。一般用于实时分析，存储对象ID关联的节省空间且高性能的布尔信息。底层是String</p><hr><p>HyperLogLogs：用于计算唯一事物的概率数据结构。可用于计算用户每天在搜索框中执行唯一的搜索。底层是String</p><hr><p>GEO：存储用户给定的地理位置信息，并对这些信息操作。底层是zset</p><hr><p>Streams：内存版的kafka</p><h2 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h2><p>速度快，支持丰富数据类型，支持事务、<em><strong>指令操作</strong></em>都是原子性的</p><p>容量收到物理内存限制，只适合较小数据量的高性能操作和运算上；</p><p>难在线扩容，在集群容量达到上限时在线扩容很复杂，所以运维人员在保证足够的空间</p><h1 id="redis6-0以后为什么引入多线程？"><a href="#redis6-0以后为什么引入多线程？" class="headerlink" title="redis6.0以后为什么引入多线程？"></a>redis6.0以后为什么引入多线程？</h1><p>多线程的情况下，线程切换换消耗CPU，<em><strong>CPU并不是redis的瓶颈</strong></em>。</p><p>引入多线程<em><strong>主要是为了提高网络IO读写性能</strong></em>：多线程只是在网络数据的读写这类耗时操作上使用，而执行命令仍是单线程顺序执行</p><p>redis将所有数据放在了内存中，对于小数据包，redis服务器已经处理80000到100000QPS，已经是极限，对大部分公司已经够用了</p><p>从redis自身角度，因为读写网络read&#x2F;write系统调用占用了Redis执行期间大部分CPU时间，瓶颈主要在于网络的 IO 消耗, 优化主要有两个方向:</p><ul><li>提高网络 IO 性能，典型的实现比如使用 DPDK 来替代内核网络栈的方式</li><li>使用多线程充分利用多核，典型的实现比如 Memcached</li></ul><p>小总结：</p><p>​可以充分利用服务器CPU资源，目前主线程只有一个核</p><p>​多线程可以分摊redis同步IO读写消耗</p><h1 id="redis6-0关于多线程"><a href="#redis6-0关于多线程" class="headerlink" title="redis6.0关于多线程"></a>redis6.0关于多线程</h1><p><em><strong>多线程默认是禁用的，只使用主线程</strong></em>。所以需要修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads-do-reads <span class="built_in">yes</span></span><br></pre></td></tr></table></figure><p>仅仅是开启多线程是不生效，修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads 4 <span class="comment">#官网建议4核使用2/3个线程，8核使设置6个线程</span></span><br></pre></td></tr></table></figure><p>实现机制：</p><p>​主线程负责接收建立连接请求，获取socket放入全局等待处理读处理队列</p><p>​主线程处理完读时间后，通过RR（Round Robin）将这些连接分配给这些IO线程</p><p>​主线程阻塞等待IO线程读取socket完毕</p><p>​主线程通过单线程的方式执行请求命令，请求数据读取并解析完成，但不执行</p><p>​主线程阻塞等待IO线程将数据收回，写socket完毕</p><p>​解除绑定，清空等待队列</p><h1 id="开启多线程后，是否有线程并发安全问题"><a href="#开启多线程后，是否有线程并发安全问题" class="headerlink" title="开启多线程后，是否有线程并发安全问题"></a>开启多线程后，是否有线程并发安全问题</h1><p>Redis的多线程部分只是用来处理网络数据的读写和协议解析，执行命令仍然是单线程顺序执行。所以我们不需要去考虑控制 key、lua、事务，LPUSH&#x2F;LPOP 等等的并发及线程安全问题。</p><h1 id="redis经常提到IO多路复用，怎么理解？"><a href="#redis经常提到IO多路复用，怎么理解？" class="headerlink" title="redis经常提到IO多路复用，怎么理解？"></a>redis经常提到IO多路复用，怎么理解？</h1><p>这是IO模型的一种，即经典的Reactor设计模式，有时也称为异步阻塞IO。</p><p>多路指的是多个socket连接，复用指的是复用一个线程。多路复用主要有三种技术：select，poll，epoll。epoll是最新的也是目前最好的多路复用技术。采用多路 I&#x2F;O 复用技术可以让单个线程高效的处理多个连接请求（尽量减少网络IO的时间消耗），且Redis在内存中操作数据的速度非常快（内存内的操作不会成为这里的性能瓶颈），主要以上两点造就了Redis具有很高的吞吐量。</p><p>[Redis 6.0 新特性-多线程连环13问！](<a href="https://mp.weixin.qq.com/s/FZu3acwK6zrCBZQ_3HoUgw">Redis 6.0 新特性-多线程连环13问！ (qq.com)</a>)</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;redis的基本性质&quot;&gt;&lt;a href=&quot;#redis的基本性质&quot; class=&quot;headerlink&quot; title=&quot;redis的基本性质&quot;&gt;&lt;/a&gt;redis的基本性质&lt;/h1&gt;&lt;p&gt;redis是&amp;#x3D;&amp;#x3D;完全基于内存&amp;#x3D;&amp;#x3D;，绝</summary>
+      
+    
+    
+    
+    <category term="redis" scheme="http://example.com/categories/redis/"/>
+    
+    
+    <category term="redis" scheme="http://example.com/tags/redis/"/>
+    
+  </entry>
   
   <entry>
     <title>redis内存淘汰</title>
