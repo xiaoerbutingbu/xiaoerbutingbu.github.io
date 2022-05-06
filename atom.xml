@@ -42,7 +42,7 @@
     <link href="http://example.com/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7%E5%8F%8Aredis%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/"/>
     <id>http://example.com/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7%E5%8F%8Aredis%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</id>
     <published>2022-05-03T17:15:38.054Z</published>
-    <updated>2022-05-03T17:15:38.243Z</updated>
+    <updated>2022-05-06T03:37:33.914Z</updated>
     
     <content type="html"><![CDATA[<p>redis用来实现应用和数据库之间读操作的缓存层，主要目的是去减少数据库的IO，并提升数据库的IO性能。</p><h1 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h1><p>当应用程序需要读取某个数据的时候，首先会尝试去redis里面加载，若命中就直接返回，反之就去数据库里面查询，查询到数据后再把数据缓存到redis里面。</p><h1 id="出现原因"><a href="#出现原因" class="headerlink" title="出现原因"></a>出现原因</h1><p>即一份数据同时保存在redis和数据库里面，当数据发生变化的时候需要同时更新数据库和redis，由于更新操作具有先后顺序且redis不像数据库中的多表事务操作（满足ACID的特性），所以会出现数据一致性的问题</p><h1 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h1><h2 id="先更新数据库后更新缓存"><a href="#先更新数据库后更新缓存" class="headerlink" title="先更新数据库后更新缓存"></a>先更新数据库后更新缓存</h2><p>此情况下，若缓存更新失败，就会导致数据库和redis的数据不一样。</p><p>线程1连接到数据库，读取到了数据A，此时线程1停顿，线程2连接到数据库将数据A更改为数据B，并将B写入了redis完成了线程2的操作，然后线程1将读取到的数据A写入redis即把B覆盖。此时，数据库里面的数据为B，而redis里的数据为A</p><h2 id="先删除缓存后更新数据库"><a href="#先删除缓存后更新数据库" class="headerlink" title="先删除缓存后更新数据库"></a>先删除缓存后更新数据库</h2><p>理想情况下是应用下次访问redis的时候，发现redis里面是空值，就会从数据库里加载并保存至数据库，理论上可行。但在极端情况下，由于删除redis和更新数据库的两个操作均不是原子操作，所以还是会出现数据不一致</p><h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>基于RocketMQ的可靠性消息通信实现数据的最终一致性</p><p>通过Canal组件监控数据库里面的binlog的日志，把更新后的数据同步到redis里面</p><p>采用延时双删的原则：先淘汰缓存，再写数据库，休眠一会儿后再淘汰缓存。因为存在了延时时间，目的就是为了先把查到的数据写入redis再删redis</p><h1 id="redis的线程安全问题"><a href="#redis的线程安全问题" class="headerlink" title="redis的线程安全问题"></a>redis的线程安全问题</h1><h2 id="redis-server"><a href="#redis-server" class="headerlink" title="redis-server"></a>redis-server</h2><p>是一个线程安全的K-V数据库，即在redis-server端去执行指令的时候不要任何的同步机制，不存在任何线程安全的问题，虽然6.0之后增加了多线程的模型，但该模型只是去处理网络的IO事件，对于指令的执行还是采用主线程来处理的，所以并不会存在多个线程同时去执行操作指令的情况。</p><p>没有采用多线程执行指令：</p><p>​本身可能出现的性能瓶颈点无非是网络IO、CPU、内存，但是CPU不是redis的瓶颈，所以就没必要采用多线程执行指令</p><p>​若采用多线程，那么所有指令就必须要考虑线程安全的问题，也就需要加锁来解决，这种方式反而会对性能造成更大的影响</p><h2 id="redis-client"><a href="#redis-client" class="headerlink" title="redis-client"></a>redis-client</h2><p>里面的指令操作都是原子性，但若有多个redis客户端同时执行多个指令就无法保证原子性。</p><p>比如：两个client同时去获取server上的key1，同时去修改和写入，因为多线程下原子性不能保证以及多进程的情况下共享资源访问的竞争问题也不能保证数据安全性</p><h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>尽可能使用redis里面的原子指令</p><p>对个客户端的资源访问加锁</p><p>通过lua脚本实现多个指令的操作，去满足原子性</p>]]></content>
     
@@ -54,6 +54,8 @@
       
     
     
+    
+    <category term="redis" scheme="http://example.com/categories/redis/"/>
     
     
   </entry>
