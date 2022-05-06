@@ -6,4 +6,4 @@ http://example.com/categories/index.html
 http://example.com/tags/index.html
 http://example.com/
 http://example.com/categories/redis/
-http://example.com/categories/basic/
+http://example.com/categories/foundation/
