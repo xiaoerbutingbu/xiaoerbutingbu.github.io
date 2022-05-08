@@ -11,5 +11,6 @@ http://example.com/
 http://example.com/tags/%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/
 http://example.com/tags/redis/
 http://example.com/tags/TheadLocal/
+http://example.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/
 http://example.com/categories/redis/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
