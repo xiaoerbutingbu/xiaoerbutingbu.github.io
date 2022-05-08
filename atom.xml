@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-08T03:04:03.952Z</updated>
+  <updated>2022-05-08T04:23:46.822Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Spring基础</title>
+    <link href="http://example.com/2022/05/08/spring-1/"/>
+    <id>http://example.com/2022/05/08/spring-1/</id>
+    <published>2022-05-08T03:17:14.000Z</published>
+    <updated>2022-05-08T04:23:46.822Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="主要模块"><a href="#主要模块" class="headerlink" title="主要模块"></a>主要模块</h1><p><img src="/2022/05/08/spring-1/spring-model.png" alt="主要模块"></p><p>主要被分成：数据访问&#x2F;继承、web、AOP（面向切面编程）、工具、消息、测试</p><h1 id="Bean"><a href="#Bean" class="headerlink" title="Bean"></a>Bean</h1><h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><p>创建方式：构造器创建Bean<bean>标签、Setter方法、静态工厂方法创建bean、实例工厂方法创建bean</bean></p><p>获取bean：在初始化的时候保存ApplicationContext对象、通过Spring提供的工具类获取ApplicationContext对象、实现ApplicationContextAware接口、继承自抽象类ApplicationObjectSupport</p><p>配置Bean方式：基于XML配置、基于注解的配置、基于java的配置</p><h2 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h2><p>默认下，spring只为每个在IOC容器里声明的bean创建唯一一个实例，整个IOC容器范围内都能共享该实例；所有后续的getBean()调用和bean引用都将返回这个唯一的bean实例。该作用域被称为singleton，是所有bean的默认作用域</p><table><thead><tr><th align="center">类别</th><th align="center">说明</th></tr></thead><tbody><tr><td align="center">singleton</td><td align="center">在SpringIoc容器中仅存在一个bean实例,bean以单实例方式存在</td></tr><tr><td align="center">prototype</td><td align="center">每次调用getbean() 都将返回一个新的实例</td></tr><tr><td align="center">request</td><td align="center">每次Http请求都会创建一个新的bean,该作用域仅适合于WebApplicationContext 环境</td></tr><tr><td align="center">session</td><td align="center">同一个Http Session 共享一个bean,不同的Http Session使用不同的bean.该作用域仅适合 WebApplicationContext 环境</td></tr></tbody></table><p>singleton 默认值 当Ioc容器一创建就会创建bean实例,而且是单例的,每次得到的都是同一个<br>prototype 原型的 当Ioc容器一创建不实例化该bean,每次调用getBean() 方法时再实例化该bean,而且每次调用都是不同的bean实例<br>request 每次请求实例化一个bean<br>session 在一次会话中共享一个bean</p><h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><h3 id="创建前准备"><a href="#创建前准备" class="headerlink" title="创建前准备"></a>创建前准备</h3><p>​bean在开始加载之前，从上下文和配置中解析并查找bean有关的一些扩展实现。比如：init-method：容器在初始化时调用的；destroy-method：容器在销毁bean的时候会调用；BeanFactoryPostProcessor：加载过程中的前置、后置的一些处理拓展实现。</p><p>​这些类或配置时提供给开发者去实现bean加载过程中的拓展，在很多与spring集成的中间件常见。比如：Dubbo</p><h3 id="创建实例化"><a href="#创建实例化" class="headerlink" title="创建实例化"></a>创建实例化</h3><p>​通过反射去创建bean的实例对象，并且扫描和解析bean声明的一些属性</p><h3 id="依赖注入"><a href="#依赖注入" class="headerlink" title="依赖注入"></a>依赖注入</h3><p>​若被实例化的bean存在依赖其他bean对象的一些情况，则需要对这些依赖的bean进行对象注入。比如：@Autowired、@Setter这样的配置形式。</p><p>​还会触发一些拓展的调用。比如：BeanPostProcessors：去实现bean初始化前后的拓展回调；</p><h3 id="容器缓存"><a href="#容器缓存" class="headerlink" title="容器缓存"></a>容器缓存</h3><p>​把bean缓存到容器里面以及spring的缓存中；这个阶段的bean就能被开发者拿去用。</p><h3 id="销毁实例"><a href="#销毁实例" class="headerlink" title="销毁实例"></a>销毁实例</h3><p>​当spring的应用上下文被关闭的时候，上下文中所有的bean会被销毁。若bean实现了诸如DisposableBean接口或者配置了destory-method属性的一些方法会在该阶段调用</p><h1 id="IOC"><a href="#IOC" class="headerlink" title="IOC"></a>IOC</h1><p> 一种设计思想，控制反转，<em><strong>将设计好的对象交给容器控制</strong></em>。在调用某个类时，容器会实例化，即容器控制对象的创建。</p><p>  IOC容器实例化过程中，一般不包含bean的依赖注入，bean的注册和依赖注入是两个过程，依赖注入一般发生在应用第一次索取bean的时候，但是也可以在xml中配置，在容器初始化的时候，这个bean就完成了初始化。</p><h1 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h1><p>面向切面编程基于IOC。简单说就是将部分重复的代码抽取出来，需要执行的时候用动态代理价技术。不修改代码进行功能增强。</p><p> 降低了耦合度，提高了程序的可重用性，同时提高了开发效率，实现业务和切入类的解耦</p><p>底层使用动态代理</p><p>与OOP相比，一个是横向一个纵向在</p><h1 id="涉及到的设计模式"><a href="#涉及到的设计模式" class="headerlink" title="涉及到的设计模式"></a>涉及到的设计模式</h1><p>IOC：工厂模式，单例模式，装饰器模式</p><p>AOP：代理模式，观察者模式（监听）</p><p>MVC:委派模式，适配者模式</p><p>JDBC：模板方法模式（RestTemplate）</p><h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>有了IOC容器，对象间的依赖关系交给了spring，更专注业务逻辑代码</p><p>有AOP和OOP，很多功能更方便简单使用</p><p>简化开发</p><p>方便测试</p><p>声明式事务管理</p><p>减低API开发难度</p><p>低耦合</p><p>方便集成其他框架</p><h1 id="BeanFactory和FactoryBean的区别"><a href="#BeanFactory和FactoryBean的区别" class="headerlink" title="BeanFactory和FactoryBean的区别"></a>BeanFactory和FactoryBean的区别</h1><p>spring里面的核心功能是IOC容器，本质就是bean的容器、工厂，能去根据XML中声明的bean的配置去进行加载和初始化，然后beanFactory去生成我们所需要的各种各样的一个bean。</p><p>BeanFacory：是所有Spring Bean容器的顶级接口，为Spring的容器定义了一套规范，并提供像getBean等方法从容器中获取指定的Bean的实例；在产生bean的同时，提供解决bean之间依赖注入的能力；</p><p>FactoryBean：是一个工厂bean，接口，主要功能是去动态生成某一类型的bean的一个实例，即可以自定义一个bean并加载到IOC容器里，里面有个方法getObject就是实现动态构建bean的一个过程。OpenFeign组件客户端代理就是使用了FactoryBean实现</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;主要模块&quot;&gt;&lt;a href=&quot;#主要模块&quot; class=&quot;headerlink&quot; title=&quot;主要模块&quot;&gt;&lt;/a&gt;主要模块&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;/2022/05/08/spring-1/spring-model.png&quot; alt=&quot;主要模块&quot;&gt;&lt;/</summary>
+      
+    
+    
+    
+    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
+    
+    
+    <category term="Spring" scheme="http://example.com/tags/Spring/"/>
+    
+    <category term="框架" scheme="http://example.com/tags/%E6%A1%86%E6%9E%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>ThreadLocal</title>
