@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-10T08:56:03.323Z</updated>
+  <updated>2022-05-10T08:57:57.298Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>synchronized-1</title>
+    <title>synchronized基础</title>
     <link href="http://example.com/2022/05/10/synchronized-1/"/>
     <id>http://example.com/2022/05/10/synchronized-1/</id>
     <published>2022-05-10T08:36:16.000Z</published>
-    <updated>2022-05-10T08:56:03.323Z</updated>
+    <updated>2022-05-10T08:57:57.298Z</updated>
     
     <content type="html"><![CDATA[<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>解决多个线程之间访问资源的同步性，该关键字可保证修饰的方法或代码块在任意时刻只能有一个线程执行。</p><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>JVM是通过进入、退出对象监视器来实现对方法、同步块的同步，而对象监视器的本质依赖于底层操作系统的互斥锁实现，能自动解锁</p><p>使用：</p><p>作用于普通方法时：锁的是对象的实例，即this对象，所谓的方法锁。进入同步代码块，要获得当前实例的锁</p><p>修饰静态方法时：锁的是这个类的所有class对象，即xxx.class  类锁。会作用于所有对象实例。进入同步代码要获得当前类对象的锁</p><p>修饰代码块（在方法中）时：锁的是synchronized(obj)，用户给定的对象，对象锁。进入同步代码要获得给定对象的锁</p><p><img src="/2022/05/10/synchronized-1/use.png" alt="use"></p><p>不能在类级别的（静态）代码块</p><p>特点：</p><p>  原子性、可见性（释放锁时，所有写入都会写回内存，获得锁就会从内存读取最新数据）、有序性；可重入性（对同一个线程在获得锁后，在调用其他需同样锁的代码时可直接调用）；重量级（底层是一个监视器对象完成。监视器锁的本质是依赖于操作系统的互斥锁实现）</p><h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p> 偏向锁：Java6之后加的新锁。会偏向当前已经占领锁的线程 ，总是让一个线程多次获得。只在第一次请求锁时采用CAS操作并将锁对象的标记字段记录为当前线程地址。之后，持有该锁的线程无需加锁操作</p><p>​线程在进入同步代码块获得锁时，会检查对象头中是否存储了线程ID，若没有，判断一下偏向标志位是否为1，若不是1，说明该锁没有被任何线程获取，就CAS的方式替换mark word，将对象Mark word中的线程ID指向该线程，并将偏向标志位置位</p><p>  轻量锁：多个线程在不同时间请求同一把锁，即没有锁竞争。代码进入同步块时，若同步对象无锁，当前线程会在栈帧中创建一个锁记录区域，同时将锁对象头中的mark word拷贝到锁记录，再使用CAS将mark word 更新为指向锁记录的指针</p><p>  自旋锁：轻量级失败后，进行。基于大多数情况下，线程持有锁的时间都不会太长。因为线程间的切换操作系统需要从用户态到核心态，时间成本高。线程没有获取到锁的时候，虚拟机让线程做几个时间不太久的空循环（即自旋），循环后再次去尝试获取锁，若得到锁就进入临界区，反之就会被在操作系统层面挂起。<em><strong>提升了效率</strong></em>，最后没办法就只能升级为重量级锁</p><p>  锁消除：<em><strong>删除不必要的加锁</strong></em>。虚拟机在JIT编译时，扫描运行上下文，去除不可能存在共享资源竞争的锁。</p><p>  锁粗化：将多次连续的加锁、解锁操作合并为一次，将多个连续的锁拓展成一个更大的锁</p><p> 构造方法不能使用该关键字修饰，因为构造方法本身就线性安全</p><h1 id="底层"><a href="#底层" class="headerlink" title="底层"></a>底层</h1><p>是通过monitorenter获取锁，通过monitorexit释放锁</p><p>出现两个monitorexit：防止同步代码块中线程因异常退出，而锁没有释放，这必然会导致死锁。<em><strong>最后一个monitorexit保证在异常情况下，锁也可以得到释放，避免死锁</strong></em></p><h1 id="和Lock比较"><a href="#和Lock比较" class="headerlink" title="和Lock比较"></a>和Lock比较</h1><p>相同点：</p><p>  都是可重入锁；都保证了可见性和互斥性；都可以用于控制多线程对共享对象的访问</p><p>不同点</p><table><thead><tr><th align="center">ReetrantLock</th><th align="center">synchronized</th></tr></thead><tbody><tr><td align="center">默认也是非公平，但可以实现公平锁</td><td align="center">锁非公平</td></tr><tr><td align="center">只是lock接口下的实现类，是API层面的锁</td><td align="center">是JVM级别的锁</td></tr><tr><td align="center">显示获取和释放锁，在使用时避免程序异常无法释放锁，需要在finally控制块中进行解锁操作</td><td align="center">隐式获取锁和释放锁</td></tr><tr><td align="center">等待可中断、可实现公平锁、可实现选择性通知</td><td align="center"></td></tr><tr><td align="center">是可精确唤醒</td><td align="center">要么随机唤醒一个线程，要么唤醒所有等待的线程</td></tr></tbody></table><p>隐式锁和显示锁就是在使用的时候，使用者是否要手动写代码来控制获取锁和释放锁</p><p>公平锁实现：获取锁时，会先看sync队列是否在 等待获取资源的线程。没有就尝试获取锁，若有就将当前线程封装成node加入sync队列</p><p>非公平锁实现： 当线程争锁时，会进行一次CAS尝试获取锁，失败就进入acquir(1)函数，再尝试获取锁，若失败就将当前线程封装成node加入sync队列，就等前面线程执行完轮到自己</p><h1 id="和volatile比较"><a href="#和volatile比较" class="headerlink" title="和volatile比较"></a>和volatile比较</h1><table><thead><tr><th align="center">Synchronized</th><th align="center">Volatile</th></tr></thead><tbody><tr><td align="center">性能较差</td><td align="center">线程同步的轻量级实现，性能更好</td></tr><tr><td align="center">可以修饰方法以及代码块</td><td align="center">只能用于变量</td></tr><tr><td align="center">原子性、可见性都保证</td><td align="center">可保证数据的可见性，不保证原子性</td></tr><tr><td align="center">解决的是多线程之间访问资源的同步性</td><td align="center">解决变量在多个线程间的可见性</td></tr><tr><td align="center">因为是锁，可能造成线程阻塞</td><td align="center">不会线程阻塞</td></tr><tr><td align="center">标记的变量可以被编译器优化</td><td align="center">标记的变量不会被编译器优化</td></tr></tbody></table><p>内存屏障：是CPU的重排列指令引起的</p><p>Volatile通过内存屏障禁止指令重排序</p>]]></content>
     
