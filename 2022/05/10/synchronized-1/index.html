@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>synchronized-1 | 小二小二不停步</title><meta name="keywords" content="synchronized,锁"><meta name="author" content="小二小二不停步"><meta name="copyright" content="小二小二不停步"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="目的解决多个线程之间访问资源的同步性，该关键字可保证修饰的方法或代码块在任意时刻只能有一个线程执行。 原理JVM是通过进入、退出对象监视器来实现对方法、同步块的同步，而对象监视器的本质依赖于底层操作系统的互斥锁实现，能自动解锁 使用： 作用于普通方法时：锁的是对象的实例，即this对象，所谓的方法锁。进入同步代码块，要获得当前实例的锁 修饰静态方法时：锁的是这个类的所有class对象，即xxx.c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized-1">
+<meta property="og:url" content="http://example.com/2022/05/10/synchronized-1/index.html">
+<meta property="og:site_name" content="小二小二不停步">
+<meta property="og:description" content="目的解决多个线程之间访问资源的同步性，该关键字可保证修饰的方法或代码块在任意时刻只能有一个线程执行。 原理JVM是通过进入、退出对象监视器来实现对方法、同步块的同步，而对象监视器的本质依赖于底层操作系统的互斥锁实现，能自动解锁 使用： 作用于普通方法时：锁的是对象的实例，即this对象，所谓的方法锁。进入同步代码块，要获得当前实例的锁 修饰静态方法时：锁的是这个类的所有class对象，即xxx.c">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/3.jpeg">
+<meta property="article:published_time" content="2022-05-10T08:36:16.000Z">
+<meta property="article:modified_time" content="2022-05-10T08:56:03.323Z">
+<meta property="article:author" content="小二小二不停步">
+<meta property="article:tag" content="synchronized">
+<meta property="article:tag" content="锁">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/3.jpeg"><link rel="shortcut icon" href="/img/archives.jpg"><link rel="canonical" href="http://example.com/2022/05/10/synchronized-1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'synchronized-1',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-05-10 16:56:03'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="小二小二不停步" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博客</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/3.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">小二小二不停步</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博客</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">synchronized-1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-05-10T08:36:16.000Z" title="发表于 2022-05-10 16:36:16">2022-05-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-05-10T08:56:03.323Z" title="更新于 2022-05-10 16:56:03">2022-05-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="synchronized-1"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>解决多个线程之间访问资源的同步性，该关键字可保证修饰的方法或代码块在任意时刻只能有一个线程执行。</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>JVM是通过进入、退出对象监视器来实现对方法、同步块的同步，而对象监视器的本质依赖于底层操作系统的互斥锁实现，能自动解锁</p>
+<p>使用：</p>
+<p>作用于普通方法时：锁的是对象的实例，即this对象，所谓的方法锁。进入同步代码块，要获得当前实例的锁</p>
+<p>修饰静态方法时：锁的是这个类的所有class对象，即xxx.class  类锁。会作用于所有对象实例。进入同步代码要获得当前类对象的锁</p>
+<p>修饰代码块（在方法中）时：锁的是synchronized(obj)，用户给定的对象，对象锁。进入同步代码要获得给定对象的锁</p>
+<p><img src="/2022/05/10/synchronized-1/use.png" alt="use"></p>
+<p>不能在类级别的（静态）代码块</p>
+<p>特点：</p>
+<p>  原子性、可见性（释放锁时，所有写入都会写回内存，获得锁就会从内存读取最新数据）、有序性；可重入性（对同一个线程在获得锁后，在调用其他需同样锁的代码时可直接调用）；重量级（底层是一个监视器对象完成。监视器锁的本质是依赖于操作系统的互斥锁实现）</p>
+<h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p> 偏向锁：Java6之后加的新锁。会偏向当前已经占领锁的线程 ，总是让一个线程多次获得。只在第一次请求锁时采用CAS操作并将锁对象的标记字段记录为当前线程地址。之后，持有该锁的线程无需加锁操作</p>
+<p>​				线程在进入同步代码块获得锁时，会检查对象头中是否存储了线程ID，若没有，判断一下偏向标志位是否为1，若不是1，说明该锁没有被任何线程获取，就CAS的方式替换mark word，将对象Mark word中的线程ID指向该线程，并将偏向标志位置位</p>
+<p>  轻量锁：多个线程在不同时间请求同一把锁，即没有锁竞争。代码进入同步块时，若同步对象无锁，当前线程会在栈帧中创建一个锁记录区域，同时将锁对象头中的mark word拷贝到锁记录，再使用CAS将mark word 更新为指向锁记录的指针</p>
+<p>  自旋锁：轻量级失败后，进行。基于大多数情况下，线程持有锁的时间都不会太长。因为线程间的切换操作系统需要从用户态到核心态，时间成本高。线程没有获取到锁的时候，虚拟机让线程做几个时间不太久的空循环（即自旋），循环后再次去尝试获取锁，若得到锁就进入临界区，反之就会被在操作系统层面挂起。<em><strong>提升了效率</strong></em>，最后没办法就只能升级为重量级锁</p>
+<p>  锁消除：<em><strong>删除不必要的加锁</strong></em>。虚拟机在JIT编译时，扫描运行上下文，去除不可能存在共享资源竞争的锁。</p>
+<p>  锁粗化：将多次连续的加锁、解锁操作合并为一次，将多个连续的锁拓展成一个更大的锁</p>
+<p> 构造方法不能使用该关键字修饰，因为构造方法本身就线性安全</p>
+<h1 id="底层"><a href="#底层" class="headerlink" title="底层"></a>底层</h1><p>是通过monitorenter获取锁，通过monitorexit释放锁</p>
+<p>出现两个monitorexit：防止同步代码块中线程因异常退出，而锁没有释放，这必然会导致死锁。<em><strong>最后一个monitorexit保证在异常情况下，锁也可以得到释放，避免死锁</strong></em></p>
+<h1 id="和Lock比较"><a href="#和Lock比较" class="headerlink" title="和Lock比较"></a>和Lock比较</h1><p>相同点：</p>
+<p>  都是可重入锁；都保证了可见性和互斥性；都可以用于控制多线程对共享对象的访问</p>
+<p>不同点</p>
+<table>
+<thead>
+<tr>
+<th align="center">ReetrantLock</th>
+<th align="center">synchronized</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">默认也是非公平，但可以实现公平锁</td>
+<td align="center">锁非公平</td>
+</tr>
+<tr>
+<td align="center">只是lock接口下的实现类，是API层面的锁</td>
+<td align="center">是JVM级别的锁</td>
+</tr>
+<tr>
+<td align="center">显示获取和释放锁，在使用时避免程序异常无法释放锁，需要在finally控制块中进行解锁操作</td>
+<td align="center">隐式获取锁和释放锁</td>
+</tr>
+<tr>
+<td align="center">等待可中断、可实现公平锁、可实现选择性通知</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">是可精确唤醒</td>
+<td align="center">要么随机唤醒一个线程，要么唤醒所有等待的线程</td>
+</tr>
+</tbody></table>
+<p>隐式锁和显示锁就是在使用的时候，使用者是否要手动写代码来控制获取锁和释放锁</p>
+<p>公平锁实现：获取锁时，会先看sync队列是否在 	等待获取资源的线程。没有就尝试获取锁，若有就将当前线程封装成node加入sync队列</p>
+<p>非公平锁实现： 当线程争锁时，会进行一次CAS尝试获取锁，失败就进入acquir(1)函数，再尝试获取锁，若失败就将当前线程封装成node加入sync队列，就等前面线程执行完轮到自己</p>
+<h1 id="和volatile比较"><a href="#和volatile比较" class="headerlink" title="和volatile比较"></a>和volatile比较</h1><table>
+<thead>
+<tr>
+<th align="center">Synchronized</th>
+<th align="center">Volatile</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">性能较差</td>
+<td align="center">线程同步的轻量级实现，性能更好</td>
+</tr>
+<tr>
+<td align="center">可以修饰方法以及代码块</td>
+<td align="center">只能用于变量</td>
+</tr>
+<tr>
+<td align="center">原子性、可见性都保证</td>
+<td align="center">可保证数据的可见性，不保证原子性</td>
+</tr>
+<tr>
+<td align="center">解决的是多线程之间访问资源的同步性</td>
+<td align="center">解决变量在多个线程间的可见性</td>
+</tr>
+<tr>
+<td align="center">因为是锁，可能造成线程阻塞</td>
+<td align="center">不会线程阻塞</td>
+</tr>
+<tr>
+<td align="center">标记的变量可以被编译器优化</td>
+<td align="center">标记的变量不会被编译器优化</td>
+</tr>
+</tbody></table>
+<p>内存屏障：是CPU的重排列指令引起的</p>
+<p>Volatile通过内存屏障禁止指令重排序</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">小二小二不停步</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/05/10/synchronized-1/">http://example.com/2022/05/10/synchronized-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">小二小二不停步</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/synchronized/">synchronized</a><a class="post-meta__tags" href="/tags/%E9%94%81/">锁</a></div><div class="post_share"><div class="social-share" data-image="/img/3.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/05/09/springmvc-1/"><img class="next-cover" src="/img/2.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">SpringMVC基础</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">小二小二不停步</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xiaoerbutingbu"><i class="fab fa-github"></i><span>github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xiaoerbutingbu" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="http://wpa.qq.com/msgrd?v=3&amp;uin=370951771&amp;site=qq&amp;menu=yes" target="_blank" title="QQ"><i class="fab fa-qq"></i></a><a class="social-icon" href="mailto:370951771@2019.cqut.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到小二小二不停步的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%AE%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">目的</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BC%98%E5%8C%96"><span class="toc-number">3.</span> <span class="toc-text">优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BA%95%E5%B1%82"><span class="toc-number">4.</span> <span class="toc-text">底层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%92%8CLock%E6%AF%94%E8%BE%83"><span class="toc-number">5.</span> <span class="toc-text">和Lock比较</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%92%8Cvolatile%E6%AF%94%E8%BE%83"><span class="toc-number">6.</span> <span class="toc-text">和volatile比较</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/05/10/synchronized-1/" title="synchronized-1"><img src="/img/3.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="synchronized-1"/></a><div class="content"><a class="title" href="/2022/05/10/synchronized-1/" title="synchronized-1">synchronized-1</a><time datetime="2022-05-10T08:36:16.000Z" title="发表于 2022-05-10 16:36:16">2022-05-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/09/springmvc-1/" title="SpringMVC基础"><img src="/img/2.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringMVC基础"/></a><div class="content"><a class="title" href="/2022/05/09/springmvc-1/" title="SpringMVC基础">SpringMVC基础</a><time datetime="2022-05-09T04:44:14.000Z" title="发表于 2022-05-09 12:44:14">2022-05-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/08/spring-1/" title="Spring基础"><img src="/img/1.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring基础"/></a><div class="content"><a class="title" href="/2022/05/08/spring-1/" title="Spring基础">Spring基础</a><time datetime="2022-05-08T03:17:14.000Z" title="发表于 2022-05-08 11:17:14">2022-05-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/07/ThreadLocal-1/" title="ThreadLocal"><img src="/img/6.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ThreadLocal"/></a><div class="content"><a class="title" href="/2022/05/07/ThreadLocal-1/" title="ThreadLocal">ThreadLocal</a><time datetime="2022-05-07T03:14:29.000Z" title="发表于 2022-05-07 11:14:29">2022-05-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/06/redis%E5%9F%BA%E7%A1%80/" title="redis基础"><img src="/img/5.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="redis基础"/></a><div class="content"><a class="title" href="/2022/05/06/redis%E5%9F%BA%E7%A1%80/" title="redis基础">redis基础</a><time datetime="2022-05-06T10:27:26.449Z" title="发表于 2022-05-06 18:27:26">2022-05-06</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/3.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 小二小二不停步</div><div class="footer_custom_text">try my best</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-show-text.min.js" data-mobile="false" data-text="I,LOVE,YOU" data-fontsize="15px" data-random="false" async="async"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
