@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-11T06:02:53.771Z</updated>
+  <updated>2022-05-12T01:04:47.181Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>三次握手四次挥手-1</title>
+    <link href="http://example.com/2022/05/12/threefour/"/>
+    <id>http://example.com/2022/05/12/threefour/</id>
+    <published>2022-05-12T00:58:11.000Z</published>
+    <updated>2022-05-12T01:04:47.181Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h1><p>建立可靠的通信信道，也就是<em><strong>双方确认自己与对方发送与接收是正常的</strong></em></p><h1 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h1><p>一开始，服务端和客户端都是closed状态。先是服务端主动监听某个端口，处于LISTEN状态。</p><p>客户端随机初始化序号，将此序号置于TCP首部的‘序号’字段中，同时把SYN标志位置为1，表示SYN报文。接着把第一个SYN报文发送给服务端，表示向服务端发起连接，该报文不包含应用层数据，之后客户端处于SYN-SEBT状态</p><p>服务器端收到SYN报文后，首先服务端也随机初始化自己序号，并填入TCP首部的‘序号’字段中，其次把TCP首部的‘确认应答号’字段填入，再把SYN和ACK标志位置为1。最后把该报文发给客户端，该报文也不包含应用层数据，之后服务端处于SYN-RCVD状态</p><p>客户端收到服务端报文后，再向服务端回应最后的应答报文，应答报文TCP首部ACK标志位置位1，其次‘确认应答号’字段填入，最后把报文发送服务端，这个报文可以携带客户到服务器的数据，之后客户端处于ESTABLISHED状态。服务器收到客户端的应答报文后也进入ESTABLESHED状态</p><p>简单说：客户端发送链接请求报文；服务端接收连接后回复ACK报文，并分配资源；客户端接收了ACK报文后向服务端发送ACK报文，并分配资源</p><p>客户端和服务端初始化序列号不能一样：防止历史报文被下一个相同元祖的连接接收</p><p><img src="/2022/05/12/threefour/woshou.png" alt="image-20220512090045815"></p><h1 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h1><p>客户端发起中断连接请求，就是发FIN报文（FIN位置置位1），等待服务器发FIN报文；当服务器端确定数据（读到结束符EOF）已发送完成，则向客户端发FIN报文，延迟一段时间 再发ACK报文（处理一些最后的请求）；客户端收到FIN报文后发送ACK报文（若服务器端没有收到则可以重传）；服务器端收到ACK就关闭，客户端等待了2MSL（最大报文生存时间，因为最后一个ACK可能会丢失）后没收到回复就关闭</p><p><img src="/2022/05/12/threefour/huishou.png" alt="image-20220512090215143"></p><h1 id="为什么是三次握手"><a href="#为什么是三次握手" class="headerlink" title="为什么是三次握手"></a>为什么是三次握手</h1><p>因为三次握手才可以阻止重复历史连接的初始化（最主要，若是两次握手就不能判断）：若是历史连接，客户端发送的报文就是RST报文，反之则是ACK报文</p><p>同步双方的初始序列号：</p><p>避免资源浪费：  若服务端阻塞，发送了多个SYN报文，那么服务器收到请求后会建立多个无效链接</p><p>两次的话：就没办法确定客户端的接收能力，就可能让客户端单方面觉得连接已建立，序列号得不到确认</p><p>三次握手的过程就是通信双方相互告知序列号起始值，并确认对方已经收到了序列号起始值的步骤。若是两次就只有一方选择的序列号得不到确认</p><p>主要目的就是保证连接是双工的，保证双方得知自己和对方收发能力正常</p><h1 id="握手是三次，挥手是四次"><a href="#握手是三次，挥手是四次" class="headerlink" title="握手是三次，挥手是四次"></a>握手是三次，挥手是四次</h1><p>当服务器端收到SYN连接请求报文后，可以直接发SYN+ACK报文，ACK是应答，SYN是同步的。关闭时，服务器端收到FIN时，有可能不会立即关闭SOCKET，所以只能先回一个ACK报文</p><p>但在抓包时，服务器接收到FIN后，服务器端同时要关闭链接，这样ACK和FIN一起发送节省了一个包。从抓包方面看，就是“三次挥手”</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;目的&quot;&gt;&lt;a href=&quot;#目的&quot; class=&quot;headerlink&quot; title=&quot;目的&quot;&gt;&lt;/a&gt;目的&lt;/h1&gt;&lt;p&gt;建立可靠的通信信道，也就是&lt;em&gt;&lt;strong&gt;双方确认自己与对方发送与接收是正常的&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&quot;</summary>
+      
+    
+    
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>InnoDB基础</title>
