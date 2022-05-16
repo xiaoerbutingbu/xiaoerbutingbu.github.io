@@ -1,8 +1,8 @@
+http://example.com/2022/05/15/String/
 http://example.com/2022/05/16/volatile/
 http://example.com/2022/05/14/thread/
 http://example.com/2022/05/13/hashmap/
 http://example.com/2022/05/02/java%E4%B8%8D%E5%8F%AF%E5%8F%98%E5%9E%8B/
-http://example.com/2022/05/15/String/
 http://example.com/2022/05/12/threefour/
 http://example.com/2022/05/11/InnoDB-1/
 http://example.com/2022/05/10/synchronized-1/
@@ -28,7 +28,6 @@ http://example.com/tags/synchronized/
 http://example.com/tags/%E9%94%81/
 http://example.com/tags/MySQL/
 http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/
-http://example.com/tags/StringBuilder/
 http://example.com/tags/Map/
 http://example.com/tags/volatile/
 http://example.com/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/
