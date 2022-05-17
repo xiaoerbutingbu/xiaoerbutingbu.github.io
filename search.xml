@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>TCP基础</title>
+      <link href="/2022/05/17/TCP/"/>
+      <url>/2022/05/17/TCP/</url>
+      
+        <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>在运输层的可靠数据传输的服务，面向连接【1对1】、可靠的【一个报文一定能到达接收端】、基于字节流的传输层通信协议</p><p>头部包含端口号、序列号</p><p>唯一确定一个TCP连接：TCP四元组（源地址、源端口、目的地址、目的端口）</p><p><img src="/2022/05/17/TCP/jiegou.png" alt="结构"></p><p>标志位：</p><p>URG：表示TCP包的紧急指针域有效，保证TCP连接不被中断</p><p>ACK：应答域有效</p><p>PSH：push操作，让到达接收端的数据包能直接传给应用程序</p><p>RST：连接复位请求</p><p>SYN：建立连接</p><p>FIN：断开连接</p><h1 id="如何保证可靠性"><a href="#如何保证可靠性" class="headerlink" title="如何保证可靠性"></a>如何保证可靠性</h1><p>应用数据都被分割成TCP认为最适合发送的数据包</p><p>  给发送的每一个包进行编号，接收方对数据包排序，把有序数据传给应用层</p><p>  校验和：保持首部和数据的校验和，检测数据是否有变化</p><p>  流量控制：控制协议是可变大小的滑动窗口协议（防止发送方无脑的发送），以控制发送方发送效率</p><p>  拥塞控制：网络拥塞时，减少数据发送。慢启动（每收到一个ACK，拥塞窗口就+1，直到增加到门限状态变量），拥塞避免（超过慢启动门限后进行，每个ACK，cwnd+1），拥塞发生（超时重传，快速重传），快速恢复</p><p>  超时重传：TCP发出一个段后，启动一个定时器，若不能及时收到确认，就重新发这个报文；数据包丢失或确认应答丢失会发生该情况。定时器太长，重发就满了，没效率，性能差；太短，可能没有丢就重发了，会增加网络拥塞，导致更多超时</p><p>  QRQ协议：为实现可靠重传，每发完一个分组后就停止发，收到对方发的确认后再发下一个</p><p>重传机制：</p><p>​       超时重传：如上</p><p>​      快速重传：以数据驱动重传。收到三个相同ACK报文时，立刻重传丢失报文段</p><p>滑动窗口：</p><p>  TCP头部有一个字段交Window（窗口大小），接收端告诉发送端子机还有多少缓冲区可接收数据，于是发送端就根据这个发送数据。大小为0时，就会阻止发送方发送数据</p><p>解决窗口关闭：TCP为每个链接设有一个持续定时器，只要TCP连接一方收到对方的零窗口通知，就启动该定时器，定时器超时的话就发送窗口检测报文，而对方确认该报文时给出自己接收窗口大小</p><h1 id="黏包"><a href="#黏包" class="headerlink" title="黏包"></a>黏包</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>多个数据包被连续存储在连续的缓存中，在对数据包读取时由于无法确定发生方的发送边界，而采用某一估测值大小来读出数据。双方size不一致就会让发送方发送的若干包数据到接收方接收时沾成一包，从接收缓冲区看，后一包的数据的头紧接着前一包数据的尾</p><h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>TCP若连续几次发送的数据很少，那TCP根据优化算法把这些数据合成一包一次发送，接收方就收到了粘包数据</p><p>  TCP协议有MISS，若数据包过长就会被分开传输。接收方就收到粘包数据</p><h2 id="处理方式"><a href="#处理方式" class="headerlink" title="处理方式"></a>处理方式</h2><p>TCP短连接就不用考虑</p><p>若数据无结构，发送放就只管发，接收方只管接，也不用考虑</p><p>双方建立长连接，要在连接一段是时间内发送不同数据结构：</p><p>​         发送端的每个数据包添加包首部，首部中应该至少包含数据包的长度。这样接收方就能知道数据包的实际长度</p><p>​         发送端将每个数据包封装为固定长度（不够的，0补充），接收端每次就从接收缓冲区中读取固定长度的数据就行，也就拆开了数据包</p><p>​         可在数据包之间设置边界</p><h1 id="与UDP的比较"><a href="#与UDP的比较" class="headerlink" title="与UDP的比较"></a>与UDP的比较</h1><table><thead><tr><th align="center">TCP</th><th align="center">UDP</th></tr></thead><tbody><tr><td align="center">面向连接</td><td align="center">无连接</td></tr><tr><td align="center">提供可靠服务</td><td align="center">尽最大努力交付</td></tr><tr><td align="center">面向字节流</td><td align="center">数据报文段</td></tr><tr><td align="center">每一条TCP连接都是点到点</td><td align="center">支持一对一，一对多，多对多的交互通信</td></tr><tr><td align="center">首部开销20字节</td><td align="center">首部开销8字节</td></tr><tr><td align="center">全双工可靠通信</td><td align="center">不可靠通信</td></tr><tr><td align="center">常用于FTP文件传输、HTTP&#x2F;HTTPS</td><td align="center">包总量较少信息，视频、音频等多媒体通信，广播通信</td></tr><tr><td align="center">传输较慢，所需资源较多</td><td align="center">传出快，所需资源少</td></tr></tbody></table>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 计算机网络 </tag>
+            
+            <tag> TCP </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Volatile</title>
       <link href="/2022/05/16/volatile/"/>
       <url>/2022/05/16/volatile/</url>
