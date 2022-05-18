@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>HTTP基础</title>
+      <link href="/2022/05/18/http-1/"/>
+      <url>/2022/05/18/http-1/</url>
+      
+        <content type="html"><![CDATA[<h3 id="http"><a href="#http" class="headerlink" title="http"></a>http</h3><p>是一个在计算机世界专门在 两点 之间 传输 文字、图片、音频、视频等 超文本 数据的 约定和规范</p><p>简单、灵活和易于拓展、应用广泛和跨平台</p><p>不安全</p><p>基于TCP&#x2F;IP,并且使用了【请求-应答】的通信模式</p><h4 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h4><p>HTTP1.0默认使用短连接。每发起一个请求，都要新建TCP连接（三次握手），而且是串行请求，做了无谓的TCP连接建立和断开，增加了开销；</p><p>HTTP1.1就提出了长连接的通信方式（持久连接），减少了服务器的负载。特点：只要任意一端没有明确提出断开连接，则保持TCP连接状态</p><h4 id="管道网络传输"><a href="#管道网络传输" class="headerlink" title="管道网络传输"></a>管道网络传输</h4><p>因为采用了长连接，所以管道网络传输成为了可能</p><p>即在同一个TCP连接中，客户端可以发起多个请求，只要第一个请求发出去，不会等其回来就可以发第二个请求出去，也就减少正特的响应时间</p><h4 id="队头阻塞"><a href="#队头阻塞" class="headerlink" title="队头阻塞"></a>队头阻塞</h4><p>因为当顺序发送的请求序列中的一个请求因某种原因被阻塞，后面排队的所有请求也一同被阻塞，客户端也就一直请求不到资源</p><h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><p>支持C&#x2F;S模式、简单快速、灵活、无连接、无状态</p><h4 id="请求头结构"><a href="#请求头结构" class="headerlink" title="请求头结构"></a>请求头结构</h4><p>由关键字&#x2F;值对组成，每行一对，关键字和值用英文冒号</p><p>User-Agent：产生请求的浏览器类型</p><p>Accept：客户端可识别的内容类型列表</p><p>Host：请求的主机名</p><h4 id="响应头格式"><a href="#响应头格式" class="headerlink" title="响应头格式"></a>响应头格式</h4><p>状态行：状态码、八本</p><p>响应头部：</p><p>​         Server：应用程序软件的名称和版本</p><p>​         Content-Type：发送给接受者的实体正文的媒体类型</p><p>​         Accept-Language：描述资源所用的自然语言</p><p>​         Content-Length：实体正文长度</p><p>响应正文：</p><h4 id="发展"><a href="#发展" class="headerlink" title="发展"></a>发展</h4><h5 id="HTTP1-0和1-1"><a href="#HTTP1-0和1-1" class="headerlink" title="HTTP1.0和1.1"></a>HTTP1.0和1.1</h5><p>长连接：同上</p><p>错误状态响应码：1.1中新增加了24个错误状态响应码</p><p>缓存处理：1.1引用了更多缓存控制策略</p><p>带宽优化及网络连接的使用</p><h5 id="HTTP1-1-优化"><a href="#HTTP1-1-优化" class="headerlink" title="HTTP1.1 优化"></a>HTTP1.1 优化</h5><p>尽量避免HTTP请求（缓存技术）</p><p>在需要发HTTP请求，减少次数（减少重定向，合并请求，延迟发送）</p><p>合并请求就是合并资源，以一个大资源的请求替换多个小资源的请求；当大资源中的小资源发生变化，客户端就要重新下载整个完整的大资源</p><p>  延迟发送：只获取当前用户所看到的页面资源，当用户向下滑动页面的时候，再向服务器获取接下来的资源</p><p>减少服务器的HTTP响应大小</p><h5 id="HTTP-x2F-2"><a href="#HTTP-x2F-2" class="headerlink" title="HTTP&#x2F;2"></a>HTTP&#x2F;2</h5><p>通过静态表和哈夫曼编码的方式，将体积压缩了近一半，针对后续的请求头部也可建立动态表（会占用内存而影响并发能力）</p><p>  实现了Stream并发，多个Stream只需复用一个TCP连接，节约了TCP和TLS握手时间，以及减少了TCP慢启动阶段对流量的影响。</p><p>  服务器支持主动推送资源，大大提升了消息的传输信息</p><p>  HTTP&#x2F;2是基于TCP协议来传输数据，TCP层必须保证收到的字节数据是完成且连续的，这样内核才会将缓冲区里的数据返回给HTTP应用。有队头阻塞问题，TCP和TLS的握手时延迟，网络迁移需要重新连接</p><h5 id="HTTP-x2F-3"><a href="#HTTP-x2F-3" class="headerlink" title="HTTP&#x2F;3"></a>HTTP&#x2F;3</h5><p>传输层的TCP换成UDP，并在UDP协议开发了QUIC协议保证了数据的可靠传输。</p><p>QUIC</p><p>  无队头阻塞</p><p>  建立连接速度块</p><p>  连接迁移</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 计算机网络 </tag>
+            
+            <tag> HTTP </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>TCP基础</title>
       <link href="/2022/05/17/TCP/"/>
       <url>/2022/05/17/TCP/</url>
