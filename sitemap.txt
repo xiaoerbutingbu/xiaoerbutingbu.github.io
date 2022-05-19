@@ -1,4 +1,5 @@
 http://example.com/2022/05/19/redis%E6%8C%81%E4%B9%85%E5%8C%96/
+http://example.com/2022/05/19/redis_c/
 http://example.com/2022/05/18/http-1/
 http://example.com/2022/05/17/TCP/
 http://example.com/2022/05/15/String/

@@ -29,6 +29,31 @@
     
     
     <entry>
+      <title>redis持久化</title>
+      <link href="/2022/05/19/redis_c/"/>
+      <url>/2022/05/19/redis_c/</url>
+      
+        <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>持久化就是指redis会把内存中的数据写入到硬盘中，redis重启的时候加载这些数据，就最大限度的降低惠存丢失带来的影响。</p><p><em><strong>因为数据全部在内存，若宕机、进程退出，若没有持久化机制，数据就会全部丢失</strong></em>。有了持久化后，redis在下次重启的时候就会进行数据</p><p>备份的执行过程：redis会单独创建一个子进程来进行持久化，会先将数据写入到一个临时文件中，待持久化过程都结束了，再用这个临时文件替换上一次持久化好的文件。整个过程，主进程是不进行任何I&#x2F;O操作，就确保了极高的性能，若要大规模的数据恢复，且对于数据恢复的完整性不是很敏感，那RDB方式要比AOF方式更高效。缺点就是最后一次 持久化后数据可能丢失</p><h1 id="持久化方式"><a href="#持久化方式" class="headerlink" title="持久化方式"></a>持久化方式</h1><h2 id="RDB快照（默认）"><a href="#RDB快照（默认）" class="headerlink" title="RDB快照（默认）"></a>RDB快照（默认）</h2><p>​    将当前redis中的数据<em><strong>生成快照二进制的形式</strong></em>保存到硬盘，保存的文件后缀是rdb；redis重启时可以读取快照文件恢复数据。有手动触发和自动触发两种。记录结果</p><h3 id="手动"><a href="#手动" class="headerlink" title="手动"></a>手动</h3><p>​    创建命令：SAVE和BGSAVE（推荐，因为可在不阻塞服务器进程情况下执行）</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">save：会阻塞Redis服务，直到RDB持久化完成，当Rredis里面存储了大量数据的时候，就造成较长时间的阻塞，不建议用</span><br><span class="line">bgsave：一般不会阻塞，进行会执行fork操作创建子进程负责，不会阻塞Redis服务进程。Redis服务的阻塞只发生在fork阶段，一般时间很短</span><br></pre></td></tr></table></figure><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bgsave的流程：</span><br><span class="line">执行besave命令，Redis进程会判断当前是否存在正在执行的RDB或AOF子线程，若存在就直接结束</span><br><span class="line">Redis进程执行fork操作创建子线程，fork操作过程中redis进程会被阻塞</span><br><span class="line">fork完成后，bgsave就结束了，redis进程就不会被阻塞，其他命令就可以被响应</span><br><span class="line">子进程根据redis进程的内存生成快照文件，并替换原有的RDB文件</span><br><span class="line">子进程通过信号量通知Redis进程已完成</span><br></pre></td></tr></table></figure><h3 id="自动"><a href="#自动" class="headerlink" title="自动"></a>自动</h3><p>在配置文件中设置save的相关配置，如save 5 1，就表示在5s内数据被修改1次时自动触发bgsave操作</p><p>当从节点做全量复制时，主节点会自动执行bgsave操作，并且把生成的RDB文件发送给从节点</p><p>执行 “debug reload”命令时，会触发</p><p>执行“shutdown”，若没有开启AOF持久化也会触发bgsave操作</p><h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p>优点：节省磁盘空间，恢复速度快（有向的持久化文件，重启redis，数据就可恢复），方便备份，可最大化redis性能</p><p>  缺点：虽然在fork中使用了写时拷贝技术，但若数据庞大，还是较耗性能；在备份周期，意外down掉的话，就会丢失最后一次快照后的所有改变；</p><p>  较适合大数据集恢复速度的，能承受数分钟内的数据丢失</p><h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>  以日志的形式来<em><strong>记录每个写操作</strong></em>，只追加文件，不改写文件。随着AOF越来越大，需要定期对其重写，达到压缩的目的。默认关闭</p><p>  保存redis服务器执行的所有写命令来记录数据库数据。记录过程</p><p>  优点：备份机制更稳健，丢失数据的概率更低；可读的日志形式，通过AOF更稳健，可处理误操作。</p><p>  缺点：比RDB占用更多磁盘空间；恢复备份速度慢；每次读写都同步的话，有一定的性能压力；存在个别bug，造成不能恢复</p><p>  较适合对业务数据敏感的，不能承受数分钟内的数据丢失</p><h3 id="文件同步的策略"><a href="#文件同步的策略" class="headerlink" title="文件同步的策略"></a>文件同步的策略</h3><p>alawas：每次写入缓存区都要同步到AOF文件中，硬盘的操作比较慢，限制了Redis高并发</p><p>no：每次写入缓存区后不进行同步，同步到AOF文件的操作由操作系统负责，每次同步AOF文件的周期不可控，而且增大了每次同步的硬盘的数据量。</p><p>eversec：每次写入缓存区后，由专门的线程每秒钟同步一次，做到了兼顾性能和数据安全。是建议的同步策略，也是默认的策略。</p><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>默认AOF不开启，需要修改配置文件</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># appendonly改为yes，开启AOF</span></span><br><span class="line">appendonly <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># AOF文件的名字</span></span><br><span class="line">appendfilename <span class="string">&quot;appendonly.aof&quot;</span></span><br><span class="line"><span class="comment"># AOF文件的写入方式</span></span><br><span class="line"><span class="comment"># everysec 每个一秒将缓存区内容写入文件 默认开启的写入方式</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"><span class="comment"># 运行AOF重写时AOF文件大小的增长率的最小值</span></span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line"><span class="comment"># 运行AOF重写时文件大小的最小值</span></span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure><h1 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h1><p><img src="/2022/05/19/redis_c/changjing.png" alt="场景"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> redis </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> redis </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>HTTP基础</title>
       <link href="/2022/05/18/http-1/"/>
       <url>/2022/05/18/http-1/</url>
