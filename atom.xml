@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-19T12:33:09.005Z</updated>
+  <updated>2022-05-20T14:06:07.553Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JVM基础</title>
+    <link href="http://example.com/2022/05/20/JVM-1/"/>
+    <id>http://example.com/2022/05/20/JVM-1/</id>
+    <published>2022-05-20T13:18:58.000Z</published>
+    <updated>2022-05-20T14:06:07.553Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="JVM组成"><a href="#JVM组成" class="headerlink" title="JVM组成"></a>JVM组成</h1><img src="/2022/05/20/JVM-1/zucheng.png" alt="组成" style="zoom:150%;"><h1 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h1><p>一种快速有效的分配存储方式，<em><strong>访问速度仅次于程序计数器；</strong></em></p><p>线程私有</p><p>  JVM直接对java栈的操作：</p><p>​            每个方法的执行，伴随着进栈（入栈，压栈）</p><p>​            执行结果后的出栈工作</p><p>  不存在垃圾回收的问题</p><p>  栈中的数据都是以栈帧的格式存在，<em><strong>这个线程上正在执行的每个方法都各自对应一个栈帧</strong></em>。栈帧是一个内存区块，是一个数据集，维系着方法执行过程中的各种数据信息。每一个方法执行结束就对应着一个栈帧从虚拟机栈从入栈到出栈</p><p>栈就只有 压栈 和 出栈</p><p>不同线程中所包含的线帧是不允许相互引用的，即不可能在一个栈帧之中引用另一个线程中的栈帧</p><p>若当前方法调用其他方法，方法返回的时候，当前栈帧会传回此方法的执行结果给前一个栈帧，然后虚拟机会丢弃当前栈帧，使得前一个栈帧重新成为当前栈帧</p><p>方法的结束方式：正常结束和抛出异常（未被捕获处理）</p><h2 id="栈帧内部结构"><a href="#栈帧内部结构" class="headerlink" title="栈帧内部结构"></a>栈帧内部结构</h2><p><img src="/2022/05/20/JVM-1/zhangzhen.png" alt="zhanzhen"></p><h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><p>  定义为一个数字数组，主要用于<em><strong>存储方法参数和定义在方法体内的局部变量</strong></em></p><p>  因是建立在线程的栈上，是<em><strong>私有</strong></em>的，所以不存在数据安全问题</p><p>  所需的容量的大小是在编译期确定下来的</p><p>  方法嵌套使用的次数由栈的大小决定。越大，次数越多</p><p>  局部变量表中的变量只在当前方法调用中有效。方法调用结束，该表也会随之销毁</p><p>  里面最基本的存储单元Slot（变量槽）：</p><p>​    参数值的存放总是在局部变量数组的index0开始，到数组长度-1结束</p><p>局部变量表最基本的存储单元</p><p>​    局部变量表里，32位以内的类型只占用一个slot，64位占两个</p><p>​    当一个实例方法被调用，它的方法参数和方法体内部定义的局部变量将会按照顺序复制到局部变量表中的每一个slot上</p><p>​    若当前帧是由构造方法或者实例方法创建的，那么该对象引用this将会存放在index为0的slot处。</p><p>  Slot重复利用：栈帧中的局部变量表中的槽位是可以重用，为了节省资源。</p><p>  局部变量表中的变量也是重要的垃圾回收根节点，只要被局部变量表直接或间接引用的对象都不会被回收</p><h4 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h4><p>  是一个以字长为单位的数组，但是以后进先出的操作数栈（表达式栈），方法执行过程中，根据字节码指令，进行入栈、出栈操作。</p><p>  进行数据运算的</p><p>  并非采用访问索引的方式来进行数据访问</p><p>  若被调用的方法带有返回值的话，其返回值将会被压入当前栈帧的操作数栈中</p><p>Java虚拟机的解释引擎是基于栈（操作数栈）的执行引擎</p><h4 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h4><p>  一个指向运行时常量池中该栈帧所属方法的引用，包含这个引用就是为了支持当前方法的代码能够实现动态连接</p><p>  Java源文件被编译到字节码文件中时，所有的变量和方法引用都作为符号引用保存在class文件的常量池中，动态链接作用就是将这些符号引用转换为调用方法的直接引用</p><p>  常量池：提供一些符号和常量，便于指令的识别</p><h4 id="方法返回地址"><a href="#方法返回地址" class="headerlink" title="方法返回地址"></a>方法返回地址</h4><p>存放调用该方法的PC寄存器的值。（交给执行引擎，让其执行后续操作）</p><p>调用者的PC计数器的值作为返回地址，即调用该方法的指令作为下一条指令的地址</p><p>正常完成与异常完成的区别：异常完成出口退出不会给他上层调用者产生任何的返回值</p><p>方法的退出就是当前栈帧出栈的过程。此时，需要恢复上层方法的局部变量表、操作数栈、将返回值压入调用者栈帧的操作数栈、设置PC寄存器值等，让调用者方法继续执行下去</p><h4 id="一些附加信息"><a href="#一些附加信息" class="headerlink" title="一些附加信息"></a>一些附加信息</h4><p>不一定有。比如：对程序调试提供支持的信息</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;JVM组成&quot;&gt;&lt;a href=&quot;#JVM组成&quot; class=&quot;headerlink&quot; title=&quot;JVM组成&quot;&gt;&lt;/a&gt;JVM组成&lt;/h1&gt;&lt;img src=&quot;/2022/05/20/JVM-1/zucheng.png&quot; alt=&quot;组成&quot; style=&quot;zoom</summary>
+      
+    
+    
+    
+    
+    <category term="JVM" scheme="http://example.com/tags/JVM/"/>
+    
+    <category term="虚拟机栈" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/"/>
+    
+  </entry>
   
   <entry>
     <title>redis持久化</title>

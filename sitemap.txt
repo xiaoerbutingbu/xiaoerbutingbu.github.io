@@ -1,3 +1,4 @@
+http://example.com/2022/05/20/JVM-1/
 http://example.com/2022/05/19/redis_c/
 http://example.com/2022/05/18/http-1/
 http://example.com/2022/05/17/TCP/
@@ -36,6 +37,8 @@ http://example.com/tags/volatile/
 http://example.com/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/
 http://example.com/tags/TCP/
 http://example.com/tags/HTTP/
+http://example.com/tags/JVM/
+http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/
 http://example.com/categories/redis/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/Spring/
