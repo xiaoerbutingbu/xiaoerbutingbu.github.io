@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>IO</title>
+      <link href="/2022/05/22/IO/"/>
+      <url>/2022/05/22/IO/</url>
+      
+        <content type="html"><![CDATA[<h2 id="I-x2F-O模型"><a href="#I-x2F-O模型" class="headerlink" title="I&#x2F;O模型"></a>I&#x2F;O模型</h2><h3 id="阻塞式I-x2F-O"><a href="#阻塞式I-x2F-O" class="headerlink" title="阻塞式I&#x2F;O"></a>阻塞式I&#x2F;O</h3><p>用户线程发出IO请求后，内核会查看数据是否就绪，若没有就绪，就会等待数据就绪，而一直处于阻塞状态并交出CPU资源</p><h3 id="非阻塞式IO"><a href="#非阻塞式IO" class="headerlink" title="非阻塞式IO"></a>非阻塞式IO</h3><p>用户线程发出一个请求后会立刻得到一个结果，若结果是error就再次发起请求，直到得到结果。在此期间会一直占用CPU，因为会一直询问内核数据是否就绪</p><h3 id="多路复用IO模型"><a href="#多路复用IO模型" class="headerlink" title="多路复用IO模型"></a>多路复用IO模型</h3><p>一种机制</p><p>用的较多，NIO就是</p><p>总有一个线程轮询多个socket状态，只有当真正有读写事件时，才真正调用实际的IO读写操作。因为只需要一个线程就可以管理多个socket，系统不需要建立新的进程或者线程，也不用维护这些，只有真的socket读写事件进行时才使用IO资源。</p><p>该模型用到了select、poll函数，两个函数可以同时阻塞多个I&#x2F;O操作</p><p>函数方法</p><p>selsect：监视的文件描述符分三类，调用select函数会阻塞，直到描述符就绪或超时</p><p>​         缺陷：单线程打开的FD有限制；对socket进行线性扫描（轮询）IO，效率低；限定大小，因为保存文件描述符的bitmaps是1024</p><p>​         阻塞函数，没数据阻塞</p><p>​        一开始是收集文件描述符给内核看哪儿有数据（提高了效率，不然用户态判断会因为切换而浪费资源），有数据的话，FD置位，select函数返回，后面就遍历FD，判断哪个置位并读出数据再处理</p><p>poll：本质与select无区别；将用户给的数组拷贝进内核，查询每个fd对应设备的状态</p><p>若遍历fd都没有就绪设备就挂起当前线程，直到设备就绪或主动超时，被唤醒后再次遍历fd</p><p>​             没有最大连接次数（因为恢复revents）；大量fd数组复制进内核（有些无意义）；若报告的fd没处理，那下次poll会再次报告fd</p><p>​           有超时时间，5个FD拷贝到内核态并监听数据</p><p>​           有数据时内核会对revents字段置位，poll返回，遍历找置位读数据</p><p>Epoll：没有描述符的限制；可水平触发和边缘触发；</p><p>没有最大并发连接的限制；效率提升，不是轮询方式；内存拷贝</p><p>​             连接数较多且很多的不活跃连接时，epoll效率更好；反之，epoll因需要回调，所以性能此时会低</p><p>​             创建了epfd白板，再epoll_ctr，写了结构体；用户态和内核态共享fd内存（不像上面还需要拷贝）；水平触发：重排置位（有数据的放到前面），返回值为有多少个数据，遍历就遍历前几个，进行处理</p><h3 id="信号驱动IO模型"><a href="#信号驱动IO模型" class="headerlink" title="信号驱动IO模型"></a>信号驱动IO模型</h3><p>用户线程发起IO请求，会给对应的socket注册一个信号函数，线程再继续执行，当用户线程接收到信号之后，便在信号函数中调用IO读写操作来进行实际IO请求操作</p><h3 id="异步IO模型"><a href="#异步IO模型" class="headerlink" title="异步IO模型"></a>异步IO模型</h3><p>用户线程发起请求后，就可做其他事，当接收到数据内核返回的成功信号时，就表示IO操作已经完成，可以直接去使用数据</p><h2 id="I-x2F-O流"><a href="#I-x2F-O流" class="headerlink" title="I&#x2F;O流"></a>I&#x2F;O流</h2><p>本身是指数据 从源头到目的地</p><p>其中的输入输出流都是在外部文件和内存之间数据的流通</p><p>分为两种：字符流和字节流。InputStream和OutputStream，Reader，Writer</p><h3 id="字符流和字节流"><a href="#字符流和字节流" class="headerlink" title="字符流和字节流"></a>字符流和字节流</h3><p>底层设备只接收字节数据，字符流是字节流的包装，字符流则是直接接收字符串，它会在内部转成字节，再写入底层设备</p><h3 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h3><p>同步阻塞，服务器实现模式为一个连接一个线程</p><p>服务端：通过serverSocket注册端口；服务器通过调用accept方法用于监听客户端socket请求；从socket中获取字节输入或者输出进行数据读写</p><p>客户端：通过socket独享请求域服务端的连接；从socket得到字节输入或字节输出流进行数据的读写</p><h3 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h3><p>同步非阻塞式，核心类：</p><p>​                 Buffer（缓冲区）为所有原始类型提供缓存支持，是一个容器，连续的数组 </p><p>​                 Charset字符集编码解决解码方案</p><p>​                 Channel（通道）一个新的原始I&#x2F;O抽象，用于读写Buffer类型，通道可以认为是一种连接，可以是到特定设备、程序或是网络的连接</p><p>数据source：需要读取，使用：InputStream、Reader。对应了 硬盘、内存、键盘（System.in）</p><p>数据destination：就是需要写入，使用OutputStram、Writer对应了 硬盘、内存、控制台（System.out）</p><h3 id="BIO、NIO、AIO区别"><a href="#BIO、NIO、AIO区别" class="headerlink" title="BIO、NIO、AIO区别"></a>BIO、NIO、AIO区别</h3><p>BIO：同步阻塞式IO，就平常使用的，模式简单使用方便，并发处理能力低</p><p>​    是一个连接一个线程</p><p>​    适用于连接数目较小且固定的架构，对服务器资源要求较高</p><p>NIO：同步非阻塞IO，客户端和服务器端通过Channel通讯，多路复用</p><p>​    一个请求一个线程</p><p>​    适用于连接数目多且连接较短的架构，比如聊天服务器</p><p>AIO：NIO的升级，异步非阻塞IO，异步IO操作基于事件和回调机制</p><p>一个有效请求一个线程</p><p>适用于连接数据木多且连接较长的架构，比如相册服务器</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> IO模型 </tag>
+            
+            <tag> IO流 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>JVM基础-类加载</title>
       <link href="/2022/05/21/JVM-2/"/>
       <url>/2022/05/21/JVM-2/</url>

@@ -1,3 +1,4 @@
+http://example.com/2022/05/22/IO/
 http://example.com/2022/05/20/JVM-1/
 http://example.com/2022/05/21/JVM-2/
 http://example.com/2022/05/19/redis_c/
@@ -41,6 +42,8 @@ http://example.com/tags/HTTP/
 http://example.com/tags/JVM/
 http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/
 http://example.com/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/
+http://example.com/tags/IO%E6%A8%A1%E5%9E%8B/
+http://example.com/tags/IO%E6%B5%81/
 http://example.com/categories/redis/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/Spring/
