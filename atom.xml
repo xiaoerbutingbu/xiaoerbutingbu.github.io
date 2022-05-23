@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-22T15:12:17.166Z</updated>
+  <updated>2022-05-23T14:57:51.385Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>kafka常见问题</title>
+    <link href="http://example.com/2022/05/23/kafka-1/"/>
+    <id>http://example.com/2022/05/23/kafka-1/</id>
+    <published>2022-05-23T14:52:45.000Z</published>
+    <updated>2022-05-23T14:57:51.385Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="Kafka"><a href="#Kafka" class="headerlink" title="Kafka"></a>Kafka</h2><h3 id="Kafka比RocketMQ吞吐量高的原因"><a href="#Kafka比RocketMQ吞吐量高的原因" class="headerlink" title="Kafka比RocketMQ吞吐量高的原因"></a>Kafka比RocketMQ吞吐量高的原因</h3><p>kafka的生产者采用的是异步发送消息机制，当发送一条消息时，消息没有发送到Broker而是<em><strong>在生产者缓存起来</strong></em>，然后直接向业务返回成功。当缓存的消息达到了一定的数量时再分批量发送给Broker。这样就减少了网络IO，从而提高了消息发送的吞吐量，但若消息生产者宕机，会导致消息丢失，业务出错，所以理论上kafka利用该机制提高了性能却降低了可靠性</p><h3 id="Kafka的pull和Push的优缺点"><a href="#Kafka的pull和Push的优缺点" class="headerlink" title="Kafka的pull和Push的优缺点"></a>Kafka的pull和Push的优缺点</h3><p>pull表示消费者主动拉取，可批量拉也可单条拉，所有pull可由消费者自己控制，根据自己的消息处理能力来进行控制，但消费者不能及时知道是否有消息，拉的消息可能为空</p><p>push表示broker主动给消费者推送消息，所以肯定是有消息时才会推送，但是消费者不能按自己的能力来消费消息，推过来多少消息，消费者就消费多少消息，可能会造成网络堵塞，消费者压力大等问题</p><h3 id="kafka的rebalance机制"><a href="#kafka的rebalance机制" class="headerlink" title="kafka的rebalance机制"></a>kafka的rebalance机制</h3><p>consumer group中的消费者与topic下的partion重新匹配的过程</p><p>产生rebalance的时间： consumer group 中的成员个数发生变化， consumer消费超时，group订阅的topic个数发生变化，group订阅的topic的分区数发生变化</p><p>coordinator（协调者）：是partition的leader节点所在的broker，负责监控group中的consumer的存活，consumer维持到coordinator的心跳，判断consumer的消费超时。    通过心跳返回通知consumer进行rebalance；consumer请求coordinator加入组，coordinator选举产生leader consumer；leader consuemr从coordinator获取所有的consumer，发送syncGroup（分配信息）给到coordinator；coordinator通过心跳机制将syncGroup下发给consumer</p><p>leader consumer监控topic的变化，通知coordinator触发rebalance</p><h3 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h3><p><img src="/2022/05/23/kafka-1/jiagou.png" alt="image-20220501201317495"></p><p>consumer group：消费者组，消费者组内每个消费者负责消费不同分区的数据，提供消费能力。逻辑上的一个订阅者</p><p>topic：理解为一个队列，topic将消息分类，生产者和消费者面向同一个topic</p><p>partition：为了实现拓展性，提供并发能力，一个topic以多个partition的方式分布到多个broker上，每个partition是一个有序的队列。一个topic的每个partition都有若干个副本，一个leader和若干个follower。生产者发送数据的对象，以及消费者消费数据的对象都是leader。follower负责实时从leader中同步数据，保证和leader数据的同步。leader故障，某个follower会成为新的leader</p><h3 id="zookeeper作用"><a href="#zookeeper作用" class="headerlink" title="zookeeper作用"></a>zookeeper作用</h3><p>&#x2F;brokers&#x2F;ids：临时节点，保存所有broker节点信息，存储broker的物理地址、版本信息、启动时间等，节点名称为brokerID，broker定时发送心跳到zk，若断开该brokerID会被删除</p><p>&#x2F;brokers&#x2F;topic：临时节点，节点保存broker节点下所有的topic信息，每一个topic节点下包含一个固定的partition节点，partitions的子节点就是topic的分区，每个分区下保存一个state节点，保存着当前leader分区和ISR的brokerID，leader创建state节点，若leader宕机，该节点会被删除，直到新的leader产生，重新生成state节点</p><p>&#x2F;consumer&#x2F;[group_id]&#x2F;owners&#x2F;[topic]&#x2F;[broker_id-partition_id]：维护消费者和分区的注册关系。 比如：consumer下有c1，c2，c3分别与topic下的p1，p2，p3相连，该节点就是记录消费者消费的哪个分区关系。若c1宕机了，p1就没有消费端，就触发rebalance</p><p>&#x2F;consumer&#x2F;[group_id]&#x2F;offsets&#x2F;[topic]&#x2F;[broker_id-partition_id]：分区消息的消费进度offset。partition第一次拉取了consumer的第一条消息，第二次就拉取第二条，该节点就记录这个信息  </p><p>client通过topic找到topic树下的state节点，获取leader的brokerID，到broker树找到broker的物理地址，但是client不会直连zk，而是通过配置的broker获取到zk中的信息</p><h3 id="高性能的原因"><a href="#高性能的原因" class="headerlink" title="高性能的原因"></a>高性能的原因</h3><p>指读写性能</p><p>kafka<em><strong>不基于内存</strong></em>，而是硬盘存储，因此消息堆积能力更强，硬盘容量大。文件系统</p><p>顺序写：利用磁盘的顺序访问速度可以接近内存，kafka的消息都是append操作，partition是有序的，节省了磁盘的寻道时间，同时通过批量操作、节省写入次数，partition物理上分为多个segment存储方便删除</p><p>传统：读取磁盘文件数据到内核缓冲区；将内核缓冲区的数据copy到用户缓冲区；将用户缓冲区的数据copy到socket的发送缓冲区；将socket发送缓冲区的数据发送到网卡，进行传输</p><p>零拷贝：直接将内核缓冲区的数据发送到网卡传输；使用的是操作系统的指令支持</p><p>kafka不太依赖jvm，主要理由操作系统的pageCache，由操作系统决定把数据从pageCache刷到磁盘，若生产消费速率相当，则直接用pageCache交换数据，不需要经过磁盘IO</p><h3 id="消息高可靠的解决方案"><a href="#消息高可靠的解决方案" class="headerlink" title="消息高可靠的解决方案"></a>消息高可靠的解决方案</h3><p>消息发送：</p><p>​ack：0、不重试；1、leader写入成功就返回了；all&#x2F;-1、等待ISR同步完再返回（ISR列表中的follow全部同步完成）</p><p>​unclean.leader.election.enable：false，禁止选举ISR以外的follower为leader。若为true，即允许leader从OSR中选举，即使ack为all，消息也可能丢失，因为leader从OSR中选的话，该follow与之前的leader相比已经差了很大了 </p><p>​tries&gt;1，重试次数</p><p>​min.insync.replicas&gt;1：最小同步副本数，没满足该值前，不提供读写服务、写操作异常</p><p>消费：</p><p>​手工提交offset；</p><p>broker：</p><p>​减少刷盘间隔；事务消息</p><h3 id="消息丢失的场景和解决"><a href="#消息丢失的场景和解决" class="headerlink" title="消息丢失的场景和解决"></a>消息丢失的场景和解决</h3><p>场景：</p><p>​ack&#x3D;0：即producer发送消息完后，不管发送结果了，若发送失败数据也就丢失了</p><p>​ack&#x3D;1，leader crash：producer发送消息后，只等待lead写入成功就返回了，leader crash了，这时follow没来得及同步，消息就丢失了</p><p>​unclean.leader.election.enable 配置为true：即允许OSR节点作为leader，producer发送完消息，只等待leader写入成功就返回了，但leader crash而ISR没有follower，leader就会从OSR选举，而OSR的信息本来就落后于leader，就造成信息发生丢失</p><p>解决：</p><p>发送端</p><p>​ack&#x3D;all&#x2F;-1，tries&gt;1,unclean.leader.election.enable配置为false ：producer发送完消息，等待follower同步完再返回，若异常则重试，副本的数量可能影响吞吐量</p><p>​不允许选举ISR以外的副本作为leader</p><p>​配置：min.insync.replicas&gt;1：<em><strong>副本指定必须确认写操作成功的最小副本数量</strong></em>。若不能满足这个最小值，则生产者将引发一个异常</p><p>​min.insync.relicas和ack跟搭嘎的持久性保证，确保如果大多数副本没有收到写操作，则生产者将引发异常</p><p>​失败的offset单独记录：producer发送消息，会自动重试，遇到不可恢复异常会抛出，这时可以捕获异常记录到数据库或缓存，进行单独处理</p><p>消费端</p><p>​先commit再处理消息，如果在处理消息的时候异常了，但是offset已经提交了，该消息对于该消费者就是丢失了，再也不会被消费到</p><p>​<em><strong>而若先处理，没来得及commit就宕机了，消息就会被重复消费</strong></em></p><p>broker</p><p>​减少刷盘间隔</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;Kafka&quot;&gt;&lt;a href=&quot;#Kafka&quot; class=&quot;headerlink&quot; title=&quot;Kafka&quot;&gt;&lt;/a&gt;Kafka&lt;/h2&gt;&lt;h3 id=&quot;Kafka比RocketMQ吞吐量高的原因&quot;&gt;&lt;a href=&quot;#Kafka比RocketMQ吞吐量高的原</summary>
+      
+    
+    
+    
+    <category term="消息队列" scheme="http://example.com/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
+    
+    
+    <category term="消息队列" scheme="http://example.com/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
+    
+  </entry>
   
   <entry>
     <title>IO</title>
@@ -488,30 +512,6 @@
       
     <summary type="html">&lt;p&gt;redis用来实现应用和数据库之间读操作的缓存层，主要目的是去减少数据库的IO，并提升数据库的IO性能。&lt;/p&gt;
 &lt;h1 id=&quot;整体架构&quot;&gt;&lt;a href=&quot;#整体架构&quot; class=&quot;headerlink&quot; title=&quot;整体架构&quot;&gt;&lt;/a&gt;整体架构&lt;/h1&gt;&lt;p&gt;当应</summary>
-      
-    
-    
-    
-    <category term="redis" scheme="http://example.com/categories/redis/"/>
-    
-    
-    <category term="redis" scheme="http://example.com/tags/redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>redis理解和分布式锁</title>
-    <link href="http://example.com/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
-    <id>http://example.com/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</id>
-    <published>2022-05-03T04:15:52.889Z</published>
-    <updated>2022-05-06T12:13:44.965Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="对redis的理解"><a href="#对redis的理解" class="headerlink" title="对redis的理解"></a>对redis的理解</h1><p>redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部分都采用redis实现分布式缓存，从而去提高数据的的检索效率。</p><p>redis流行的原因：</p><p>​1 基于内存存储，在进行数据IO操作的时候能达到很高的QPS（官方给的10w）</p><p>​2 提供了非常丰富的数据存储结构，比如String、list、hash、set、zset</p><p>​3 底层采用单线程实现数据的IO，所以在数据算法层面不需要考虑并发安全性，从而让底层算法的时间复杂度基本都是常量复杂度</p><p>​4 虽然是内存存储，但却可以支持持久化，避免因服务器故障而导致的数据丢失问题</p><p>综上，redis一般是用来实现分布式缓存，从而降低应用程序对关系型数据库检索带来的性能影响，redis还可以实现分布式锁、分布式队列、排行榜、查找附近的人等功能，为复杂应用提供了解决方案</p><h1 id="实现分布式锁中-zookeeper和redis的比较"><a href="#实现分布式锁中-zookeeper和redis的比较" class="headerlink" title="实现分布式锁中 zookeeper和redis的比较"></a>实现分布式锁中 zookeeper和redis的比较</h1><p>分布式锁：核心目的是为了解决在同一个时刻有多个进程或线程来访问共享资源所带来的安全性问题。锁又分为共享锁（在同一个时刻允许多个线程或进程访问共享资源，适用于幂等性场景，从而避免重复加锁的性能开销）和排它锁（同一个时刻只允许一个线程或进程访问该共享资源，适用于非幂等性场景）</p><p>实现分布式锁的最常用中间件就是zookeeper和redis</p><p>redis实现分布式锁方式：</p><p>​1 基于redis本身提供的指令：SET key value NX PX millisecounds。设置key的时候，若key已经存在与服务器上了会返回一个0，表示无法设置，否则就返回1表示设置成功。程序就根据0和1判断状态，从而表示去获得锁</p><p>​2 基于redission客户端实现，redission提供了分布式锁的封装方法，只需要调用封装好的api，<em><strong>lock()</strong></em> 和 ***unlock()***方法，就可以实现锁的抢占和释放。redission的所有指令都是通过lua脚本去实现，该脚本可以保证所有执行指令的原则性。另外，redission提供了一个watchdog，它会在我们获取锁后每隔10s去把key的时间延长，就避免锁的过期。</p><p>redis的缺点：</p><p>​在获得锁的时候，很简单，若获取不到锁就一直去尝试获取，会影响程序性能</p><p>​是一个&#x3D;&#x3D;AP模型&#x3D;&#x3D;，也就是可用性模型，集群模式中，存在数据一致性，会导致锁出现问题。即使使用了redlock算法实现分布式锁，但在某些复杂的场景下也不能保证锁的一定可用</p><p>zookeeper实现分布式锁：</p><p>​1 有序节点实现：每个线程或进程都到zookeeper上的<em><strong>lock</strong></em>目录下去创建一个临时有序节点，去表示抢占锁，所有创建的节点都会按照先后顺序生成带有有序编号的节点，线程创建节点后获取<em><strong>lock</strong></em>节点下的所有子节点，判断当前线程创建的节点是否是所有子节点里序号最小的，若是就获取锁成功。反之就需要对当前线程的前一个节点建立事件监听，当被监听的节点释放后，则触发回调告诉当前线程从而再次去尝试抢占锁</p><p> 使用redis还是比较常见，因为实际开发中极端情况少，redis本身的性能又高，在高并发中比较合适。</p><p>zookeeper是一个分布的协调组件，是&#x3D;&#x3D;一个CP模型&#x3D;&#x3D;所以更适合实现分布式锁。当获取不到锁就添加监听器，不用一直获取，就减少了性能。</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;对redis的理解&quot;&gt;&lt;a href=&quot;#对redis的理解&quot; class=&quot;headerlink&quot; title=&quot;对redis的理解&quot;&gt;&lt;/a&gt;对redis的理解&lt;/h1&gt;&lt;p&gt;redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部</summary>
       
     
     
