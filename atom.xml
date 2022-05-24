@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-23T14:57:51.385Z</updated>
+  <updated>2022-05-24T07:32:00.968Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MySQL基础</title>
+    <link href="http://example.com/2022/05/24/MySQL-1/"/>
+    <id>http://example.com/2022/05/24/MySQL-1/</id>
+    <published>2022-05-24T07:22:57.000Z</published>
+    <updated>2022-05-24T07:32:00.968Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="三大范式和反模式"><a href="#三大范式和反模式" class="headerlink" title="三大范式和反模式"></a>三大范式和反模式</h2><p>第一：属性不可分割，原子项</p><p>第二：原子性，即非主属性必完全依赖主属性</p><p>第三：原子性，非主属性必完全主属性，且不存在传递依赖</p><p>反模式：解决了旧问题，又产生了新问题。实际开发中，不会严格遵守三范式</p><h2 id="三种引擎"><a href="#三种引擎" class="headerlink" title="三种引擎"></a>三种引擎</h2><p><img src="/2022/05/24/MySQL-1/yinqin.png" alt="引擎"></p><h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><p>不支持事务，不支持外键，支持表锁，不支持行锁，访问速度快</p><p>若主要用于插入新记录和读出记录，该引擎就能实现处理的高效率。若应用的完整性、并发性要求较低，也可</p><p>每次查询具有原子性</p><p>B+树的索引结构</p><p>非聚集性索引，存储会有两个文件，一个索引文件，一个数据文件，其中索引文件的索引指向数据文件中的表数据</p><p>用一个变量保存了整个表的行数，而innodb是全表扫描</p><p>支持全文索引，innodb不支持全文索引（5.7以前）</p><p>可以被压缩后查询</p><p>所以MYISAM只缓存索引块，记录的直接是文件的OFFSET，定位比INNODB块。多以查询比较快</p><h3 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h3><p>内存存放，hash索引（默认）</p><p>所有数据存在内存汇总，数据的处理速度快，但安全性不高，因对表的大小有要求，不能建太大的表。适用于需要很快的读写速度、安全性要求较低的</p><h3 id="MyISAM-1"><a href="#MyISAM-1" class="headerlink" title="MyISAM"></a>MyISAM</h3><p>不支持事务，不支持外键，支持表锁，不支持行锁，访问速度快</p><p>若主要用于插入新记录和读出记录，该引擎就能实现处理的高效率。若应用的完整性、并发性要求较低，也可</p><p>每次查询具有原子性</p><p>B+树的索引结构</p><p>非聚集性索引，存储会有两个文件，一个索引文件，一个数据文件，其中索引文件的索引指向数据文件中的表数据</p><p>用一个变量保存了整个表的行数，而innodb是全表扫描</p><p>支持全文索引，innodb不支持全文索引（5.7以前）</p><p>可以被压缩后查询</p><p>所以MYISAM只缓存索引块，记录的直接是文件的OFFSET，定位比INNODB块。多以查询比较快</p><h2 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h2><p>多版本并发控制，是一种并发控制的方法，实现对数据库的并发访问，在编程语言中实现事务内存。</p><p><em><strong>就是为了实现读写冲突不加锁。</strong></em></p><p>MVCC多版本并发控制：维持一个数据的多个版本，让读写操作没有冲突</p><p>在InnoDB中的实现主要是为了提高数据库并发性能</p><p>使用RC和RR隔离级别的事务，在执行普通selsect操作时，访问记录版本链的过程；让不同事务的读写、写操作并发执行，提高体统性能</p><h3 id="益处"><a href="#益处" class="headerlink" title="益处"></a>益处</h3><p>解决读写冲突的无锁并发控制</p><p>在并发读写时，可在读操作时不用阻塞写操作，写操作不用阻塞读操作，提供读写性能；解决脏读，幻读，不可重复读等事务隔离问题，但不能解决更新丢失问题</p><h3 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h3><p>第一种：将数据记录的多个版本保存在数据库中，当这些版本数据不再需要时，垃圾回收器就回收这些记录</p><p>第二种：只在数据库中保存最新版本的数据，但是在使用undo时动态重构旧版本数据</p><h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><p>3个隐式字段：分别记录</p><p>​                 最近修改事务ID：记录创建这条记录&#x2F;最后一次修改该记录的事务ID</p><p>​                 指向这条记录的上一个版本；</p><p>​                 隐含自增ID，若数据表没有主键，就自动产生一个聚集索引</p><p>Undo日志：</p><p>​        Insert undo log：事务在insert新纪录时产生的undo log，只在事务回滚时需要，并且在事务提交后可以被立即丢弃</p><p>​        Update undo log：在update或delete时产生；事务回滚需要，快照读也需要；所以不能随便删除，只有在快速读或事务回滚不涉及该该日志，才会被统一清除</p><p>Read View：</p><p>​         事务进行快照读操作的时候生产的读视图</p><h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><p>存储引擎层实现，索引：帮助mysql高效获取数据的数据结构</p><p>提高数据库的性能，不用加内存，不用该程序，不同调sql</p><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>把无序的数据变成有序的查询</p><p>创建了索引的列的内容进行排序</p><p>对排序结果倒排索引</p><p>在倒排表内容上拼上数据地址链</p><p>查询时，先拿倒排表内容，再取出数据地址链，从而拿到数据</p><h3 id="主要分类"><a href="#主要分类" class="headerlink" title="主要分类"></a>主要分类</h3><p>普通索引、唯一索引（hash）、主键索引、组合索引、全文索引（full text），BTREE，RTREE</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;三大范式和反模式&quot;&gt;&lt;a href=&quot;#三大范式和反模式&quot; class=&quot;headerlink&quot; title=&quot;三大范式和反模式&quot;&gt;&lt;/a&gt;三大范式和反模式&lt;/h2&gt;&lt;p&gt;第一：属性不可分割，原子项&lt;/p&gt;
+&lt;p&gt;第二：原子性，即非主属性必完全依赖主属性&lt;/p&gt;
+</summary>
+      
+    
+    
+    
+    <category term="MySQL" scheme="http://example.com/categories/MySQL/"/>
+    
+    
+    <category term="MySQL" scheme="http://example.com/tags/MySQL/"/>
+    
+  </entry>
   
   <entry>
     <title>kafka常见问题</title>
@@ -487,31 +513,6 @@
       
     <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;内存淘汰： 当内存的使用率到达了maxMemory的上限的时候，进行内存的释放。&lt;/p&gt;
 &lt;p&gt;redis提供了许多内存淘汰算法，主要分为4</summary>
-      
-    
-    
-    
-    <category term="redis" scheme="http://example.com/categories/redis/"/>
-    
-    
-    <category term="redis" scheme="http://example.com/tags/redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>redis和数据库的数据一致性</title>
-    <link href="http://example.com/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/"/>
-    <id>http://example.com/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</id>
-    <published>2022-05-03T17:15:38.054Z</published>
-    <updated>2022-05-06T12:13:32.199Z</updated>
-    
-    <content type="html"><![CDATA[<p>redis用来实现应用和数据库之间读操作的缓存层，主要目的是去减少数据库的IO，并提升数据库的IO性能。</p><h1 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h1><p>当应用程序需要读取某个数据的时候，首先会尝试去redis里面加载，若命中就直接返回，反之就去数据库里面查询，查询到数据后再把数据缓存到redis里面。</p><h1 id="出现原因"><a href="#出现原因" class="headerlink" title="出现原因"></a>出现原因</h1><p>即一份数据同时保存在redis和数据库里面，当数据发生变化的时候需要同时更新数据库和redis，由于更新操作具有先后顺序且redis不像数据库中的多表事务操作（满足ACID的特性），所以会出现数据一致性的问题</p><h1 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h1><h2 id="先更新数据库后更新缓存"><a href="#先更新数据库后更新缓存" class="headerlink" title="先更新数据库后更新缓存"></a>先更新数据库后更新缓存</h2><p>此情况下，若缓存更新失败，就会导致数据库和redis的数据不一样。</p><p>线程1连接到数据库，读取到了数据A，此时线程1停顿，线程2连接到数据库将数据A更改为数据B，并将B写入了redis完成了线程2的操作，然后线程1将读取到的数据A写入redis即把B覆盖。此时，数据库里面的数据为B，而redis里的数据为A</p><h2 id="先删除缓存后更新数据库"><a href="#先删除缓存后更新数据库" class="headerlink" title="先删除缓存后更新数据库"></a>先删除缓存后更新数据库</h2><p>理想情况下是应用下次访问redis的时候，发现redis里面是空值，就会从数据库里加载并保存至数据库，理论上可行。但在极端情况下，由于删除redis和更新数据库的两个操作均不是原子操作，所以还是会出现数据不一致</p><h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>基于RocketMQ的可靠性消息通信实现数据的最终一致性</p><p>通过Canal组件监控数据库里面的binlog的日志，把更新后的数据同步到redis里面</p><p>采用延时双删的原则：先淘汰缓存，再写数据库，休眠一会儿后再淘汰缓存。因为存在了延时时间，目的就是为了先把查到的数据写入redis再删redis</p><h1 id="redis的线程安全问题"><a href="#redis的线程安全问题" class="headerlink" title="redis的线程安全问题"></a>redis的线程安全问题</h1><h2 id="redis-server"><a href="#redis-server" class="headerlink" title="redis-server"></a>redis-server</h2><p>是一个线程安全的K-V数据库，即在redis-server端去执行指令的时候不要任何的同步机制，不存在任何线程安全的问题，虽然6.0之后增加了多线程的模型，但该模型只是去处理网络的IO事件，对于指令的执行还是采用主线程来处理的，所以并不会存在多个线程同时去执行操作指令的情况。</p><p>没有采用多线程执行指令：</p><p>​本身可能出现的性能瓶颈点无非是网络IO、CPU、内存，但是CPU不是redis的瓶颈，所以就没必要采用多线程执行指令</p><p>​若采用多线程，那么所有指令就必须要考虑线程安全的问题，也就需要加锁来解决，这种方式反而会对性能造成更大的影响</p><h2 id="redis-client"><a href="#redis-client" class="headerlink" title="redis-client"></a>redis-client</h2><p>里面的指令操作都是原子性，但若有多个redis客户端同时执行多个指令就无法保证原子性。</p><p>比如：两个client同时去获取server上的key1，同时去修改和写入，因为多线程下原子性不能保证以及多进程的情况下共享资源访问的竞争问题也不能保证数据安全性</p><h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>尽可能使用redis里面的原子指令</p><p>对个客户端的资源访问加锁</p><p>通过lua脚本实现多个指令的操作，去满足原子性</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;redis用来实现应用和数据库之间读操作的缓存层，主要目的是去减少数据库的IO，并提升数据库的IO性能。&lt;/p&gt;
-&lt;h1 id=&quot;整体架构&quot;&gt;&lt;a href=&quot;#整体架构&quot; class=&quot;headerlink&quot; title=&quot;整体架构&quot;&gt;&lt;/a&gt;整体架构&lt;/h1&gt;&lt;p&gt;当应</summary>
       
     
     
