@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-05-24T07:32:00.968Z</updated>
+  <updated>2022-05-25T12:53:41.652Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>操作系统基础</title>
+    <link href="http://example.com/2022/05/25/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/"/>
+    <id>http://example.com/2022/05/25/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/</id>
+    <published>2022-05-25T12:47:24.000Z</published>
+    <updated>2022-05-25T12:53:41.652Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="基本概述"><a href="#基本概述" class="headerlink" title="基本概述"></a>基本概述</h2><p>是管理计算机硬件与软件资源的程序</p><p>本质是一个运行在计算机上的软件程序，用于管理计算机硬件和软件的资源</p><p>屏蔽了硬件层的复杂性</p><p>内核是操作系统核心，它负责系统的内存管理，硬件设备的管理，文件系统的管理以及应用程序的管理</p><h2 id="用户态和核心态"><a href="#用户态和核心态" class="headerlink" title="用户态和核心态"></a>用户态和核心态</h2><p>处理器的执行状态分为内核态和用户态，就是为了避免操作系统和关键字数据被用户程序破坏</p><p>内核态：是操作系统管理程序执行时所处状态，能执行包含特权指令在内的所有指令，能访问系统内所有的存储空间</p><p>用户态：用户态运行的进程或可以直接遁去用户程序的数据</p><h2 id="实现内核态和用户态的切换"><a href="#实现内核态和用户态的切换" class="headerlink" title="实现内核态和用户态的切换"></a>实现内核态和用户态的切换</h2><p>系统调用：是操作系统的最小功能单位，操作系统提供的用户接口，本身是一种软中断。</p><p>异常：也叫内中断，由错误引起</p><p>外中断: 通过两根信号线来通知处理器外设的状态变化，是硬中断</p><h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>资源分配的基本单位，独立运行的基本单位</p><p>由以下组成：</p><p>  进程控制块PCB，进程唯一存在标志，包含进程标识符PID，进程当前状态，程序和数据地址，进程优先级，CPU现场保护区（用户进程切换），占有的资源清单</p><p>  程序段</p><p>  数据段</p><p>状态：</p><p>  创建态（进程正在被创建）</p><p>就绪态（除了CPU，其他资源都有，一个系统中可有多个进程处于该状态）、</p><p>运行态（占有处理器正在运行）、</p><p>阻塞态（不具备运行条件，在等待某个时间完成）</p><p>  结束态（进程正在从系统中消失）</p><p>孤儿进程：父进程退出，子进程还在运行。将被init进程收养</p><p>僵尸进程：进程使用fork创建子进程，若子进程退出，而父进程没有调用wait或waitpid获取子进程状态信息，那子进程的进程描述符仍然保存在系统中</p><h3 id="进程间的通信方法"><a href="#进程间的通信方法" class="headerlink" title="进程间的通信方法"></a>进程间的通信方法</h3><p>  每个进程各有不同的用户地址空间，任何一个进程的全局变量在另一个进程看不见。所以，进程间的交换数据必须在内核：在内核中开辟出一块缓冲区，进程A把数据从用户空间拷贝到内核缓冲区，进程B再从内核缓冲区把数据读走。</p><p>不同进程间的通信本质：进程间可以看到一份公共资源；提供这资源的形式或提供者不同，通信方式也就不同</p><p>主要包括：管道&#x2F;匿名管道，消息队列、信号量、信号、共享内存、套接字socket</p><h3 id="同步方式"><a href="#同步方式" class="headerlink" title="同步方式"></a>同步方式</h3><p>互斥量：互斥对象机制</p><p>信号量：允许同一时刻多线程访问同一资源，但要控制同一时刻最大线程数</p><p>事件：通过通知操作的方式来保持多线程同步</p><h3 id="进程调度时机"><a href="#进程调度时机" class="headerlink" title="进程调度时机"></a>进程调度时机</h3><p>当前运行的进程运行结束、当前运行进程阻塞、执行完系统调用等系统程序后返回用户进程、抢占式调度中有更高优先级的进行就绪、分时系统中，分给当前进程的时间片用完</p><h3 id="不能进行调度的时候"><a href="#不能进行调度的时候" class="headerlink" title="不能进行调度的时候"></a>不能进行调度的时候</h3><p>中断处理程序执行时，操作系统的内核程序临界区内、其他需要完全屏蔽中断的原子操作过程中</p><h2 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h2><p>某个函数、数据库在并发环境中被调用时，能够正确的处理多个线程之间的共享变量，让程序功能正确完成</p><p>上下文就是这样的过程，允许CPU记录并恢复各种正在运行程序的状态，使它能够完成切换操作</p><h3 id="进程同步的方法"><a href="#进程同步的方法" class="headerlink" title="进程同步的方法"></a>进程同步的方法</h3><p>互斥锁、读写锁、条件变量、记录锁、信号量、屏障</p><h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><p>进程划分的任务，是一个进程内可调度的实体，CPU调度的基本单位，来保证程序的实时性，实现进程内部的并发</p><p>是操作系统可识别的最小执行和调度单位</p><h3 id="线程同步的方法"><a href="#线程同步的方法" class="headerlink" title="线程同步的方法"></a>线程同步的方法</h3><p>互斥锁、读写锁、条件变量、记录锁、信号量、屏障</p><h3 id="线程间的通信方式"><a href="#线程间的通信方式" class="headerlink" title="线程间的通信方式"></a>线程间的通信方式</h3><p>用Volatile关键字，就是多个线程同时监听一个变量</p><p>Object类的wait和notify</p><p>JUC工具类CountDownLatch</p><h2 id="携程"><a href="#携程" class="headerlink" title="携程"></a>携程</h2><p>比线程更轻量级，不被操作系统管理，完全由程序控制（用户态执行）。这样能提升性能，不会像线程那样切换而消耗资源</p><p>单线程下的并发 </p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;基本概述&quot;&gt;&lt;a href=&quot;#基本概述&quot; class=&quot;headerlink&quot; title=&quot;基本概述&quot;&gt;&lt;/a&gt;基本概述&lt;/h2&gt;&lt;p&gt;是管理计算机硬件与软件资源的程序&lt;/p&gt;
+&lt;p&gt;本质是一个运行在计算机上的软件程序，用于管理计算机硬件和软件的资源&lt;/p&gt;
+</summary>
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://example.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://example.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
   
   <entry>
     <title>MySQL基础</title>
@@ -488,31 +514,6 @@
       
       
     <summary type="html">&lt;h1 id=&quot;redis的基本性质&quot;&gt;&lt;a href=&quot;#redis的基本性质&quot; class=&quot;headerlink&quot; title=&quot;redis的基本性质&quot;&gt;&lt;/a&gt;redis的基本性质&lt;/h1&gt;&lt;p&gt;redis是&lt;em&gt;&lt;strong&gt;完全基于内存&lt;/strong&gt;&lt;/em&gt;</summary>
-      
-    
-    
-    
-    <category term="redis" scheme="http://example.com/categories/redis/"/>
-    
-    
-    <category term="redis" scheme="http://example.com/tags/redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>redis内存淘汰</title>
-    <link href="http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/"/>
-    <id>http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/</id>
-    <published>2022-05-05T02:52:26.015Z</published>
-    <updated>2022-05-06T12:13:51.244Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>内存淘汰： 当内存的使用率到达了maxMemory的上限的时候，进行内存的释放。</p><p>redis提供了许多内存淘汰算法，主要分为4种：</p><p>​随机：随机移除某个key</p><p>​TTL算法：，在设置了过期时间的键里面去找更早过期时间的key进行有限的移除</p><p>​LRU算法：去移除最近很少使用的key。</p><p>​LFU算法：与LRU算法类似                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </p><h1 id="LRU算法"><a href="#LRU算法" class="headerlink" title="LRU算法"></a>LRU算法</h1><p>​LRU算法会维护一个大小为16的侯选池，里面的数据会随着时间排序，每一次随机抽取5个key放入侯选池，当侯选池满了后，访问的时间间隔最大的key就从侯选池里面取出来并淘汰。这样就可以把真实的最少访问的key从内存里面淘汰。</p><p>​存在问题：若一个key很长时间没有访问，突然偶尔被访问，那LRU就会认为这是一个热点key就不会被淘汰。</p><h1 id="LFU算法"><a href="#LFU算法" class="headerlink" title="LFU算法"></a>LFU算法</h1><p>​相比于LRU算法，LFU增加了访问频率来统计数据的热点情况。</p><p>​主要设置是使用了两个双向链表形成了一个二维的双向链表，一个链表来保存访问频率，另一个保存访问频率相同的所有元素。当添加元素的时候，访问频次默认为1，找到相同频次的节点，然后添加到相同的频率节点对应的双向链表的头部，当元素被访问的时候，就增加对应key的访问频率，并把当前访问的节点移动到下一个频次的节点。</p><p>​可能出现某个数据前期的访问次数很多，但后续不再使用。若单纯按照这样的一个访问频次来进行淘汰的话，那这个key就很难被淘汰掉。该算法通过使用频率和上次访问的时间来标记数据的热度。若某个数据有读和写，那增加访问的频率；若一段时间内该数据没有读写，那就减少访问频率。</p><p>​经过LFU算法改进后就可以实现真正达到非热点数据的淘汰</p><p>​缺点：与LRU相比，增加了访问频次的维护以及实现的复杂度要比LRU更高</p><h1 id="过期删除"><a href="#过期删除" class="headerlink" title="过期删除"></a>过期删除</h1><p>定时策略：创建一个定时器，过期时间到，逻辑对键的删除</p><p>​对内存友好而CPU时间不好，redis还没有使用</p><p>惰性删除：过期键不管，每次从键空间获取键的时候，该键过期了删了，没过期就返回该键</p><p>​对内存不友好而CPU时间友好</p><p>定期删除：每隔一段时间就检查，删除过期键，由算法决定</p><p>​较为折中</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;内存淘汰： 当内存的使用率到达了maxMemory的上限的时候，进行内存的释放。&lt;/p&gt;
-&lt;p&gt;redis提供了许多内存淘汰算法，主要分为4</summary>
       
     
     
