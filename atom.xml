@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-06-13T16:05:15.251Z</updated>
+  <updated>2022-06-14T07:21:29.002Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Bean</title>
+    <link href="http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/"/>
+    <id>http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</id>
+    <published>2022-06-14T05:21:37.000Z</published>
+    <updated>2022-06-14T07:21:29.002Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="配置Bean"><a href="#配置Bean" class="headerlink" title="配置Bean"></a>配置Bean</h1><p>两种方式：在xml中写<bean>标签，用@Bean注解</bean></p><p>两个方法都在sping的refresh方法中都会用loadBeanDefinitions加载到容器里面，通过BeanDefinitionRegistry.register方法，会包括一些后置处理</p><h1 id="BeanDefinition"><a href="#BeanDefinition" class="headerlink" title="BeanDefinition"></a>BeanDefinition</h1><p>配置bean之后就拿到了BeanDefinition，是配置bean的加载结果，也是下面步骤的原始数据。</p><p>Spring在启动时，会扫描到类的信息，将相关信息封装为BeanDefinition存入到beanDefinitionMap中，根据里面的扫描信息生成bean                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </p><p>注意：beanName、ClassType。</p><p>提前初始化：把那个没有配置的懒加载bean开始初始化</p><h1 id="实例化"><a href="#实例化" class="headerlink" title="实例化"></a>实例化</h1><p>入参实际上只有一个beanName，与beanDefinition的两个属性相对应，通过beanName然后找到beanType，找到type之后调用&#x3D;&#x3D;反射&#x3D;&#x3D;返回了一object。</p><p>反射的大致：获取class对象得到一个构造器，Constructor ctor&#x3D;clazz.getDeclaredConstructor()，Object obj &#x3D; ctor.newInstance()。</p><p>容器中按照使用者来分，可以把bean对象分为用户自定义对象、容器对象（比如：ApplicationContext、BeanFactory等等）</p><p>注意：InstantiationAwareBeanPostProcessor去生成代理类回来</p><h1 id="属性赋值"><a href="#属性赋值" class="headerlink" title="属性赋值"></a>属性赋值</h1><p>此处就需要解决循环依赖-三级缓存</p><p>给自定义属性赋值：核心在于populateBean里面的autowireByName、autowireByType两个方法（@Autowire，@Resource）</p><p>给容器对象属性赋值：invokeAwareMethods</p><h1 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h1><p>对象的拓展</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">BeanPostProcessor</span> &#123;</span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">default</span> Object <span class="title function_">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException &#123;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">default</span> Object <span class="title function_">postProcessAfterInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException &#123;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><img src="/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/image-20220614145857358.png" alt="image-20220614145857358"></p><p>在属性赋值阶段后，postProcessBeforeInitialization方法之前，会执行很多Aware类型的接口，这种接口类型作用就是加载到Spring容器中，Aware前面的名字就是对应哪种资源</p><p>aware：如果实现了某些接口，比如BeanNameAware、BeanFactoryAware、ApplicationContextAware，就把这些实例给set进去。</p><p>初始化的方式有三个：分别是Initialization的afterPropertiesSet方法；PostConstruct注解标注方法；配置的init-method</p><p>BeanPostProcessor实现了AOP，AOP就是在整个IOC处理流程中某一个拓展点的实现</p><p>执行完就是一个完成的对象</p><h1 id="销毁"><a href="#销毁" class="headerlink" title="销毁"></a>销毁</h1><p>要么去实现DisposableBean接口，要么去定义destory-method方法 </p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;配置Bean&quot;&gt;&lt;a href=&quot;#配置Bean&quot; class=&quot;headerlink&quot; title=&quot;配置Bean&quot;&gt;&lt;/a&gt;配置Bean&lt;/h1&gt;&lt;p&gt;两种方式：在xml中写&lt;bean&gt;标签，用@Bean注解&lt;/bean&gt;&lt;/p&gt;
+&lt;p&gt;两个方法都在sping</summary>
+      
+    
+    
+    
+    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
+    
+    
+    <category term="Bean" scheme="http://example.com/tags/Bean/"/>
+    
+  </entry>
   
   <entry>
     <title>循环依赖</title>
@@ -491,31 +516,6 @@
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>InnoDB基础</title>
-    <link href="http://example.com/2022/05/11/InnoDB-1/"/>
-    <id>http://example.com/2022/05/11/InnoDB-1/</id>
-    <published>2022-05-11T05:26:33.000Z</published>
-    <updated>2022-05-12T02:47:53.598Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>现mysql 5.5后默认引擎，兼顾高可靠性和高性能性的通用存储引擎</p><p>若要对事务的完整性要求较高、要求实现并发的话，InnoDB有大优势；若频繁更新、删除操作也可，因为支持事务的提交和回滚</p><h1 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h1><p>​    DML遵循ACID模型，支持<em><strong>事务</strong></em>。<em><strong>行级锁</strong></em>（加锁开销最大，加锁慢，会出现死锁），提供并发性能；支持<em><strong>外键</strong></em>FOREIGN KEY约束，保证数据的完整性和正确性。</p><p><em><strong>数据块要缓存</strong></em>；寻址要映射到块，再到行；要维护MVCC一致，所以Innodb在select的时候要维护的东西比较多</p><p>delete表的时是一行一行删除，而myisam则是先drop表，再重建表</p><h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><p>聚集索引：</p><p>​将数据存储与索引放到一块，索引的叶子节点保存了行数据，必有且只有一个聚集索引。若有主键，主键即是；无主键用第一个唯一索引；若都没，会自动生成一个rowid作为隐藏的聚集索引。</p><p>索引结构：</p><p>​B+树：将所有数据都放在叶子节点，叶子节点形成一个列表，非叶子只存放键值，每个数据叶中的有效数据就多了，可以减少IO次数</p><p>​    因为相对于二叉树（会有左倾右倾的情况），B+树层级更少，搜索效率高</p><p>​    因为B树：无论叶子节点还是非叶子，都保存数据，所以存储值减少，指针就减少，要同样保存大量数据，只能增加树的高度，导致性能降低，要查找就要遍历整个树</p><p>​    Hash索引只支持等值匹配，不支持排序操作</p><p>二级索引：将数据与索引分开，索引结构的叶子节点关联的是对应的主键</p><h1 id="逻辑存储结构"><a href="#逻辑存储结构" class="headerlink" title="逻辑存储结构"></a>逻辑存储结构</h1><p>TableSpace(表空间)：可以看成Innodb逻辑存储的最高层，所有的数据都存放在表空间内</p><p>Segment（段）：分为数据段、索引段、回滚段。Innodb是索引组织表，数据段是B+树的叶子节点，索引段为B+的非叶子节点。段用来管理多个区</p><p>Extent（区）：表空间的单元结构，每个区默认1M。innodb引擎页大小为16K。连续的页组成</p><p>Page（页）：每个默认16KB，存储引擎磁盘管理的最小单位。数据页、undo页、系统页、事务数据页</p><p>Row（行）：存放的数据</p><h1 id="内存架构"><a href="#内存架构" class="headerlink" title="内存架构"></a>内存架构</h1><p>Buffer Pool（缓冲池）：</p><p>主内存中的一个区域，里面可以缓存磁盘上经常操作的真实数据。增删时，先操作缓冲池的数据（没有，则从磁盘加载），再以一定频率刷新到磁盘，也就减少磁盘IO，加快处理速度</p><p>​    页为单位，链表数据结构管理Page。空闲page（未被使用），被使用page（数据没有被修改过），脏页（被使用过，数据与磁盘的数据不同）</p><p>Change Buffer（更改缓冲区）：执行DML时，操作的数据不在buffer pool中就不会操作磁盘，会将数据变更存在此处，在未来数据被读取时，再将数据合并恢复到缓冲池，再将合并后的数据写到磁盘</p><p>意义：可以在缓冲池中间进行合并处理，减少磁盘IO。因为二级索引一般非唯一，并且以相对随机的顺序插入二级索引。</p><p>Log Buffer（日志缓冲区）：用来保存要写入到磁盘中的log日志数据，默认16MB，日志缓冲区的日志会定期刷新到磁盘中。</p><p>后台线程：将缓冲池中的数据在合适的时候刷新到磁盘</p><p>Master thread：核心，负责调度其他线程，将缓冲池中的数据异步刷新到磁盘中，保持数据一致性，包括脏页的刷新、合并插入缓存，undo页的回收</p><p>​    IO thread：负责IO请求的回调</p><p><img src="/2022/05/11/InnoDB-1/jiegou.png" alt="image-20220511134406227"></p><h1 id="保证ACID"><a href="#保证ACID" class="headerlink" title="保证ACID"></a>保证ACID</h1><p>Redo log（重做日志）：保证持久性。记录的是事务提交时数据页的物理修改。记录的是物理日志</p><p>​    重做日志缓冲：在内存   重做日志文件：在磁盘</p><p>​    当事务提交后把所有信息都存到日志文件，用于刷新脏页到磁盘；发生错误，进行数据恢复使用</p><p>​    在脏页信息发生错误时进行数据恢复，也就是持久性。</p><p>Undo log（回滚日志）：保证原子性。记录数据被修改前的操作。逻辑日志</p><p>​             作用：提供回滚和MVCC</p><p>​             Delete时，undo log里记录insert；update时，会记录反向的update语句 </p><p>​         当事务提交时不会立即删除，因为可能用于MVCC</p><p>​         采用段的方式进行管理和记录</p><h1 id="解决幻读"><a href="#解决幻读" class="headerlink" title="解决幻读"></a>解决幻读</h1><p>通过MVCC。</p><p>MVCC会给每行元祖加一些辅助字段，记录版本号和删除版本号，每一个事务启动都有一个唯一的递增的版本号。每开启一个事务，事务版本号就会递增</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;简述&quot;&gt;&lt;a href=&quot;#简述&quot; class=&quot;headerlink&quot; title=&quot;简述&quot;&gt;&lt;/a&gt;简述&lt;/h1&gt;&lt;p&gt;现mysql 5.5后默认引擎，兼顾高可靠性和高性能性的通用存储引擎&lt;/p&gt;
-&lt;p&gt;若要对事务的完整性要求较高、要求实现并发的话，InnoD</summary>
-      
-    
-    
-    
-    <category term="MySQL" scheme="http://example.com/categories/MySQL/"/>
-    
-    
-    <category term="MySQL" scheme="http://example.com/tags/MySQL/"/>
     
   </entry>
   
