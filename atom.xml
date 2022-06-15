@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-06-15T07:26:31.327Z</updated>
+  <updated>2022-06-15T07:57:02.409Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,19 +17,19 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>SpringCloud和SpringCloudAlibaba简单对比</title>
-    <link href="http://example.com/2022/06/15/SpringCloud%E5%92%8CSpringCloudAlibaba%E7%AE%80%E5%8D%95%E5%AF%B9%E6%AF%94/"/>
-    <id>http://example.com/2022/06/15/SpringCloud%E5%92%8CSpringCloudAlibaba%E7%AE%80%E5%8D%95%E5%AF%B9%E6%AF%94/</id>
+    <title>SpringCloudAlibaba简单阐述</title>
+    <link href="http://example.com/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/"/>
+    <id>http://example.com/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/</id>
     <published>2022-06-15T07:21:38.000Z</published>
-    <updated>2022-06-15T07:26:31.327Z</updated>
+    <updated>2022-06-15T07:57:02.409Z</updated>
     
-    <content type="html"><![CDATA[<p>Spring社区有大一统java的趋势，快速构建一个单体单元SpringBoot，分布式微服务解决方案，SpringCloud和SpringFrameWork和各种组件等等</p>]]></content>
+    <content type="html"><![CDATA[<p>Spring社区有大一统java的趋势，快速构建一个单体单元SpringBoot，分布式微服务解决方案，SpringCloud和SpringFrameWork和各种组件等等</p><p>SpringCloud是一个分布式的微服务解决方案。区别于Dubbo，Dubbo只是一个远程RPC框架，而前者则是一整套的解决方案，包括<strong>服务注册、服务调用、负载均衡、服务网关、服务降级与熔断、分布式配置管理、消息总线</strong>等等技术。</p><h1 id="为什么还要SpringCloudAlibaba？"><a href="#为什么还要SpringCloudAlibaba？" class="headerlink" title="为什么还要SpringCloudAlibaba？"></a>为什么还要SpringCloudAlibaba？</h1><p>因为SpringCloud版本迭代非常快，每次发布一个realease之后又会马上发布下一个版本，所以可能会积累很多bug，而若是进入到了维护阶段，意味着不会再有新的组件技术出现，只是在原来的技术上修改。</p><h1 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title="SpringCloudAlibaba"></a>SpringCloudAlibaba</h1><p>是Spring cloud的子项目，符合SpringCloud的标准，致力于提供微服务开发的一站式解决方案。此项目包含开发分布式应用微服务的必需组件，方便开发者通过 Spring Cloud 编程模型轻松使用这些组件来开发分布式应用服务。</p><p>依托 Spring Cloud Alibaba，您只需要添加一些注解和少量配置，就可以将 Spring Cloud 应用接入阿里微服务解决方案，通过阿里中间件来迅速搭建分布式应用系统。</p><p>同 Spring Cloud 一样，Spring Cloud Alibaba 也是一套微服务解决方案，包含开发分布式应用微服务的必需组件，方便开发者通过 Spring Cloud 编程模型轻松使用这些组件来开发分布式应用服务。</p><p>依托 Spring Cloud Alibaba，只需要添加一些注解和少量配置，就可以将 Spring Cloud 应用接入阿里微服务解决方案，通过阿里中间件来迅速搭建分布式应用系统。</p><h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><ul><li><strong>服务限流降级</strong>：默认支持 WebServlet、WebFlux, OpenFeign、RestTemplate、Spring Cloud Gateway, Zuul, Dubbo 和 RocketMQ 限流降级功能的接入，可以在运行时通过控制台实时修改限流降级规则，还支持查看限流降级 Metrics 监控。</li><li><strong>服务注册与发现</strong>：适配 Spring Cloud 服务注册与发现标准，默认集成了 Ribbon 的支持。</li><li><strong>分布式配置管理</strong>：支持分布式系统中的外部化配置，配置更改时自动刷新。</li><li><strong>消息驱动能力</strong>：基于 Spring Cloud Stream 为微服务应用构建消息驱动能力。</li><li><strong>分布式事务</strong>：使用 @GlobalTransactional 注解， 高效并且对业务零侵入地解决分布式事务问题。</li></ul><h2 id="功能组件"><a href="#功能组件" class="headerlink" title="功能组件"></a>功能组件</h2><p>Sentinel：把流量作为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。<br>Nacos：一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。<br>RocketMQ：一款开源的分布式消息系统，基于高可用分布式集群技术，提供低延时的、高可靠的消息发布与订阅服务。<br>Dubbo：Apache Dubbo™ 是一款高性能 Java RPC 框架。<br>Seata：阿里巴巴开源产品，一个易于使用的高性能微服务分布式事务解决方案。<br>Alibaba Cloud OSS: 阿里云对象存储服务（Object Storage Service，简称 OSS），是阿里云提供的海量、安全、低成本、高可靠的云存储服务。您可以在任何应用、任何时间、任何地点存储和访问任意类型的数据。<br>Alibaba Cloud SchedulerX: 阿里中间件团队开发的一款分布式任务调度产品，提供秒级、精准、高可靠、高可用的定时（基于 Cron 表达式）任务调度服务。<br>Alibaba Cloud SMS: 覆盖全球的短信服务，友好、高效、智能的互联化通讯能力，帮助企业迅速搭建客户触达通道。<br><img src="/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/jiegou1.png" alt="1"></p>]]></content>
     
     
       
       
     <summary type="html">&lt;p&gt;Spring社区有大一统java的趋势，快速构建一个单体单元SpringBoot，分布式微服务解决方案，SpringCloud和SpringFrameWork和各种组件等等&lt;/p&gt;
-</summary>
+&lt;p&gt;SpringCloud是一个分布式的微服务解决方案。区别于Dubbo，Dubbo只是一</summary>
       
     
     
