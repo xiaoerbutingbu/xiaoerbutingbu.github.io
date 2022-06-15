@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>SpringCloud和SpringCloudAlibaba简单对比</title>
+      <link href="/2022/06/15/SpringCloud%E5%92%8CSpringCloudAlibaba%E7%AE%80%E5%8D%95%E5%AF%B9%E6%AF%94/"/>
+      <url>/2022/06/15/SpringCloud%E5%92%8CSpringCloudAlibaba%E7%AE%80%E5%8D%95%E5%AF%B9%E6%AF%94/</url>
+      
+        <content type="html"><![CDATA[<p>Spring社区有大一统java的趋势，快速构建一个单体单元SpringBoot，分布式微服务解决方案，SpringCloud和SpringFrameWork和各种组件等等</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Spring </category>
+          
+          <category> 微服务 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Spring </tag>
+            
+            <tag> 框架 </tag>
+            
+            <tag> 微服务 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Bean</title>
       <link href="/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/"/>
       <url>/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</url>
