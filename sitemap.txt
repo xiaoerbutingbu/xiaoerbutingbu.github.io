@@ -1,3 +1,4 @@
+http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/06/16/Shiro/
 http://example.com/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/
 http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/

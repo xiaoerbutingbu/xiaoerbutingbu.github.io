@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-06-16T08:28:04.950Z</updated>
+  <updated>2022-06-25T14:34:00.368Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Autowired和Resource</title>
+    <link href="http://example.com/2022/06/25/Autowired%E5%92%8CResource/"/>
+    <id>http://example.com/2022/06/25/Autowired%E5%92%8CResource/</id>
+    <published>2022-06-25T13:40:50.000Z</published>
+    <updated>2022-06-25T14:34:00.368Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>@Auwired：</p><p>对成员变量、方法及构造函数进行标注，完成自动装配的工作</p><p>@Resource：</p><p>​官方定义：在语义上被定义为通过其唯一的名称来标识特定的目标组件，其中声明的类型与匹配过程无关</p><p>​若没有明确指定名称，则默认名称是从字段名称或设置方法（get、set方法）派生的。若用在字段上，则采用字段名称；如果用在setter方法，它采用其属性名称（例如setProperty()方法，取property作为属性名称）    </p><h1 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h1><p>包含的属性不同：</p><p>​Autowired只包含一个参数：required，表示是否开启自动注入，默认是true</p><p>​Resource有七个参数，其中最重要的两个参数：name和type</p><p>注解使用的地方不同：</p><p>​Autowired可以用在构造方法、方法、参数、成员变量和注解上</p><p>​Resource可以用在类、成员变量、方法上</p><p>出处不同：</p><p>​Autowired是Spring定义的注解，所以只能用在Spring框架下</p><p>​Resource是JSR-250定义的注解，所以可以与其他框架一起使用</p><p>自动装配的方式不同：</p><p>​Autowired默认按byType，如果要使用byName，需要结合@Qualifier注解配合使用</p><p>​Resource默认byName自动装配，如果指定了name，则用byName自动装配，如果指定了type，则用byType自动装配</p><p>自动装配的顺序：</p><p>​Autowired：默认先按byTpe进行匹配，若发现找到多个bean则又按照byName方式进行匹配，如果还有多个，则抛出异常</p><p>​<img src="/2022/06/25/Autowired%E5%92%8CResource/A.png" alt="image-20220625222414253"></p><p>​Resource：</p><p>​若同时指定了name和type：会从容器中查找name和type唯一匹配bean，若找到则自动装配，找不到则抛出异常</p><p>​只指定了name：则按name后的名字去bean元素里查找有与之相等的name属性的bean，若找到则自动装配，找不到则抛出异常</p><p>​只指定了type：则从上下文汇总找到类型匹配的<em><strong>唯一</strong></em>bean进行装配，找不到或者找到多个，都会抛出异常</p><p>​都没有指定：自动按照byName方式找，若没有找到符合的bean，则回退为一个原始类型进行查找，如果找到就注入，没找到或者找到多个则抛出异常</p><p>​</p><p>​</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;@Auwired：&lt;/p&gt;
+&lt;p&gt;对成员变量、方法及构造函数进行标注，完成自动装配的工作&lt;/p&gt;
+&lt;p&gt;@Resource：&lt;/p&gt;
+&lt;p&gt;</summary>
+      
+    
+    
+    
+    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
+    
+    
+    <category term="Spring" scheme="http://example.com/tags/Spring/"/>
+    
+  </entry>
   
   <entry>
     <title>Shiro</title>
@@ -495,31 +522,6 @@
     
     <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
     
-    
-  </entry>
-  
-  <entry>
-    <title>Thread</title>
-    <link href="http://example.com/2022/05/14/thread/"/>
-    <id>http://example.com/2022/05/14/thread/</id>
-    <published>2022-05-14T06:34:24.000Z</published>
-    <updated>2022-05-16T04:37:51.453Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h1><p>新建(new)，就绪(runnable)，运行(running)，阻塞(block)，死亡(dead)</p><p>新建：使用new创建一个线程，此时仅由jvm为其分配内存，并初始化其成员变量的值</p><p>就绪：调用了start()方法，jvm为其创建方法调用栈和程序计数器</p><p>运行：就绪状态获取了cpu，开始执行run方法</p><p>阻塞：因某种原因放弃了cpu的使用，暂时停止运行，直到进入可运行状态</p><p>​    等到阻塞:运行o.wait()方法，JVM会把线程放入等待队列</p><p>   同步阻塞:运行的线程获取对象的同步锁时，若该锁被占用，则JVM把该线程放入锁池</p><p>​    其他阻塞:运行sleep()或t.join()或I&#x2F;O请求，JVM把该线程设为阻塞状态</p><p>死亡：正常结束或异常结束或调用线程的stop()方法（该方法易导致死锁）</p><p>Blocked和waiting的区别：线程可以通过notify进入waiting状态，进入后就等待唤醒才有获取cpu的时间片段来继续执行；blocked状态是无法进入同步方法&#x2F;代码完成的，因为无法获取相关联的锁</p><h1 id="创建线程的方式"><a href="#创建线程的方式" class="headerlink" title="创建线程的方式"></a>创建线程的方式</h1><p>继承Thead类</p><p>​自定义类继承Thread类，重写run()方法，创建线程对象并启动线程（start()方法，不是run；线程不能多次启动，只能执行一次）</p><p>实现Runnable接口</p><p>​自定义类实现Runnable接口，重写run()方法，创建自定义类对象，创建Thread类的对象，并把创建的自定义类的对象作为构造参数传递，启动线程</p><p>使用Callable和Future创建线程</p><p>​ 创建Callable接口的实现类，并实现call()方法，再创建该实现类的实例。使用FutureTask类包装Callable对象，该FutureTask对象封装了Callable对象的call()方法的返回值。使用FutureTask对象作为Thread对象的target创建并启动线程。调用FutrueTask对象的get()方法来获得子线程执行结束后的返回值</p><p>线程池实现</p><p>实现线程间共享数据：线程间共享对象，然后wait&#x2F;notify&#x2F;nofifyAll</p><h1 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h1><h2 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h2><p>  线程数小于核心线程数—&gt;核心线程数</p><p>  线程数大于核心线程数 —&gt;将多余的放入任务队列</p><p>  任务队列满了，就启动最大线程数</p><p>  最大线程数也达到后，就启动拒绝策略</p><h2 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h2><p> ThreadPoolExecutor.AbortPolicy：线程池默认的，即丢弃任务并抛出RejectedExecutionException异常</p><p>  ThreadPoolExecutor.DiscardPolicy：丢弃任务，但是不抛出异常。如果线程队列已满，则后续提交的任务都会被丢弃，且是静默丢弃</p><p>  ThreadPoolExecutor.DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提交被拒绝的任务</p><p>  ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务（不会丢弃任务，最后所有的任务都执行了，并不会抛出异常）</p><h2 id="线程池的创建"><a href="#线程池的创建" class="headerlink" title="线程池的创建"></a>线程池的创建</h2><p>通过构造方法ThreadPoolExecutor</p><p><img src="/2022/05/14/thread/executors.png" alt="image-20220427110329004"></p><p>构造方法参数</p><p><img src="/2022/05/14/thread/threadPoolExecutor.png" alt="image-20220514145815343"></p><p>  CorePoolSize：核心线程数，默认状况下核心线程会一直存活；</p><p>  maximumPoolSize:线程池所能容纳的最大线程数。超过将被阻塞</p><p>  keepAliveTime:非核心线程的闲置时间超过时间，超过就会被回收</p><p>  unit：指定keepApliveTime的单位。但allowCoreThreadTimeOut设为true就无效</p><p>  workQueue：线程池的任务队列</p><p>  threadFactory：线程工厂，提供创建新线程时使用的工厂</p><p> handler：拒绝策略。当工作队列的任务和线程中的线程均到最大限制，就触发拒绝策略</p><h2 id="拒绝策略-1"><a href="#拒绝策略-1" class="headerlink" title="拒绝策略"></a>拒绝策略</h2><p>  ThreadPoolExecutor.AbortPolicy：线程池默认的，即丢弃任务并抛出RejectedExecutionException异常</p><p>  ThreadPoolExecutor.DiscardPolicy：丢弃任务，但是不抛出异常。如果线程队列已满，则后续提交的任务都会被丢弃，且是静默丢弃</p><p>  ThreadPoolExecutor.DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提交被拒绝的任务</p><p>  ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务（不会丢弃任务，最后所有的任务都执行了，并不会抛出异常）</p><h2 id="execute-和submit"><a href="#execute-和submit" class="headerlink" title="execute()和submit()"></a>execute()和submit()</h2><p> Execute()用于提交不需要返回值的任务，so 不能判断线程池任务是否成功执行；Submit()用于提交需要返回值的任务</p><p>Execute是只能提交Runnable类型的任务，submit可以提交Runnable和Callable类型</p><p>Execute可以抛出异常，submit不排除异常（可以通过Future的get将任务执行时的异常抛出）</p><h1 id="为什么调用了start-后必须调用run-方法"><a href="#为什么调用了start-后必须调用run-方法" class="headerlink" title="为什么调用了start()后必须调用run()方法"></a>为什么调用了start()后必须调用run()方法</h1><p>new 一个 thread，线程进入新建状态，调用start()方法，会启动一个线程并使线程进入就绪状态，当分配时间片后就可以运行。Start会执行线程的准备工作，再自动执行run()。这才是真正的多线程工作。但直接run()，会吧其当成一个main线程下普通方法执行</p><p>总之：调用start()方法可启动线程并使线程进入就绪状态，直接run不会以多线程方式执行。但是执行start方法，线程不一定马上创建，因为底层是操作系统，是否创建线程需要看情况。</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;生命周期&quot;&gt;&lt;a href=&quot;#生命周期&quot; class=&quot;headerlink&quot; title=&quot;生命周期&quot;&gt;&lt;/a&gt;生命周期&lt;/h1&gt;&lt;p&gt;新建(new)，就绪(runnable)，运行(running)，阻塞(block)，死亡(dead)&lt;/p&gt;
-&lt;p&gt;新建：</summary>
-      
-    
-    
-    
-    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
-    
-    
-    <category term="多线程" scheme="http://example.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
