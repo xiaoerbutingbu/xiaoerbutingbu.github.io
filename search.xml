@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>四次挥手</title>
+      <link href="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
+      <url>/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+      
+        <content type="html"><![CDATA[<h1 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h1><p>客户端发起中断连接请求，就是发FIN报文（FIN位置置位1）客户端就进入FIN_WAIT_1状态，等待服务器发FIN报文；</p><p>当服务器端收到FIN后，发送ACK应答报文，服务端就进入close_wait状态，</p><p>客户端收到ACK应答报文后，进入FIN_WAIT_2状态</p><p>服务端做最后的数据处理（读到结束符EOF）已发送完成，则向客户端发FIN报文，服务端就进入LAST_ACK状态 ；</p><p>客户端收到FIN报文后发送ACK报文（若服务器端没有收到则可以重传），就进入TIME_WAIT状态；</p><p>服务器端收到ACK就关闭（CLOASE状态），客户端等待了2MSL（最大报文生存时间，因为最后一个ACK可能会丢失）后没收到回复就关闭</p><p><img src="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/guocheng.png"></p><h1 id="为什么要四次挥手"><a href="#为什么要四次挥手" class="headerlink" title="为什么要四次挥手"></a>为什么要四次挥手</h1><p>关闭连接时，客户端向服务端发送FIN后，表示客户端不再发数据，但是能接收数据</p><p>服务端收到FIN后，先回ACK应答，但可能还有数据处理和发送不能立马关闭socket，等不再发数据后，才发FIN表示同意现在关闭连接。</p><p>所以，服务端需要等待完成数据的发送和处理，ACK和FIN一般都会分开发送，所以多一次</p><h1 id="了解"><a href="#了解" class="headerlink" title="了解"></a>了解</h1><p>为什么TIME_WAIT等待时间是2MSL：是报文最大生存时间，超过这个时间报文将被丢弃。因为TCP报文基于IP协议的，IP头部中有一个TTL字段，是IP数据报可以经过最大路由数，<em><strong>MSL要  &amp;ge; TTL消耗为0的时间</strong></em>。2MSL是从<em><strong>客户端收到FIN后发送ACK开始计时的</strong></em>，若客户端的ACK没有传到服务端，客户端就又会收到来自服务端的FIN报文，那么2MSL将重新计时</p><p>为什么需要TIME_WAIT：主动发起关闭连接的一方才会有TIME-WAIT状态。需要TIME-WAIT状态，是<em><strong>防止接收到具有相同的四元组出现的旧数据包</strong></em>，2MSL足以上两个方向上数据包都被丢掉，保证出现的数据包一定是建立连接时所产生的；保证连接能正确关闭：给出足够的时间确保最后的ACK能让被动关闭方接收</p><p>TIME_WAIT过多的危害：内存资源占用；端口资源的占用，一个TCP连接至少消耗一个本地端口，若沾满了所有端口，就不能创建新链接</p><p>若已建立了链接，但客户端突然故障：</p><p>​TCP的&#x3D;&#x3D;保活机制&#x3D;&#x3D;：定义一个时间段，该时间段内，若没有任何连接相关的活动，TCP保活机制就会开始作用，每隔一个时间段就发探测报文（数据很少），若连续几个探测报文没有回应，则认为当前TCP连接已死亡，系统内核就将错误信息通知给上层应用</p><p>​对端程序工作正常：TCP保活的探测报文，对端会正常响应，TCP保活时间会被重置</p><p>​对端程序崩溃并重启：发探测报文，对端可响应，但是没有该连接的有效信息，会产生一个RST报文，就很块发现TCP连接已被重置</p><p>​对端程序崩溃或其他原因让报文能不到达：探测报文不能得到响应，TCP会报告该TCP连接已死亡</p><h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p>四次挥手优化</p><p>​    主动方优化：发FIN报文的方式有close和shutdown，所以发送更改方式。调整FIN重传次数。调整状态时间和孤儿连接的上限个数。</p><p>   被动方优化：复用time_wait状态的连接（只使用于客户端）</p><p>Close：断开后，不能传输数据也不能发数据。</p><p>Shutdown：控制只关闭一个方向的连接</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> TCP </tag>
+            
+            <tag> 计算机网络 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>TCP怎么保证可靠传输</title>
       <link href="/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/"/>
       <url>/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/</url>

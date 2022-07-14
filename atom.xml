@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-07-13T12:29:59.154Z</updated>
+  <updated>2022-07-14T15:57:43.389Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>四次挥手</title>
+    <link href="http://example.com/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
+    <id>http://example.com/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
+    <published>2022-07-14T15:54:24.000Z</published>
+    <updated>2022-07-14T15:57:43.389Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h1><p>客户端发起中断连接请求，就是发FIN报文（FIN位置置位1）客户端就进入FIN_WAIT_1状态，等待服务器发FIN报文；</p><p>当服务器端收到FIN后，发送ACK应答报文，服务端就进入close_wait状态，</p><p>客户端收到ACK应答报文后，进入FIN_WAIT_2状态</p><p>服务端做最后的数据处理（读到结束符EOF）已发送完成，则向客户端发FIN报文，服务端就进入LAST_ACK状态 ；</p><p>客户端收到FIN报文后发送ACK报文（若服务器端没有收到则可以重传），就进入TIME_WAIT状态；</p><p>服务器端收到ACK就关闭（CLOASE状态），客户端等待了2MSL（最大报文生存时间，因为最后一个ACK可能会丢失）后没收到回复就关闭</p><p><img src="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/guocheng.png"></p><h1 id="为什么要四次挥手"><a href="#为什么要四次挥手" class="headerlink" title="为什么要四次挥手"></a>为什么要四次挥手</h1><p>关闭连接时，客户端向服务端发送FIN后，表示客户端不再发数据，但是能接收数据</p><p>服务端收到FIN后，先回ACK应答，但可能还有数据处理和发送不能立马关闭socket，等不再发数据后，才发FIN表示同意现在关闭连接。</p><p>所以，服务端需要等待完成数据的发送和处理，ACK和FIN一般都会分开发送，所以多一次</p><h1 id="了解"><a href="#了解" class="headerlink" title="了解"></a>了解</h1><p>为什么TIME_WAIT等待时间是2MSL：是报文最大生存时间，超过这个时间报文将被丢弃。因为TCP报文基于IP协议的，IP头部中有一个TTL字段，是IP数据报可以经过最大路由数，<em><strong>MSL要  &amp;ge; TTL消耗为0的时间</strong></em>。2MSL是从<em><strong>客户端收到FIN后发送ACK开始计时的</strong></em>，若客户端的ACK没有传到服务端，客户端就又会收到来自服务端的FIN报文，那么2MSL将重新计时</p><p>为什么需要TIME_WAIT：主动发起关闭连接的一方才会有TIME-WAIT状态。需要TIME-WAIT状态，是<em><strong>防止接收到具有相同的四元组出现的旧数据包</strong></em>，2MSL足以上两个方向上数据包都被丢掉，保证出现的数据包一定是建立连接时所产生的；保证连接能正确关闭：给出足够的时间确保最后的ACK能让被动关闭方接收</p><p>TIME_WAIT过多的危害：内存资源占用；端口资源的占用，一个TCP连接至少消耗一个本地端口，若沾满了所有端口，就不能创建新链接</p><p>若已建立了链接，但客户端突然故障：</p><p>​TCP的&#x3D;&#x3D;保活机制&#x3D;&#x3D;：定义一个时间段，该时间段内，若没有任何连接相关的活动，TCP保活机制就会开始作用，每隔一个时间段就发探测报文（数据很少），若连续几个探测报文没有回应，则认为当前TCP连接已死亡，系统内核就将错误信息通知给上层应用</p><p>​对端程序工作正常：TCP保活的探测报文，对端会正常响应，TCP保活时间会被重置</p><p>​对端程序崩溃并重启：发探测报文，对端可响应，但是没有该连接的有效信息，会产生一个RST报文，就很块发现TCP连接已被重置</p><p>​对端程序崩溃或其他原因让报文能不到达：探测报文不能得到响应，TCP会报告该TCP连接已死亡</p><h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p>四次挥手优化</p><p>​    主动方优化：发FIN报文的方式有close和shutdown，所以发送更改方式。调整FIN重传次数。调整状态时间和孤儿连接的上限个数。</p><p>   被动方优化：复用time_wait状态的连接（只使用于客户端）</p><p>Close：断开后，不能传输数据也不能发数据。</p><p>Shutdown：控制只关闭一个方向的连接</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;主要流程&quot;&gt;&lt;a href=&quot;#主要流程&quot; class=&quot;headerlink&quot; title=&quot;主要流程&quot;&gt;&lt;/a&gt;主要流程&lt;/h1&gt;&lt;p&gt;客户端发起中断连接请求，就是发FIN报文（FIN位置置位1）客户端就进入FIN_WAIT_1状态，等待服务器发FIN报文；&lt;</summary>
+      
+    
+    
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="TCP" scheme="http://example.com/tags/TCP/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>TCP怎么保证可靠传输</title>
@@ -493,30 +519,6 @@
     <category term="JVM" scheme="http://example.com/tags/JVM/"/>
     
     <category term="类加载" scheme="http://example.com/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>JVM基础-虚拟机栈</title>
-    <link href="http://example.com/2022/05/20/JVM-1/"/>
-    <id>http://example.com/2022/05/20/JVM-1/</id>
-    <published>2022-05-20T13:18:58.000Z</published>
-    <updated>2022-05-21T05:46:23.271Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="JVM组成"><a href="#JVM组成" class="headerlink" title="JVM组成"></a>JVM组成</h1><img src="/2022/05/20/JVM-1/zucheng.png" alt="组成" style="zoom:150%;"><h1 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h1><p>一种快速有效的分配存储方式，<em><strong>访问速度仅次于程序计数器；</strong></em></p><p>线程私有</p><p>  JVM直接对java栈的操作：</p><p>​            每个方法的执行，伴随着进栈（入栈，压栈）</p><p>​            执行结果后的出栈工作</p><p>  不存在垃圾回收的问题</p><p>  栈中的数据都是以栈帧的格式存在，<em><strong>这个线程上正在执行的每个方法都各自对应一个栈帧</strong></em>。栈帧是一个内存区块，是一个数据集，维系着方法执行过程中的各种数据信息。每一个方法执行结束就对应着一个栈帧从虚拟机栈从入栈到出栈</p><p>栈就只有 压栈 和 出栈</p><p>不同线程中所包含的线帧是不允许相互引用的，即不可能在一个栈帧之中引用另一个线程中的栈帧</p><p>若当前方法调用其他方法，方法返回的时候，当前栈帧会传回此方法的执行结果给前一个栈帧，然后虚拟机会丢弃当前栈帧，使得前一个栈帧重新成为当前栈帧</p><p>方法的结束方式：正常结束和抛出异常（未被捕获处理）</p><h2 id="栈帧内部结构"><a href="#栈帧内部结构" class="headerlink" title="栈帧内部结构"></a>栈帧内部结构</h2><p><img src="/2022/05/20/JVM-1/zhangzhen.png" alt="zhanzhen"></p><h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><p>  定义为一个数字数组，主要用于<em><strong>存储方法参数和定义在方法体内的局部变量</strong></em></p><p>  因是建立在线程的栈上，是<em><strong>私有</strong></em>的，所以不存在数据安全问题</p><p>  所需的容量的大小是在编译期确定下来的</p><p>  方法嵌套使用的次数由栈的大小决定。越大，次数越多</p><p>  局部变量表中的变量只在当前方法调用中有效。方法调用结束，该表也会随之销毁</p><p>  里面最基本的存储单元Slot（变量槽）：</p><p>​    参数值的存放总是在局部变量数组的index0开始，到数组长度-1结束</p><p>局部变量表最基本的存储单元</p><p>​    局部变量表里，32位以内的类型只占用一个slot，64位占两个</p><p>​    当一个实例方法被调用，它的方法参数和方法体内部定义的局部变量将会按照顺序复制到局部变量表中的每一个slot上</p><p>​    若当前帧是由构造方法或者实例方法创建的，那么该对象引用this将会存放在index为0的slot处。</p><p>  Slot重复利用：栈帧中的局部变量表中的槽位是可以重用，为了节省资源。</p><p>  局部变量表中的变量也是重要的垃圾回收根节点，只要被局部变量表直接或间接引用的对象都不会被回收</p><h4 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h4><p>  是一个以字长为单位的数组，但是以后进先出的操作数栈（表达式栈），方法执行过程中，根据字节码指令，进行入栈、出栈操作。</p><p>  进行数据运算的</p><p>  并非采用访问索引的方式来进行数据访问</p><p>  若被调用的方法带有返回值的话，其返回值将会被压入当前栈帧的操作数栈中</p><p>Java虚拟机的解释引擎是基于栈（操作数栈）的执行引擎</p><h4 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h4><p>  一个指向运行时常量池中该栈帧所属方法的引用，包含这个引用就是为了支持当前方法的代码能够实现动态连接</p><p>  Java源文件被编译到字节码文件中时，所有的变量和方法引用都作为符号引用保存在class文件的常量池中，动态链接作用就是将这些符号引用转换为调用方法的直接引用</p><p>  常量池：提供一些符号和常量，便于指令的识别</p><h4 id="方法返回地址"><a href="#方法返回地址" class="headerlink" title="方法返回地址"></a>方法返回地址</h4><p>存放调用该方法的PC寄存器的值。（交给执行引擎，让其执行后续操作）</p><p>调用者的PC计数器的值作为返回地址，即调用该方法的指令作为下一条指令的地址</p><p>正常完成与异常完成的区别：异常完成出口退出不会给他上层调用者产生任何的返回值</p><p>方法的退出就是当前栈帧出栈的过程。此时，需要恢复上层方法的局部变量表、操作数栈、将返回值压入调用者栈帧的操作数栈、设置PC寄存器值等，让调用者方法继续执行下去</p><h4 id="一些附加信息"><a href="#一些附加信息" class="headerlink" title="一些附加信息"></a>一些附加信息</h4><p>不一定有。比如：对程序调试提供支持的信息</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;JVM组成&quot;&gt;&lt;a href=&quot;#JVM组成&quot; class=&quot;headerlink&quot; title=&quot;JVM组成&quot;&gt;&lt;/a&gt;JVM组成&lt;/h1&gt;&lt;img src=&quot;/2022/05/20/JVM-1/zucheng.png&quot; alt=&quot;组成&quot; style=&quot;zoom</summary>
-      
-    
-    
-    
-    
-    <category term="JVM" scheme="http://example.com/tags/JVM/"/>
-    
-    <category term="虚拟机栈" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/"/>
     
   </entry>
   
