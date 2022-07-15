@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-07-14T15:57:43.389Z</updated>
+  <updated>2022-07-15T17:48:02.651Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>IP</title>
+    <link href="http://example.com/2022/07/16/IP/"/>
+    <id>http://example.com/2022/07/16/IP/</id>
+    <published>2022-07-15T17:45:22.000Z</published>
+    <updated>2022-07-15T17:48:02.651Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="基本认识"><a href="#基本认识" class="headerlink" title="基本认识"></a>基本认识</h1><p>网络层，<em><strong>实现主机与主机之间的通信，点对点通信</strong></em></p><p>MAC（数据链路层）是实现 直连 两个设备之间通信，IP是在没有直连的两个网络之间进行通信传输。个人理解：计划和实施的区别。IP是整个旅游行程表，MAC是行程表里的交通工具。</p><p>&#x3D;&#x3D;源IP地址和目标IP地址不会变化，只有源MAC地址和目标MAC一直在变化&#x3D;&#x3D;</p><h2 id="IPV4"><a href="#IPV4" class="headerlink" title="IPV4"></a>IPV4</h2><p>IP地址（IPv4地址）32位，在计算机中二进制方式处理。点分十进制的标记方式处理</p><p>分类：A,B,C,D,E类</p><p>A（0<del>127.255.255.255）,B（128</del>191.255.255.255）,C（192~223）主要两部分，网络号和主机号（比如：A小区1栋101号和B小区1栋101号）</p><p>A,B,C类中有私有IP和公有IP区分</p><p>解析IP地址，看第一个0出现在哪一位。在第一位是A类，第二为是B类，依次类推</p><p>广播地址</p><p>用于在同一个链路中互相连接的主机之间发送的数据包</p><p>​    分为：本地广播（本网络内广播）和直接广播（不同网络间的广播）</p><p>D类和E类地址没有主机号，不可用于主机IP。</p><p>D类常用于多播，E类是预留的分类，暂未使用</p><p>多播地址</p><p>​    用于将包发送给特定组内的所有主机</p><h3 id="IPV4分类的优缺点"><a href="#IPV4分类的优缺点" class="headerlink" title="IPV4分类的优缺点"></a>IPV4分类的优缺点</h3><p>优点：简单明了、选路（基于网络地址）简单</p><p>缺点：同一网络下没有地址层次，就缺少地址的灵活性；不能很好与现实网路匹配</p><p>两个缺点都可在CIDR无分类地址解决：前面是网络号，后面是主机号</p><p>​    以a.b.c.d&#x2F;x形式表示，比如10.100.122.2&#x2F;24: &#x2F;24表示前24位是网络号，剩余是主机号。</p><h2 id="问点"><a href="#问点" class="headerlink" title="问点"></a>问点</h2><p>为什么要分离网络号和主机号：两台计算机要通讯，首先判断是否处于同一个广播域内，即网络地址是否相同。若相同，表名接收方在本网络上，数据包就可以发送到目标主机</p><p>怎么划分子网：子网掩码的作用之一就是划分子网，将主机地址分为 子网网络地址和子网主机地址</p><h2 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h2><p>是128位，与v4比，可分配的地址变多；可自动装配；包头包首部长度固定的40字节，去掉包头检验和，简化了首部结构，减轻了路由器符合，提高传输的性能；可伪造IP地址的网络安全，防止窃听，提升了安全性</p><h3 id="地址类型"><a href="#地址类型" class="headerlink" title="地址类型"></a>地址类型</h3><p>单播地址：一对一通信；</p><p>组播地址：一对多通信；</p><p>任播地址：通信最近的节点，最近的节点由路由协议决定</p><p>没有广播地址</p><h2 id="IP协议相关技术"><a href="#IP协议相关技术" class="headerlink" title="IP协议相关技术"></a>IP协议相关技术</h2><h3 id="DNS解析"><a href="#DNS解析" class="headerlink" title="DNS解析"></a>DNS解析</h3><p>DNS：可将域名网址自动转换成具体的IP地址。越靠右，层级越高</p><p>层级关系：根DNS服务器，顶级域DNS服务器，权威DNS服务器</p><p>解析流程：</p><p>客户端发送DNS请求，并发给本地DNS解析器；本地域名解析器收到请求后，若缓存中能找到就直接返回IP地址，反之本地DNS会去问它的根域名服务器；根DNS收到请求后，发现后置是.com，就给本地DNS关于顶级域名服务器的地址；本地DNS收到后再发请求给顶级域名服务器，顶级域名服务器就返回权威域名服务器的地址；本地收到后，发送权威域名服务器请求，权威域名查询后将IP地址告诉给本地DNS。本地DNS将得到的IP地址返回给客户端，客户端建立连接</p><h3 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h3><p>在传输IP数据包的时候，确定了源IP和目标IP后，就通过路由表确定IP数据包下一跳、因为网络层下面是数据链路层，所以要知道下一跳的MAC地址。</p><p>因为主机路由表可找到下一跳的IP地址，所以可通过ARP协议，求下一跳MAC地址</p><p>即已知IP地址求MAC地址</p><p>ARP就是借助ARP请求域ARP响应两种类型确定MAC地址</p><p>主机通过广播发送ARP请求（里面有想知道的MAC地址的主机IP地址）；同个链路中所有设备收到ARP请求时，会自动拆开ARP里的内容，若里面的IP地址与自己的一致就将自己MAC地址放入ARP响应包返回给主机</p><p>操作系统会把第一次获取的MAC地址缓存起来（有期限）。</p><p>RARP：已知MAC地址求IP地址。</p><h3 id="DHCP"><a href="#DHCP" class="headerlink" title="DHCP"></a>DHCP</h3><p>动态获取IP地址，省去了配IP信息繁琐过程</p><p>步骤：</p><p>​    客户端发起DHCP发现报文的IP数据报（用的UDP广播通信，因IP地址、DHCP服务器地址都不知道），并用0.0.0.0作为源IP地址，255.255.255.255为广播目的地址。DHCP客户端将该IP数据包传给MAC，MAC再将帧广播到所有网络设备中</p><p>​    DHCP服务器收到DHCP报文时向客户端响应，里面包含IP地址、子网掩码等信息。客户端收到一个或多个服务器的DHCP提供报文后，选择一个服务器，并对其发送DHCP请求报文进行响应，回显配置的参数。服务端用DHCP ACK报文进行响应，回应其要求的参数</p><h3 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h3><p>网络地址转换NAT，缓解IPV4地址耗尽的问题</p><p>简单说就是在主机对外通信时，把私有IP地址转换成公有IP地址</p><p>缺点：外部无法主动与NAT内部服务器建立连接，因NAPT转换表没有转换记录；转换表的生成与转换操作会产生性能开销；通信过程中，若NAT路由器重启了，所有TCP链接将重置</p><p>解决：改用IPV6；NAT穿透技术</p><h3 id="ICMP（互联网控制报文协议）"><a href="#ICMP（互联网控制报文协议）" class="headerlink" title="ICMP（互联网控制报文协议）"></a>ICMP（互联网控制报文协议）</h3><p>主要功能：确认IP包是否到达目标地址、报告发送过程中IP包被废弃的原因、改善网络设置</p><p>分类</p><p>​    查询报文类型：诊断查询信息</p><p>​    差错报文类型：通知出错原因的错误信息</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;基本认识&quot;&gt;&lt;a href=&quot;#基本认识&quot; class=&quot;headerlink&quot; title=&quot;基本认识&quot;&gt;&lt;/a&gt;基本认识&lt;/h1&gt;&lt;p&gt;网络层，&lt;em&gt;&lt;strong&gt;实现主机与主机之间的通信，点对点通信&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;MAC（数据</summary>
+      
+    
+    
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    <category term="IP" scheme="http://example.com/tags/IP/"/>
+    
+  </entry>
   
   <entry>
     <title>四次挥手</title>
@@ -493,32 +520,6 @@
     <category term="IO模型" scheme="http://example.com/tags/IO%E6%A8%A1%E5%9E%8B/"/>
     
     <category term="IO流" scheme="http://example.com/tags/IO%E6%B5%81/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>JVM基础-类加载</title>
-    <link href="http://example.com/2022/05/21/JVM-2/"/>
-    <id>http://example.com/2022/05/21/JVM-2/</id>
-    <published>2022-05-21T05:41:56.000Z</published>
-    <updated>2022-05-21T05:46:05.578Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="类加载器和类加载过程"><a href="#类加载器和类加载过程" class="headerlink" title="类加载器和类加载过程"></a>类加载器和类加载过程</h1><p>类加载器子系统负责从文件系统或者网络中加载class文件，class文件在文件开头有特定的文件结构</p><p>ClassLoader只负责class文件的加载，至于是否可以运行，则由ExecutionEngine决定</p><p>加载的类信息存放于一块称为方法区的内存空间，除了类信息外，方法区还有存放运行时常量池的信息，可能还包含字符串自变量和数字常量</p><h3 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>​    通过一个类的全限定名获取定义此类的二进制字节流（字节码文件）</p><p>​    将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构</p><p>​    在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口</p><p>​    补充：加载.class文件的方式</p><p>​         从本地系统中直接加载</p><p>​         通过网络获取，典型场景：web Applet</p><p>​         从zip压缩包中读取，成为日后jar，war格式的基础</p><p>​         运行时计算生成，使用最多的是：动态代理技术</p><p>​         由其他文件生成，典型：JSP应用</p><p>​         从专有数据库中提取.class文件，少见</p><p>​         从加密文件获取，典型：防class文件被反编译的保护措施</p><h4 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h4><p>​    验证：目的确保class文件的字节流包含信息符合当前虚拟机要求，保证被加载类的正确性不会危害虚拟机自身安全</p><p>​          主要包括四种验证：文件格式验证，元数据验证，字节码验证，符号引用验证</p><p>​    准备：为类变量分配并且设置该类变量的默认初始值，即零值</p><p>此处不包含用修饰的static，因为final在编译时就已经会分配了，准备阶段会显示初始化</p><p>这里不会为实例变量分配初始化，类变量会分配在方法区，而实例变量是会随着对象一起分配到java堆中</p><p>​    解析：将常量池的符号引用（不一定已加在内存）转换为直接引用的过程</p><p>​          解析操作往往会伴随着JVM在执行完初始化之后再执行</p><p>​          符号引用就是一组符号来描述所引用的目标。符号引用的字面量形式明确定义在class文件格式中。直接引用就是直接指向目标的指针、相对偏移量或一个简介定位到目标的句柄。</p><p>​          解析动作主要针对类或接口、字段、类方法、接口方法、方法类型等。</p><h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>​    初始化过程就是执行类构造器方法<clinit>过程</clinit></p><p>​    也就是只对static修饰的初始化</p><p>​    该方法不需要定义，是javac编译器自动收集类中所有类变量的赋值动作和静态代码块中的语句合并而来</p><p>​    构造器方法中指令按语句在源文件中出现的顺序执行</p><p>​    <clinit>方法不同于类构造器，jvm会保证子类的<clinit>方法执行之前，父类的<clinit>已经执行完毕</clinit></clinit></clinit></p><p>​    虚拟机必须保证一个类的<clinit>方法在多线程下被同步加锁</clinit></p><h3 id="类加载器分类"><a href="#类加载器分类" class="headerlink" title="类加载器分类"></a>类加载器分类</h3><p>JVM支持两种类型的类加载器：引导类加载器，自定义加载器</p><p>所有派生于抽象类ClassLoader的类加载器都划分于自定义加载器</p><p>Java核心类库都是引导类加载器加载的</p><h4 id="虚拟机自带的加载器"><a href="#虚拟机自带的加载器" class="headerlink" title="虚拟机自带的加载器"></a>虚拟机自带的加载器</h4><p>启动类加载器（引导类加载器，Bootstrap ClassLoader）</p><p>​    该类由c&#x2F;c++实现，嵌套在JVM内部</p><p>​    用来加载java的核心库（JAVA_HOME&#x2F;jre&#x2F;lib&#x2F;rt.jar、resources.jar或sun.boot.class.path），提供JVM自身需要的类</p><p>​    并不继承java.lang.ClassLoader，没有父加载器</p><p>​    加载拓展类和应用程序类加载器，并指定为他们的父类加载器</p><p>​    为了安全，Bootstrap启动类加载器只加载名为java、javax、sun等开头的类</p><p>拓展类加载器（Extension ClassLoader）</p><p>Java编写，由sun.misc.Launcher$ExtClassLoader实现</p><p>派生于ClassLoader类</p><p>父类加载器为启动类加载器</p><p>​    如果用户创建的JAR放在此目录下，也会自动由拓展类加载器加载</p><p>系统类加载器（应用程序类加载器）</p><p>​    Java编写</p><p>​    父类加载器为拓展类加载器</p><p>​    负责加载环境变量classpath或系统属性，java.class.path指定路径下的类库</p><p>​    该类加载程序中默认的类加载器</p><h4 id="用户自定义类加载器"><a href="#用户自定义类加载器" class="headerlink" title="用户自定义类加载器"></a>用户自定义类加载器</h4><p>为什么要自定义类加载器</p><p>​    隔离加载类</p><p>​    修改类加载的方式</p><p>​    拓展加载源</p><p>​    防止源码泄露</p><p>实现步骤</p><p>​    通过继承抽象类java.lang.ClassLoader类的方式，实现自己的类加载器，以满足一些特殊的需求</p><p>​    JDK1.2之前，在自定义加载类时，总会继承ClassLoader类并重写loadClass方法，从而实现自定义的类加载类。JDK1.2以后，不再建议用户覆盖loadClass方法，而是建议把自定义的类加载逻辑写在findclass方法中    </p><p>​    若没有复杂需求，可直接继承URLClassLoadr类，这就可避免自己去编写findClass方法及其获取字节码流的方式，使自定义类加载器的简洁</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;类加载器和类加载过程&quot;&gt;&lt;a href=&quot;#类加载器和类加载过程&quot; class=&quot;headerlink&quot; title=&quot;类加载器和类加载过程&quot;&gt;&lt;/a&gt;类加载器和类加载过程&lt;/h1&gt;&lt;p&gt;类加载器子系统负责从文件系统或者网络中加载class文件，class文件在文</summary>
-      
-    
-    
-    
-    <category term="JVM" scheme="http://example.com/categories/JVM/"/>
-    
-    
-    <category term="JVM" scheme="http://example.com/tags/JVM/"/>
-    
-    <category term="类加载" scheme="http://example.com/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
     
   </entry>
   

@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>IP | 小二小二不停步</title><meta name="keywords" content="计算机网络,IP"><meta name="author" content="小二小二不停步"><meta name="copyright" content="小二小二不停步"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基本认识网络层，实现主机与主机之间的通信，点对点通信 MAC（数据链路层）是实现 直连 两个设备之间通信，IP是在没有直连的两个网络之间进行通信传输。个人理解：计划和实施的区别。IP是整个旅游行程表，MAC是行程表里的交通工具。 &#x3D;&#x3D;源IP地址和目标IP地址不会变化，只有源MAC地址和目标MAC一直在变化&#x3D;&#x3D; IPV4IP地址（IPv4地址）32位，在计算机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IP">
+<meta property="og:url" content="http://example.com/2022/07/16/IP/index.html">
+<meta property="og:site_name" content="小二小二不停步">
+<meta property="og:description" content="基本认识网络层，实现主机与主机之间的通信，点对点通信 MAC（数据链路层）是实现 直连 两个设备之间通信，IP是在没有直连的两个网络之间进行通信传输。个人理解：计划和实施的区别。IP是整个旅游行程表，MAC是行程表里的交通工具。 &#x3D;&#x3D;源IP地址和目标IP地址不会变化，只有源MAC地址和目标MAC一直在变化&#x3D;&#x3D; IPV4IP地址（IPv4地址）32位，在计算机">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/5.jpeg">
+<meta property="article:published_time" content="2022-07-15T17:45:22.000Z">
+<meta property="article:modified_time" content="2022-07-15T17:48:02.651Z">
+<meta property="article:author" content="小二小二不停步">
+<meta property="article:tag" content="计算机网络">
+<meta property="article:tag" content="IP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/5.jpeg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/07/16/IP/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'IP',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-07-16 01:48:02'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="小二小二不停步" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/5.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">小二小二不停步</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">IP</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-07-15T17:45:22.000Z" title="发表于 2022-07-16 01:45:22">2022-07-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-07-15T17:48:02.651Z" title="更新于 2022-07-16 01:48:02">2022-07-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="IP"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="基本认识"><a href="#基本认识" class="headerlink" title="基本认识"></a>基本认识</h1><p>网络层，<em><strong>实现主机与主机之间的通信，点对点通信</strong></em></p>
+<p>MAC（数据链路层）是实现 直连 两个设备之间通信，IP是在没有直连的两个网络之间进行通信传输。个人理解：计划和实施的区别。IP是整个旅游行程表，MAC是行程表里的交通工具。</p>
+<p>&#x3D;&#x3D;源IP地址和目标IP地址不会变化，只有源MAC地址和目标MAC一直在变化&#x3D;&#x3D;</p>
+<h2 id="IPV4"><a href="#IPV4" class="headerlink" title="IPV4"></a>IPV4</h2><p>IP地址（IPv4地址）32位，在计算机中二进制方式处理。点分十进制的标记方式处理</p>
+<p>分类：A,B,C,D,E类</p>
+<p>A（0<del>127.255.255.255）,B（128</del>191.255.255.255）,C（192~223）主要两部分，网络号和主机号（比如：A小区1栋101号和B小区1栋101号）</p>
+<p>A,B,C类中有私有IP和公有IP区分</p>
+<p>解析IP地址，看第一个0出现在哪一位。在第一位是A类，第二为是B类，依次类推</p>
+<p>广播地址</p>
+<p>用于在同一个链路中互相连接的主机之间发送的数据包</p>
+<p>​    分为：本地广播（本网络内广播）和直接广播（不同网络间的广播）</p>
+<p>D类和E类地址没有主机号，不可用于主机IP。</p>
+<p>D类常用于多播，E类是预留的分类，暂未使用</p>
+<p>多播地址</p>
+<p>​    用于将包发送给特定组内的所有主机</p>
+<h3 id="IPV4分类的优缺点"><a href="#IPV4分类的优缺点" class="headerlink" title="IPV4分类的优缺点"></a>IPV4分类的优缺点</h3><p>优点：简单明了、选路（基于网络地址）简单</p>
+<p>缺点：同一网络下没有地址层次，就缺少地址的灵活性；不能很好与现实网路匹配</p>
+<p>两个缺点都可在CIDR无分类地址解决：前面是网络号，后面是主机号</p>
+<p>​    以a.b.c.d&#x2F;x形式表示，比如10.100.122.2&#x2F;24: &#x2F;24表示前24位是网络号，剩余是主机号。</p>
+<h2 id="问点"><a href="#问点" class="headerlink" title="问点"></a>问点</h2><p>为什么要分离网络号和主机号：两台计算机要通讯，首先判断是否处于同一个广播域内，即网络地址是否相同。若相同，表名接收方在本网络上，数据包就可以发送到目标主机</p>
+<p>怎么划分子网：子网掩码的作用之一就是划分子网，将主机地址分为 子网网络地址和子网主机地址</p>
+<h2 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h2><p>是128位，与v4比，可分配的地址变多；可自动装配；包头包首部长度固定的40字节，去掉包头检验和，简化了首部结构，减轻了路由器符合，提高传输的性能；可伪造IP地址的网络安全，防止窃听，提升了安全性</p>
+<h3 id="地址类型"><a href="#地址类型" class="headerlink" title="地址类型"></a>地址类型</h3><p>单播地址：一对一通信；</p>
+<p>组播地址：一对多通信；</p>
+<p>任播地址：通信最近的节点，最近的节点由路由协议决定</p>
+<p>没有广播地址</p>
+<h2 id="IP协议相关技术"><a href="#IP协议相关技术" class="headerlink" title="IP协议相关技术"></a>IP协议相关技术</h2><h3 id="DNS解析"><a href="#DNS解析" class="headerlink" title="DNS解析"></a>DNS解析</h3><p>DNS：可将域名网址自动转换成具体的IP地址。越靠右，层级越高</p>
+<p>层级关系：根DNS服务器，顶级域DNS服务器，权威DNS服务器</p>
+<p>解析流程：</p>
+<p>客户端发送DNS请求，并发给本地DNS解析器；本地域名解析器收到请求后，若缓存中能找到就直接返回IP地址，反之本地DNS会去问它的根域名服务器；根DNS收到请求后，发现后置是.com，就给本地DNS关于顶级域名服务器的地址；本地DNS收到后再发请求给顶级域名服务器，顶级域名服务器就返回权威域名服务器的地址；本地收到后，发送权威域名服务器请求，权威域名查询后将IP地址告诉给本地DNS。本地DNS将得到的IP地址返回给客户端，客户端建立连接</p>
+<h3 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h3><p>在传输IP数据包的时候，确定了源IP和目标IP后，就通过路由表确定IP数据包下一跳、因为网络层下面是数据链路层，所以要知道下一跳的MAC地址。</p>
+<p>因为主机路由表可找到下一跳的IP地址，所以可通过ARP协议，求下一跳MAC地址</p>
+<p>即已知IP地址求MAC地址</p>
+<p>ARP就是借助ARP请求域ARP响应两种类型确定MAC地址</p>
+<p>主机通过广播发送ARP请求（里面有想知道的MAC地址的主机IP地址）；同个链路中所有设备收到ARP请求时，会自动拆开ARP里的内容，若里面的IP地址与自己的一致就将自己MAC地址放入ARP响应包返回给主机</p>
+<p>操作系统会把第一次获取的MAC地址缓存起来（有期限）。</p>
+<p>RARP：已知MAC地址求IP地址。</p>
+<h3 id="DHCP"><a href="#DHCP" class="headerlink" title="DHCP"></a>DHCP</h3><p>动态获取IP地址，省去了配IP信息繁琐过程</p>
+<p>步骤：</p>
+<p>​    客户端发起DHCP发现报文的IP数据报（用的UDP广播通信，因IP地址、DHCP服务器地址都不知道），并用0.0.0.0作为源IP地址，255.255.255.255为广播目的地址。DHCP客户端将该IP数据包传给MAC，MAC再将帧广播到所有网络设备中</p>
+<p>​    DHCP服务器收到DHCP报文时向客户端响应，里面包含IP地址、子网掩码等信息。客户端收到一个或多个服务器的DHCP提供报文后，选择一个服务器，并对其发送DHCP请求报文进行响应，回显配置的参数。服务端用DHCP ACK报文进行响应，回应其要求的参数</p>
+<h3 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h3><p>网络地址转换NAT，缓解IPV4地址耗尽的问题</p>
+<p>简单说就是在主机对外通信时，把私有IP地址转换成公有IP地址</p>
+<p>缺点：外部无法主动与NAT内部服务器建立连接，因NAPT转换表没有转换记录；转换表的生成与转换操作会产生性能开销；通信过程中，若NAT路由器重启了，所有TCP链接将重置</p>
+<p>解决：改用IPV6；NAT穿透技术</p>
+<h3 id="ICMP（互联网控制报文协议）"><a href="#ICMP（互联网控制报文协议）" class="headerlink" title="ICMP（互联网控制报文协议）"></a>ICMP（互联网控制报文协议）</h3><p>主要功能：确认IP包是否到达目标地址、报告发送过程中IP包被废弃的原因、改善网络设置</p>
+<p>分类</p>
+<p>​    查询报文类型：诊断查询信息</p>
+<p>​    差错报文类型：通知出错原因的错误信息</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">小二小二不停步</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/07/16/IP/">http://example.com/2022/07/16/IP/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">小二小二不停步</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">计算机网络</a><a class="post-meta__tags" href="/tags/IP/">IP</a></div><div class="post_share"><div class="social-share" data-image="/img/5.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"><img class="next-cover" src="/img/4.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">四次挥手</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/05/17/TCP/" title="TCP基础"><img class="cover" src="/img/2.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-17</div><div class="title">TCP基础</div></div></a></div><div><a href="/2022/05/18/http-1/" title="HTTP基础"><img class="cover" src="/img/3.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">HTTP基础</div></div></a></div><div><a href="/2022/05/12/threefour/" title="三次握手四次挥手基础"><img class="cover" src="/img/4.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-12</div><div class="title">三次握手四次挥手基础</div></div></a></div><div><a href="/2022/07/12/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/" title="三次握手"><img class="cover" src="/img/2.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-12</div><div class="title">三次握手</div></div></a></div><div><a href="/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/" title="TCP怎么保证可靠传输"><img class="cover" src="/img/3.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-13</div><div class="title">TCP怎么保证可靠传输</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">小二小二不停步</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xiaoerbutingbu"><i class="fab fa-github"></i><span>github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xiaoerbutingbu" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="http://wpa.qq.com/msgrd?v=3&amp;uin=370951771&amp;site=qq&amp;menu=yes" target="_blank" title="QQ"><i class="fab fa-qq"></i></a><a class="social-icon" href="mailto:370951771@2019.cqut.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到小二小二不停步的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E8%AE%A4%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">基本认识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#IPV4"><span class="toc-number">1.1.</span> <span class="toc-text">IPV4</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IPV4%E5%88%86%E7%B1%BB%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">1.1.1.</span> <span class="toc-text">IPV4分类的优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E7%82%B9"><span class="toc-number">1.2.</span> <span class="toc-text">问点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IPv6"><span class="toc-number">1.3.</span> <span class="toc-text">IPv6</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%B0%E5%9D%80%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.3.1.</span> <span class="toc-text">地址类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IP%E5%8D%8F%E8%AE%AE%E7%9B%B8%E5%85%B3%E6%8A%80%E6%9C%AF"><span class="toc-number">1.4.</span> <span class="toc-text">IP协议相关技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS%E8%A7%A3%E6%9E%90"><span class="toc-number">1.4.1.</span> <span class="toc-text">DNS解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARP"><span class="toc-number">1.4.2.</span> <span class="toc-text">ARP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DHCP"><span class="toc-number">1.4.3.</span> <span class="toc-text">DHCP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NAT"><span class="toc-number">1.4.4.</span> <span class="toc-text">NAT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ICMP%EF%BC%88%E4%BA%92%E8%81%94%E7%BD%91%E6%8E%A7%E5%88%B6%E6%8A%A5%E6%96%87%E5%8D%8F%E8%AE%AE%EF%BC%89"><span class="toc-number">1.4.5.</span> <span class="toc-text">ICMP（互联网控制报文协议）</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/07/16/IP/" title="IP"><img src="/img/5.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="IP"/></a><div class="content"><a class="title" href="/2022/07/16/IP/" title="IP">IP</a><time datetime="2022-07-15T17:45:22.000Z" title="发表于 2022-07-16 01:45:22">2022-07-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="四次挥手"><img src="/img/4.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="四次挥手"/></a><div class="content"><a class="title" href="/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="四次挥手">四次挥手</a><time datetime="2022-07-14T15:54:24.000Z" title="发表于 2022-07-14 23:54:24">2022-07-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/" title="TCP怎么保证可靠传输"><img src="/img/3.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="TCP怎么保证可靠传输"/></a><div class="content"><a class="title" href="/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/" title="TCP怎么保证可靠传输">TCP怎么保证可靠传输</a><time datetime="2022-07-13T12:17:56.000Z" title="发表于 2022-07-13 20:17:56">2022-07-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By 小二小二不停步</div><div class="footer_custom_text">try my best</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

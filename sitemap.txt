@@ -1,3 +1,4 @@
+http://example.com/2022/07/16/IP/
 http://example.com/2022/07/14/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/
 http://example.com/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/
 http://example.com/2022/07/12/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/
@@ -69,6 +70,7 @@ http://example.com/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/
 http://example.com/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/
 http://example.com/tags/Bean/
 http://example.com/tags/%E5%B9%B6%E5%8F%91/
+http://example.com/tags/IP/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/MySQL/
 http://example.com/categories/JVM/
