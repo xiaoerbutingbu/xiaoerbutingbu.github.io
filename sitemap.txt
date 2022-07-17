@@ -1,3 +1,4 @@
+http://example.com/2022/07/04/CopyOnWiteAayList/
 http://example.com/2022/05/18/http-1/
 http://example.com/2022/07/17/Http1-0-3-0/
 http://example.com/2022/05/17/TCP/
@@ -8,7 +9,6 @@ http://example.com/2022/07/12/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/
 http://example.com/2022/07/08/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95/
 http://example.com/2022/05/24/MySQL-1/
 http://example.com/2022/05/11/InnoDB-1/
-http://example.com/2022/07/04/CopyOnWiteAayList/
 http://example.com/2022/07/02/Java%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E9%9B%86%E5%90%88%E7%B1%BB/
 http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/06/16/Shiro/
@@ -70,8 +70,8 @@ http://example.com/tags/%E6%9E%9A%E4%B8%BE/
 http://example.com/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/
 http://example.com/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/
 http://example.com/tags/Bean/
-http://example.com/tags/%E5%B9%B6%E5%8F%91/
 http://example.com/tags/IP/
+http://example.com/tags/List/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/MySQL/
 http://example.com/categories/JVM/
