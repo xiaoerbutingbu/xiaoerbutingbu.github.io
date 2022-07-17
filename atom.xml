@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-07-16T06:41:24.760Z</updated>
+  <updated>2022-07-17T06:38:46.438Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Http1.0-3.0</title>
+    <link href="http://example.com/2022/07/17/Http1-0-3-0/"/>
+    <id>http://example.com/2022/07/17/Http1-0-3-0/</id>
+    <published>2022-07-17T06:35:00.000Z</published>
+    <updated>2022-07-17T06:38:46.438Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="发展"><a href="#发展" class="headerlink" title="发展"></a>发展</h3><h4 id="HTTP1-0和1-1"><a href="#HTTP1-0和1-1" class="headerlink" title="HTTP1.0和1.1"></a>HTTP1.0和1.1</h4><p>HTTP&#x2F;1.0性能上，每发起一个请求都要新建一次TCP连接（三次握手），而且是串行，做了没有用TCP连接和断开</p><p>长连接：HTTP&#x2F;1.1采取的，只要任意一端没有明确的提出断开连接，则保持TCP连接状态</p><p>错误状态响应码：1.1中新增加了24个错误状态响应码</p><p>缓存处理：1.1引用了更多缓存控制策略</p><p> 1.1的性能：<em><strong>长连接、管道网络传输、队头阻塞</strong></em></p><p>管道网络传输：在同一个TCP连接里，客户端可以发起多个请求，只要第一个请求发出去了，不用等其回来，就可以发第二个请求出去</p><p>队头阻塞：顺序发送的请求序列中，一个请求因为某种原因被阻塞时，后面排队的所有请求都阻塞了</p><p><img src="/http1-0-3-0/1.0-1.1.png" alt="image-20220709114337819"></p><p>HTTP1.1的瓶颈：</p><p>最大的问题就是高延迟：因为延迟难以下降；并发连接优先；队头阻塞；HTTP头部巨大且重复；不支持服务器推送消息</p><ul><li>请求&#x2F;响应头部未经压缩就发送，首部信息越多，延迟越大。只能压缩body部分</li><li>发送冗长的首部。每次都发送相同的首部浪费较多</li><li>没有请求优先级</li><li>请求只能从客户端开始，服务器只能被动响应</li></ul><h5 id="HTTP1-1-优化"><a href="#HTTP1-1-优化" class="headerlink" title="HTTP1.1 优化"></a>HTTP1.1 优化</h5><p>尽量避免HTTP请求（缓存技术）</p><p>在需要发HTTP请求，减少次数（减少重定向，合并请求，延迟发送）</p><p>​收到合并请求就是合并资源，以一个大资源的请求替换多个小资源的请求；当大资源中的小资源发生变化，客户端就要重新下载整个完整的大资源</p><p>​     延迟发送：只获取当前用户所看到的页面资源，当用户向下滑动页面的时候，再向服务器获取接下来的资源</p><p>减少服务器的HTTP响应大小</p><h4 id="HTTP-x2F-2"><a href="#HTTP-x2F-2" class="headerlink" title="HTTP&#x2F;2"></a>HTTP&#x2F;2</h4><p>通过<em><strong>静态表和哈夫曼编码</strong></em>的方式，将体积压缩了近一半，针对后续的请求头部也可建立动态表（会占用内存而影响并发能力）</p><p>  <em><strong>实现了Stream并发，多个Stream只需复用一个TCP连接，节约了TCP和TLS握手时间，以及减少了TCP慢启动阶段对流量的影响。</strong></em></p><p>  服务器支持主动推送资源，大大提升了消息的传输信息</p><p>  HTTP&#x2F;2是基于TCP协议来传输数据，TCP层必须保证收到的字节数据是完成且连续的，这样内核才会将缓冲区里的数据返回给HTTP应用。有队头阻塞问题，TCP和TLS的握手时延迟，网络迁移需要重新连接</p><h5 id="相比于HTTP-x2F-1-1的改进"><a href="#相比于HTTP-x2F-1-1的改进" class="headerlink" title="相比于HTTP&#x2F;1.1的改进"></a>相比于HTTP&#x2F;1.1的改进</h5><p>&#x3D;&#x3D;头部压缩&#x3D;&#x3D;：会压缩头，若头一样，会消除重复的部分</p><p>&#x3D;&#x3D;二进制格式&#x3D;&#x3D;：全面采用二进制格式并同城为帧（头信息帧，数据帧）。对计算机友好，提高传输效率</p><p><img src="/http1-0-3-0/1.0-1.1-2.png" alt="image-20220709152032970"></p><p>&#x3D;&#x3D;数据流&#x3D;&#x3D;：数据包不是按顺序发送，每个请求或回应的所有数据包称为数据流。每个数据流里面有独一无二的编号，客户端发送的编号为奇数，服务器端发送的为偶数。多个stream复用一个TCP达到并发效果</p><p>&#x3D;&#x3D;多路复用&#x3D;&#x3D;：2.0是可以在一个连接中并发多个请求或回应，而不用按顺序对应</p><p>&#x3D;&#x3D;服务器推送&#x3D;&#x3D;：服务器也可以主动向客户端发</p><h5 id="缺陷"><a href="#缺陷" class="headerlink" title="缺陷"></a>缺陷</h5><p>因为多个HTTP都在复用一个TCP链接，所以一旦发生丢包，都会触发TCP的重传机制，这样一个TCP连接中的所有HTTP请求就必须这个丢的包被传回来</p><h4 id="HTTP3-0"><a href="#HTTP3-0" class="headerlink" title="HTTP3.0"></a>HTTP3.0</h4><p>传输层的TCP换成UDP，并在UDP协议开发了QUIC协议保证了数据的可靠传输。</p><p>QUIC</p><p>  无队头阻塞</p><p>  建立连接速度块</p><p>  连接迁移</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h3 id=&quot;发展&quot;&gt;&lt;a href=&quot;#发展&quot; class=&quot;headerlink&quot; title=&quot;发展&quot;&gt;&lt;/a&gt;发展&lt;/h3&gt;&lt;h4 id=&quot;HTTP1-0和1-1&quot;&gt;&lt;a href=&quot;#HTTP1-0和1-1&quot; class=&quot;headerlink&quot; title=&quot;HTT</summary>
+      
+    
+    
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="TCP" scheme="http://example.com/tags/TCP/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>网络层</title>
@@ -494,32 +520,6 @@
     
     
     <category term="消息队列" scheme="http://example.com/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>IO</title>
-    <link href="http://example.com/2022/05/22/IO/"/>
-    <id>http://example.com/2022/05/22/IO/</id>
-    <published>2022-05-22T15:10:30.000Z</published>
-    <updated>2022-05-22T15:12:17.166Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="I-x2F-O模型"><a href="#I-x2F-O模型" class="headerlink" title="I&#x2F;O模型"></a>I&#x2F;O模型</h2><h3 id="阻塞式I-x2F-O"><a href="#阻塞式I-x2F-O" class="headerlink" title="阻塞式I&#x2F;O"></a>阻塞式I&#x2F;O</h3><p>用户线程发出IO请求后，内核会查看数据是否就绪，若没有就绪，就会等待数据就绪，而一直处于阻塞状态并交出CPU资源</p><h3 id="非阻塞式IO"><a href="#非阻塞式IO" class="headerlink" title="非阻塞式IO"></a>非阻塞式IO</h3><p>用户线程发出一个请求后会立刻得到一个结果，若结果是error就再次发起请求，直到得到结果。在此期间会一直占用CPU，因为会一直询问内核数据是否就绪</p><h3 id="多路复用IO模型"><a href="#多路复用IO模型" class="headerlink" title="多路复用IO模型"></a>多路复用IO模型</h3><p>一种机制</p><p>用的较多，NIO就是</p><p>总有一个线程轮询多个socket状态，只有当真正有读写事件时，才真正调用实际的IO读写操作。因为只需要一个线程就可以管理多个socket，系统不需要建立新的进程或者线程，也不用维护这些，只有真的socket读写事件进行时才使用IO资源。</p><p>该模型用到了select、poll函数，两个函数可以同时阻塞多个I&#x2F;O操作</p><p>函数方法</p><p>selsect：监视的文件描述符分三类，调用select函数会阻塞，直到描述符就绪或超时</p><p>​         缺陷：单线程打开的FD有限制；对socket进行线性扫描（轮询）IO，效率低；限定大小，因为保存文件描述符的bitmaps是1024</p><p>​         阻塞函数，没数据阻塞</p><p>​        一开始是收集文件描述符给内核看哪儿有数据（提高了效率，不然用户态判断会因为切换而浪费资源），有数据的话，FD置位，select函数返回，后面就遍历FD，判断哪个置位并读出数据再处理</p><p>poll：本质与select无区别；将用户给的数组拷贝进内核，查询每个fd对应设备的状态</p><p>若遍历fd都没有就绪设备就挂起当前线程，直到设备就绪或主动超时，被唤醒后再次遍历fd</p><p>​             没有最大连接次数（因为恢复revents）；大量fd数组复制进内核（有些无意义）；若报告的fd没处理，那下次poll会再次报告fd</p><p>​           有超时时间，5个FD拷贝到内核态并监听数据</p><p>​           有数据时内核会对revents字段置位，poll返回，遍历找置位读数据</p><p>Epoll：没有描述符的限制；可水平触发和边缘触发；</p><p>没有最大并发连接的限制；效率提升，不是轮询方式；内存拷贝</p><p>​             连接数较多且很多的不活跃连接时，epoll效率更好；反之，epoll因需要回调，所以性能此时会低</p><p>​             创建了epfd白板，再epoll_ctr，写了结构体；用户态和内核态共享fd内存（不像上面还需要拷贝）；水平触发：重排置位（有数据的放到前面），返回值为有多少个数据，遍历就遍历前几个，进行处理</p><h3 id="信号驱动IO模型"><a href="#信号驱动IO模型" class="headerlink" title="信号驱动IO模型"></a>信号驱动IO模型</h3><p>用户线程发起IO请求，会给对应的socket注册一个信号函数，线程再继续执行，当用户线程接收到信号之后，便在信号函数中调用IO读写操作来进行实际IO请求操作</p><h3 id="异步IO模型"><a href="#异步IO模型" class="headerlink" title="异步IO模型"></a>异步IO模型</h3><p>用户线程发起请求后，就可做其他事，当接收到数据内核返回的成功信号时，就表示IO操作已经完成，可以直接去使用数据</p><h2 id="I-x2F-O流"><a href="#I-x2F-O流" class="headerlink" title="I&#x2F;O流"></a>I&#x2F;O流</h2><p>本身是指数据 从源头到目的地</p><p>其中的输入输出流都是在外部文件和内存之间数据的流通</p><p>分为两种：字符流和字节流。InputStream和OutputStream，Reader，Writer</p><h3 id="字符流和字节流"><a href="#字符流和字节流" class="headerlink" title="字符流和字节流"></a>字符流和字节流</h3><p>底层设备只接收字节数据，字符流是字节流的包装，字符流则是直接接收字符串，它会在内部转成字节，再写入底层设备</p><h3 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h3><p>同步阻塞，服务器实现模式为一个连接一个线程</p><p>服务端：通过serverSocket注册端口；服务器通过调用accept方法用于监听客户端socket请求；从socket中获取字节输入或者输出进行数据读写</p><p>客户端：通过socket独享请求域服务端的连接；从socket得到字节输入或字节输出流进行数据的读写</p><h3 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h3><p>同步非阻塞式，核心类：</p><p>​                 Buffer（缓冲区）为所有原始类型提供缓存支持，是一个容器，连续的数组 </p><p>​                 Charset字符集编码解决解码方案</p><p>​                 Channel（通道）一个新的原始I&#x2F;O抽象，用于读写Buffer类型，通道可以认为是一种连接，可以是到特定设备、程序或是网络的连接</p><p>数据source：需要读取，使用：InputStream、Reader。对应了 硬盘、内存、键盘（System.in）</p><p>数据destination：就是需要写入，使用OutputStram、Writer对应了 硬盘、内存、控制台（System.out）</p><h3 id="BIO、NIO、AIO区别"><a href="#BIO、NIO、AIO区别" class="headerlink" title="BIO、NIO、AIO区别"></a>BIO、NIO、AIO区别</h3><p>BIO：同步阻塞式IO，就平常使用的，模式简单使用方便，并发处理能力低</p><p>​    是一个连接一个线程</p><p>​    适用于连接数目较小且固定的架构，对服务器资源要求较高</p><p>NIO：同步非阻塞IO，客户端和服务器端通过Channel通讯，多路复用</p><p>​    一个请求一个线程</p><p>​    适用于连接数目多且连接较短的架构，比如聊天服务器</p><p>AIO：NIO的升级，异步非阻塞IO，异步IO操作基于事件和回调机制</p><p>一个有效请求一个线程</p><p>适用于连接数据木多且连接较长的架构，比如相册服务器</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h2 id=&quot;I-x2F-O模型&quot;&gt;&lt;a href=&quot;#I-x2F-O模型&quot; class=&quot;headerlink&quot; title=&quot;I&amp;#x2F;O模型&quot;&gt;&lt;/a&gt;I&amp;#x2F;O模型&lt;/h2&gt;&lt;h3 id=&quot;阻塞式I-x2F-O&quot;&gt;&lt;a href=&quot;#阻塞式I-x2F-O&quot; c</summary>
-      
-    
-    
-    
-    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
-    
-    
-    <category term="IO模型" scheme="http://example.com/tags/IO%E6%A8%A1%E5%9E%8B/"/>
-    
-    <category term="IO流" scheme="http://example.com/tags/IO%E6%B5%81/"/>
     
   </entry>
   
