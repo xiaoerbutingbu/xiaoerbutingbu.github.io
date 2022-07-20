@@ -922,23 +922,23 @@
     
     
     <entry>
-      <title>redis基础</title>
+      <title>Redis基础</title>
       <link href="/2022/05/06/redis%E5%9F%BA%E7%A1%80/"/>
       <url>/2022/05/06/redis%E5%9F%BA%E7%A1%80/</url>
       
-        <content type="html"><![CDATA[<h1 id="redis的基本性质"><a href="#redis的基本性质" class="headerlink" title="redis的基本性质"></a>redis的基本性质</h1><p>redis是<em><strong>完全基于内存</strong></em>，绝大部分请求是都是纯粹的内存操作</p><p>基于Reactor模式开发的网络处理器单多线程</p><p>6.0以前是单线程，利用队列技术将并发访问变为了串行访问，消除了传统数据库串行控制的开销</p><h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>支持数据持久化，可以将内存的数据保存在磁盘中，重启的时候可以再次舒勇</p><p>提供各种数据结构进行存储</p><p>支持数据的备份</p><p>高性能、高并发，所以可以作为缓存</p><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>五种基础：</p><p>String：最基本的，动态字符串，存数字时底层是int；长字符串（长度&gt;39字节）raw；短字符串（长度&lt;39字节）embstr</p><p>利用key的生命周期做投票系统；String特点数据刷新；利用数值操作特征为分布式数据库自增。访问次数、点赞、转发量</p><hr><p>Hash：是一个键值对集合，是一个String类型的key和value的映射表。相当于hashmap。存放对象类型的数据，可避免键名冲突。 用户的购物车；hash作为商品秒杀技术对象完成商品秒杀系统</p><p>底层：ziplist（元素数量&lt;512，所有元素长度&lt;64字节）和哈希表。</p><hr><p>List：简单的字符串列表，底层是顺序的双向链表和ziplist（元素数量&lt;512，所有对象元素长度小于64字节）。可用于消息队列；顺序特性实现朋友圈点赞；顺序特性进行分布式日志顺序性展示</p><hr><p>Set:String类型的无序集合，底层哈希表和inset（所有元素是整数，元素数量小于512）</p><p>比如标签；黑白名单；获取所有业务的权限</p><hr><p>Zset（SortedSet）：ziplist（元素数量小于128，所有元素长度&lt;64）和跳表结合，value保证唯一性，又可为每个value代表权重的值。排行榜系统；带权重任务队列；根据权重进行排序</p><p>三种高级：</p><p>Bitmaps:String类型上的一组面向bit操作的集合，不是真的数据结构，优点就是存储信息可节省大量空间。一般用于实时分析，存储对象ID关联的节省空间且高性能的布尔信息。底层是String</p><hr><p>HyperLogLogs：用于计算唯一事物的概率数据结构。可用于计算用户每天在搜索框中执行唯一的搜索。底层是String</p><hr><p>GEO：存储用户给定的地理位置信息，并对这些信息操作。底层是zset</p><hr><p>Streams：内存版的kafka</p><h2 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h2><p>速度快，支持丰富数据类型，支持事务、<em><strong>指令操作</strong></em>都是原子性的</p><p>容量收到物理内存限制，只适合较小数据量的高性能操作和运算上；</p><p>难在线扩容，在集群容量达到上限时在线扩容很复杂，所以运维人员在保证足够的空间</p><h1 id="redis6-0以后为什么引入多线程？"><a href="#redis6-0以后为什么引入多线程？" class="headerlink" title="redis6.0以后为什么引入多线程？"></a>redis6.0以后为什么引入多线程？</h1><p>多线程的情况下，线程切换换消耗CPU，<em><strong>CPU并不是redis的瓶颈</strong></em>。</p><p>引入多线程<em><strong>主要是为了提高网络IO读写性能</strong></em>：多线程只是在网络数据的读写这类耗时操作上使用，而执行命令仍是单线程顺序执行</p><p>redis将所有数据放在了内存中，对于小数据包，redis服务器已经处理80000到100000QPS，已经是极限，对大部分公司已经够用了</p><p>从redis自身角度，因为读写网络read&#x2F;write系统调用占用了Redis执行期间大部分CPU时间，瓶颈主要在于网络的 IO 消耗, 优化主要有两个方向:</p><ul><li>提高网络 IO 性能，典型的实现比如使用 DPDK 来替代内核网络栈的方式</li><li>使用多线程充分利用多核，典型的实现比如 Memcached</li></ul><p>小总结：</p><p>​可以充分利用服务器CPU资源，目前主线程只有一个核</p><p>​多线程可以分摊redis同步IO读写消耗</p><h1 id="redis6-0关于多线程"><a href="#redis6-0关于多线程" class="headerlink" title="redis6.0关于多线程"></a>redis6.0关于多线程</h1><p><em><strong>多线程默认是禁用的，只使用主线程</strong></em>。所以需要修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads-do-reads <span class="built_in">yes</span></span><br></pre></td></tr></table></figure><p>仅仅是开启多线程是不生效，修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads 4 <span class="comment">#官网建议4核使用2/3个线程，8核使设置6个线程</span></span><br></pre></td></tr></table></figure><p>实现机制：</p><p>​主线程负责接收建立连接请求，获取socket放入全局等待处理读处理队列</p><p>​主线程处理完读时间后，通过RR（Round Robin）将这些连接分配给这些IO线程</p><p>​主线程阻塞等待IO线程读取socket完毕</p><p>​主线程通过单线程的方式执行请求命令，请求数据读取并解析完成，但不执行</p><p>​主线程阻塞等待IO线程将数据收回，写socket完毕</p><p>​解除绑定，清空等待队列</p><h1 id="开启多线程后，是否有线程并发安全问题"><a href="#开启多线程后，是否有线程并发安全问题" class="headerlink" title="开启多线程后，是否有线程并发安全问题"></a>开启多线程后，是否有线程并发安全问题</h1><p>Redis的多线程部分只是用来处理网络数据的读写和协议解析，执行命令仍然是单线程顺序执行。所以我们不需要去考虑控制 key、lua、事务，LPUSH&#x2F;LPOP 等等的并发及线程安全问题。</p><h1 id="redis经常提到IO多路复用，怎么理解？"><a href="#redis经常提到IO多路复用，怎么理解？" class="headerlink" title="redis经常提到IO多路复用，怎么理解？"></a>redis经常提到IO多路复用，怎么理解？</h1><p>这是IO模型的一种，即经典的Reactor设计模式，有时也称为异步阻塞IO。</p><p>多路指的是多个socket连接，复用指的是复用一个线程。多路复用主要有三种技术：select，poll，epoll。epoll是最新的也是目前最好的多路复用技术。采用多路 I&#x2F;O 复用技术可以让单个线程高效的处理多个连接请求（尽量减少网络IO的时间消耗），且Redis在内存中操作数据的速度非常快（内存内的操作不会成为这里的性能瓶颈），主要以上两点造就了Redis具有很高的吞吐量。</p><p>[Redis 6.0 新特性-多线程连环13问！](<a href="https://mp.weixin.qq.com/s/FZu3acwK6zrCBZQ_3HoUgw">Redis 6.0 新特性-多线程连环13问！ (qq.com)</a>)</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="redis的基本性质"><a href="#redis的基本性质" class="headerlink" title="redis的基本性质"></a>redis的基本性质</h1><p>完全基于内存，绝大部分请求是纯粹的内存操作</p><p>基于Reactor模式开发的网络时间处理器单多线程</p><p>C语言写的</p><p>Redis是单线程（6.0以前），利用<em><strong>队列技术将并发访问变为了串行访问，消除了传统数据库串行控制的开销。</strong></em></p><p>​因为线程切换而消耗CPU，而CPU不是redis的瓶颈。所以，单线程和多线程效果都差不多，还不如单线程来减少切换的消耗，单线程就没必要的上下文切换和竞争条件；易于维护</p><p>单线程的瓶颈主要在网络IO操作</p><p>6.0后redis引入多线程，为了提高网络IO读写性能。因为单线程的瓶颈，若大量键值删除，短时间删不完，那么单线程就会阻塞后边的操作</p><h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>支持数据持久化，可以将内存中的数据保存在磁盘中，重启的时候可以再次加载使用</p><p>提供各种数据结构进行存储</p><p>支持数据的备份</p><p>高性能、高并发，所以redis作为缓存。</p><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>String：最基本的，动态可修改字符串，二进制安全，存数字时底层是int编码；长字符串（长度&gt;39字节）raw编码；短字符串（长度&lt;39字节）embstr编码。长度不能超过512MB。整体类似于ArrayList</p><p>​存储double类型的浮点数是先转换为字符串再存储。raw和embstr编码效果相同，不同于内存分配释放，raw一次，embstr两次；embstr内存快连续，能更好的利用缓存带来的优势；</p><p>利用key的生命周期做投票系统；String特点数据刷新；利用数值操作特征为分布式数据库自增。访问次数、点赞、转发量；计数器、限流</p><p>del key,get key,set key value</p><hr><p>Hash：是一个键值对集合，是一个String类型的key和value的映射表。相当于hashmap。存放对象类型的数据，可避免键名冲突。 用户的购物车；hash作为商品秒杀技术对象完成商品秒杀系统</p><p>底层：ziplist（元素数量&lt;512个，所有值&lt;64字节）和hashtable</p><p>redis为了提高性能，不能阻塞服务，采用了渐进式策略</p><p>hset,hgetall,hlen,hget</p><p>用来缓存作为用户信息</p><hr><p>List：简单的字符串列表，<em><strong>底层是linkedlist和ziplist</strong></em>（元素数量&lt;512，所有对象元素长度小于64字节就使用ziplist反之就linkedlist）。</p><p>​ziplist：将所有元素紧挨着一起存储，分配的是一块连续的内存</p><p>​linkedlist:会有前驱后驱指针</p><p>可用于消息队列；顺序特性实现朋友圈点赞；顺序特性进行分布式日志顺序性展示；发布和订阅；慢查询</p><p>  Lpush,lpop,rpop,rush,</p><hr><p>Set:String类型的无序集合，底层哈希表和intset（所有元素是整数，元素数量小于512）</p><p>​intset：有序不重复的连续空间；</p><p>sadd key element[ ]</p><p>比如标签；黑白名单；获取所有业务的权限、用户标签</p><hr><p>Zset（SortedSet）：ziplist（元素数量小于128，所有元素长度&lt;64）和跳跃表结合，value保证唯一性，又可为每个value代表权重的值。</p><p>跳表：第一层是一个双向链表，其他层级都是单向链表。每一层都是一个有序链表，默认升序</p><p>排行榜系统；带权重任务队列；根据权重进行排序</p><p>zadd  key score member[]</p><p>三种高级：</p><p>Bitmaps:String类型上的一组面向bit操作的集合，不是真的数据结构，优点就是存储信息可节省大量空间。一般用于实时分析，存储对象ID关联的节省空间且高性能的布尔信息。底层是String</p><hr><p>HyperLogLogs：用于计算唯一事物的概率数据结构。可用于计算用户每天在搜索框中执行唯一的搜索。底层是String</p><hr><p>GEO：存储用户给定的地理位置信息，并对这些信息操作。底层是zset</p><hr><p>Streams：内存版的kafka</p><h2 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h2><p>速度快，支持丰富数据类型，支持事务、<em><strong>指令操作</strong></em>都是原子性的</p><p>容量收到物理内存限制，只适合较小数据量的高性能操作和运算上；</p><p>难在线扩容，在集群容量达到上限时在线扩容很复杂，所以运维人员在保证足够的空间</p><h1 id="redis6-0以后为什么引入多线程？"><a href="#redis6-0以后为什么引入多线程？" class="headerlink" title="redis6.0以后为什么引入多线程？"></a>redis6.0以后为什么引入多线程？</h1><p>多线程的情况下，线程切换换消耗CPU，<em><strong>CPU并不是redis的瓶颈</strong></em>。</p><p>引入多线程<em><strong>主要是为了提高网络IO读写性能</strong></em>：多线程只是在网络数据的读写这类耗时操作上使用，而执行命令仍是单线程顺序执行</p><p>redis将所有数据放在了内存中，对于小数据包，redis服务器已经处理80000到100000QPS，已经是极限，对大部分公司已经够用了</p><p>从redis自身角度，因为读写网络read&#x2F;write系统调用占用了Redis执行期间大部分CPU时间，瓶颈主要在于网络的 IO 消耗, 优化主要有两个方向:</p><ul><li>提高网络 IO 性能，典型的实现比如使用 DPDK 来替代内核网络栈的方式</li><li>使用多线程充分利用多核，典型的实现比如 Memcached</li></ul><p>小总结：</p><p>​可以充分利用服务器CPU资源，目前主线程只有一个核</p><p>​多线程可以分摊redis同步IO读写消耗</p><h1 id="redis6-0关于多线程"><a href="#redis6-0关于多线程" class="headerlink" title="redis6.0关于多线程"></a>redis6.0关于多线程</h1><p><em><strong>多线程默认是禁用的，只使用主线程</strong></em>。所以需要修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads-do-reads <span class="built_in">yes</span></span><br></pre></td></tr></table></figure><p>仅仅是开启多线程是不生效，修改配置文件redis.conf:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io-threads 4 <span class="comment">#官网建议4核使用2/3个线程，8核使设置6个线程</span></span><br></pre></td></tr></table></figure><p>实现机制：</p><p>​主线程负责接收建立连接请求，获取socket放入全局等待处理读处理队列</p><p>​主线程处理完读时间后，通过RR（Round Robin）将这些连接分配给这些IO线程</p><p>​主线程阻塞等待IO线程读取socket完毕</p><p>​主线程通过单线程的方式执行请求命令，请求数据读取并解析完成，但不执行</p><p>​主线程阻塞等待IO线程将数据收回，写socket完毕</p><p>​解除绑定，清空等待队列</p><h1 id="开启多线程后，是否有线程并发安全问题"><a href="#开启多线程后，是否有线程并发安全问题" class="headerlink" title="开启多线程后，是否有线程并发安全问题"></a>开启多线程后，是否有线程并发安全问题</h1><p>Redis的多线程部分只是用来处理网络数据的读写和协议解析，执行命令仍然是单线程顺序执行。所以我们不需要去考虑控制 key、lua、事务，LPUSH&#x2F;LPOP 等等的并发及线程安全问题。</p><h1 id="redis经常提到IO多路复用，怎么理解？"><a href="#redis经常提到IO多路复用，怎么理解？" class="headerlink" title="redis经常提到IO多路复用，怎么理解？"></a>redis经常提到IO多路复用，怎么理解？</h1><p>这是IO模型的一种，即经典的Reactor设计模式，有时也称为异步阻塞IO。</p><p>多路指的是多个socket连接，复用指的是复用一个线程。多路复用主要有三种技术：select，poll，epoll。epoll是最新的也是目前最好的多路复用技术。采用多路 I&#x2F;O 复用技术可以让单个线程高效的处理多个连接请求（尽量减少网络IO的时间消耗），且Redis在内存中操作数据的速度非常快（内存内的操作不会成为这里的性能瓶颈），主要以上两点造就了Redis具有很高的吞吐量。</p><p>[Redis 6.0 新特性-多线程连环13问！](<a href="https://mp.weixin.qq.com/s/FZu3acwK6zrCBZQ_3HoUgw">Redis 6.0 新特性-多线程连环13问！ (qq.com)</a>)</p>]]></content>
       
       
       <categories>
           
-          <category> redis </category>
+          <category> Redis </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> redis </tag>
+            <tag> Redis </tag>
             
         </tags>
       
@@ -947,7 +947,7 @@
     
     
     <entry>
-      <title>redis内存淘汰</title>
+      <title>Redis内存淘汰</title>
       <link href="/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/"/>
       <url>/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/</url>
       
@@ -956,14 +956,14 @@
       
       <categories>
           
-          <category> redis </category>
+          <category> Redis </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> redis </tag>
+            <tag> Redis </tag>
             
         </tags>
       
@@ -972,7 +972,7 @@
     
     
     <entry>
-      <title>redis和数据库的数据一致性</title>
+      <title>Redis和数据库的数据一致性</title>
       <link href="/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/"/>
       <url>/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</url>
       
@@ -981,14 +981,14 @@
       
       <categories>
           
-          <category> redis </category>
+          <category> Redis </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> redis </tag>
+            <tag> Redis </tag>
             
         </tags>
       
@@ -997,23 +997,23 @@
     
     
     <entry>
-      <title>redis理解和分布式锁</title>
+      <title>Redis理解和分布式锁</title>
       <link href="/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
       <url>/2022/05/03/redis%E7%90%86%E8%A7%A3%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</url>
       
-        <content type="html"><![CDATA[<h1 id="对redis的理解"><a href="#对redis的理解" class="headerlink" title="对redis的理解"></a>对redis的理解</h1><p>redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部分都采用redis实现分布式缓存，从而去提高数据的的检索效率。</p><p>redis流行的原因：</p><p>​1 基于内存存储，在进行数据IO操作的时候能达到很高的QPS（官方给的10w）</p><p>​2 提供了非常丰富的数据存储结构，比如String、list、hash、set、zset</p><p>​3 底层采用单线程实现数据的IO，所以在数据算法层面不需要考虑并发安全性，从而让底层算法的时间复杂度基本都是常量复杂度</p><p>​4 虽然是内存存储，但却可以支持持久化，避免因服务器故障而导致的数据丢失问题</p><p>综上，redis一般是用来实现分布式缓存，从而降低应用程序对关系型数据库检索带来的性能影响，redis还可以实现分布式锁、分布式队列、排行榜、查找附近的人等功能，为复杂应用提供了解决方案</p><h1 id="实现分布式锁中-zookeeper和redis的比较"><a href="#实现分布式锁中-zookeeper和redis的比较" class="headerlink" title="实现分布式锁中 zookeeper和redis的比较"></a>实现分布式锁中 zookeeper和redis的比较</h1><p>分布式锁：核心目的是为了解决在同一个时刻有多个进程或线程来访问共享资源所带来的安全性问题。锁又分为共享锁（在同一个时刻允许多个线程或进程访问共享资源，适用于幂等性场景，从而避免重复加锁的性能开销）和排它锁（同一个时刻只允许一个线程或进程访问该共享资源，适用于非幂等性场景）</p><p>实现分布式锁的最常用中间件就是zookeeper和redis</p><p>redis实现分布式锁方式：</p><p>​1 基于redis本身提供的指令：SET key value NX PX millisecounds。设置key的时候，若key已经存在与服务器上了会返回一个0，表示无法设置，否则就返回1表示设置成功。程序就根据0和1判断状态，从而表示去获得锁</p><p>​2 基于redission客户端实现，redission提供了分布式锁的封装方法，只需要调用封装好的api，<em><strong>lock()</strong></em> 和 ***unlock()***方法，就可以实现锁的抢占和释放。redission的所有指令都是通过lua脚本去实现，该脚本可以保证所有执行指令的原则性。另外，redission提供了一个watchdog，它会在我们获取锁后每隔10s去把key的时间延长，就避免锁的过期。</p><p>redis的缺点：</p><p>​在获得锁的时候，很简单，若获取不到锁就一直去尝试获取，会影响程序性能</p><p>​是一个&#x3D;&#x3D;AP模型&#x3D;&#x3D;，也就是可用性模型，集群模式中，存在数据一致性，会导致锁出现问题。即使使用了redlock算法实现分布式锁，但在某些复杂的场景下也不能保证锁的一定可用</p><p>zookeeper实现分布式锁：</p><p>​1 有序节点实现：每个线程或进程都到zookeeper上的<em><strong>lock</strong></em>目录下去创建一个临时有序节点，去表示抢占锁，所有创建的节点都会按照先后顺序生成带有有序编号的节点，线程创建节点后获取<em><strong>lock</strong></em>节点下的所有子节点，判断当前线程创建的节点是否是所有子节点里序号最小的，若是就获取锁成功。反之就需要对当前线程的前一个节点建立事件监听，当被监听的节点释放后，则触发回调告诉当前线程从而再次去尝试抢占锁</p><p> 使用redis还是比较常见，因为实际开发中极端情况少，redis本身的性能又高，在高并发中比较合适。</p><p>zookeeper是一个分布的协调组件，是&#x3D;&#x3D;一个CP模型&#x3D;&#x3D;所以更适合实现分布式锁。当获取不到锁就添加监听器，不用一直获取，就减少了性能。</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="对Redis的理解"><a href="#对Redis的理解" class="headerlink" title="对Redis的理解"></a>对Redis的理解</h1><p>redis是一个高性能的基于Key-Value结构存储的NoSQL开源数据库，绝大部分都采用redis实现分布式缓存，从而去提高数据的的检索效率。</p><p>redis流行的原因：</p><p>​1 基于内存存储，在进行数据IO操作的时候能达到很高的QPS（官方给的10w）</p><p>​2 提供了非常丰富的数据存储结构，比如String、list、hash、set、zset</p><p>​3 底层采用单线程实现数据的IO，所以在数据算法层面不需要考虑并发安全性，从而让底层算法的时间复杂度基本都是常量复杂度</p><p>​4 虽然是内存存储，但却可以支持持久化，避免因服务器故障而导致的数据丢失问题</p><p>综上，redis一般是用来实现分布式缓存，从而降低应用程序对关系型数据库检索带来的性能影响，redis还可以实现分布式锁、分布式队列、排行榜、查找附近的人等功能，为复杂应用提供了解决方案</p><h1 id="实现分布式锁中-zookeeper和Redis的比较"><a href="#实现分布式锁中-zookeeper和Redis的比较" class="headerlink" title="实现分布式锁中 zookeeper和Redis的比较"></a>实现分布式锁中 zookeeper和Redis的比较</h1><p>分布式锁：核心目的是为了解决在同一个时刻有多个进程或线程来访问共享资源所带来的安全性问题。锁又分为共享锁（在同一个时刻允许多个线程或进程访问共享资源，适用于幂等性场景，从而避免重复加锁的性能开销）和排它锁（同一个时刻只允许一个线程或进程访问该共享资源，适用于非幂等性场景）</p><p>实现分布式锁的最常用中间件就是zookeeper和Redis</p><p>Redis实现分布式锁方式：</p><p>​1 基于Redis本身提供的指令：SET key value NX PX millisecounds。设置key的时候，若key已经存在与服务器上了会返回一个0，表示无法设置，否则就返回1表示设置成功。程序就根据0和1判断状态，从而表示去获得锁</p><p>​2 基于redission客户端实现，redission提供了分布式锁的封装方法，只需要调用封装好的api，<em><strong>lock()</strong></em> 和 ***unlock()***方法，就可以实现锁的抢占和释放。redission的所有指令都是通过lua脚本去实现，该脚本可以保证所有执行指令的原则性。另外，redission提供了一个watchdog，它会在我们获取锁后每隔10s去把key的时间延长，就避免锁的过期。</p><p>redis的缺点：</p><p>​在获得锁的时候，很简单，若获取不到锁就一直去尝试获取，会影响程序性能</p><p>​是一个&#x3D;&#x3D;AP模型&#x3D;&#x3D;，也就是可用性模型，集群模式中，存在数据一致性，会导致锁出现问题。即使使用了redlock算法实现分布式锁，但在某些复杂的场景下也不能保证锁的一定可用</p><p>zookeeper实现分布式锁：</p><p>​1 有序节点实现：每个线程或进程都到zookeeper上的<em><strong>lock</strong></em>目录下去创建一个临时有序节点，去表示抢占锁，所有创建的节点都会按照先后顺序生成带有有序编号的节点，线程创建节点后获取<em><strong>lock</strong></em>节点下的所有子节点，判断当前线程创建的节点是否是所有子节点里序号最小的，若是就获取锁成功。反之就需要对当前线程的前一个节点建立事件监听，当被监听的节点释放后，则触发回调告诉当前线程从而再次去尝试抢占锁</p><p> 使用redis还是比较常见，因为实际开发中极端情况少，redis本身的性能又高，在高并发中比较合适。</p><p>zookeeper是一个分布的协调组件，是&#x3D;&#x3D;一个CP模型&#x3D;&#x3D;所以更适合实现分布式锁。当获取不到锁就添加监听器，不用一直获取，就减少了性能。</p>]]></content>
       
       
       <categories>
           
-          <category> redis </category>
+          <category> Redis </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> redis </tag>
+            <tag> Redis </tag>
             
         </tags>
       
