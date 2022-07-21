@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>MySQL简单优化</title>
+      <link href="/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/"/>
+      <url>/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Explain"><a href="#Explain" class="headerlink" title="Explain"></a>Explain</h1><p>对于所执行的SQL语句，通过“explain”查看相关信息进行调节</p><p>可以获取表的读取顺序，数据读取操作的操作类型，哪些索引可用，哪些索引实际被使用，表之间的引用，每张表有多少行被优化器查询</p><p>使用方法： EXPLCAIN + SQL语句</p><p>Id：id相同：执行顺序由上至下</p><p>​    Id不同：若是子查询，id的序号会递增，id的值越大优先级越高，越先执行</p><p>​    id不同，同时存在，可以认为从上往下顺序执行。</p><p>Select_type：</p><p>​    SIMPLE：简单的select查询，查询中不包含子查询或UNION</p><p>​    PRIMARY：若包含任何复杂的子部分，最外层查询则被标记为PRIMARY</p><p>​    SUBQUERY：在select或where列表中包含子查询</p><p>​    DERIVEN：在from列表中包含的子查询被标记为DERIVER（衍生），mysql会递归执行这些子查询，把结果放在临时表中</p><p>​    UNION：若第二个SELECT出现在UNION之后，则被标记为UNION；若UNION包含在from子句的子查询中，外层select将被标记为：DERIVED</p><p>​    UNION RESULT：从UNION表获取结果的SELECT</p><p>Table：就是执行的表</p><p><em><strong>Type</strong></em>:显示查询使用了哪些类型</p><p>​    包含：ALL、index、range、ref、eq_ref、const&#x2F;system、NULL</p><p>从好到差：system&gt;const&gt;eq_ref&gt;ref&gt;range&gt;index&gt;all</p><p>​    System:表里只有一行记录，const的特例</p><p>​    Const：通过索引，一次就找到，用于比较primary key或者union索引</p><p>​    Eq_ref：唯一索引扫描，对每个索引键，表中只有一条记录匹配。主键或唯一索引扫描</p><p>​    Ref：非唯一性索引扫描，返回某个单独值的所有行</p><p>​    Reange：值检索给定范围的行</p><p>​    Index：与all的区别是index只遍历索引树。通常比all块</p><p>​    All：将遍历全表以找到匹配的行</p><p>Possible_keys：显示可能应用在这张表中的索引，一个或多个，但不一定被查询实际使用</p><p>Key_len：表示索引中使用的字节数，通过该列计算查询中使用的索引长度</p><p>Ref：显示索引的那一列被使用了</p><p>row： 根据表统计信息及索引选用情况，大致估算出找到所需要读取的行数</p><p>Extra：包含不适合在其他列中显示但很重要的额外信息</p><h1 id="SQL语句优化"><a href="#SQL语句优化" class="headerlink" title="SQL语句优化"></a>SQL语句优化</h1><p>查询尽量不用select * ，而是具体字段：只取需要的，节省资源、减少开销；select * 时很可能不会用到索引，就会造成全表扫描 </p><p>​    避免在where子句中用or连接条件（用union all，或两条sql）：or可能让索引失效，而全局扫描；</p><p>​         Select * from student where id&#x3D;1 or salary&#x3D;3000</p><p>​         Select * from student where id&#x3D;1 union all select * from student where salary</p><p>​    Varchar代替char：因为是根据实际长度存储，存储空间小，节省空间；char按声明大小存储，不足补空格；在一个相对小的字段内搜索，效率更高</p><p>​    尽量使用数值代替字符串</p><p>​    查询时尽量避免返回大量数据：若返回的数据量大，就查询时间过长，网络传输时间过长。太多了也没意义，用户不好看。通常采用分页的形式</p><p>​    创建name字段的索引：提高查询速度的最简单最佳方式</p><p>​         Alter table student add index index_name(NAME)</p><p>​    优化like语句：like可能让索引失效</p><p>​    Where限定查询的数据</p><p>尽量避免全表的扫描，在where、order by等列上建立索引。在字句中尽量避免使用 !&#x3D; &gt; &lt; 等操作符，否则引擎会放弃使用索引去全表扫描了</p><p>尽量使用数字型的字段，不然会降低连接的性能，也会增加存储开销（因为引擎在处理查询和连接的时候会逐个去比较字符串中的每个字符），数字就只需要比较一次</p><h2 id="大表"><a href="#大表" class="headerlink" title="大表"></a>大表</h2><p>限定数据范围：比如将查看订单历史记录，控制在一定的时间范围</p><p>读写分离：数据库拆分，主库负责写，从库负责读</p><p>垂直分区：根据数据库里面数据表的相关性拆分。简单说，就是把一张列较多的表拆分成多个表</p><p>水平分区：将一片数据分散到不同表或者库中</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> MySQL </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> MySQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Http1.0-3.0</title>
       <link href="/2022/07/17/Http1-0-3-0/"/>
       <url>/2022/07/17/Http1-0-3-0/</url>
