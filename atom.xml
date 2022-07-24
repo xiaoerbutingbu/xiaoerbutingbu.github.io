@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-07-21T15:59:42.368Z</updated>
+  <updated>2022-07-24T08:17:27.045Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CAS</title>
+    <link href="http://example.com/2022/07/24/CAS/"/>
+    <id>http://example.com/2022/07/24/CAS/</id>
+    <published>2022-07-24T08:14:24.000Z</published>
+    <updated>2022-07-24T08:17:27.045Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>比较并交换</p><p>  比较当前工作内存中的值和主内存中的值，如果相同则执行规定操作，否则继续比直到主内存和工作内存中的值一致</p><p>  多个线程使用CAS操作一个变量，只有一个线程会成功，并成功更新，其余会失败。失败的线程会重新尝试（自旋）或挂起</p><p>  <em><strong>是一条CPU并发原语，原子指令</strong></em>，不会造成数据不一致的问题</p><p>  乐观锁</p><h1 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h1><p>先从地址V地区值A：2；根据A计算目标值B：3；通过CAS以原子的方式将地址V的值从A修改为B</p><p>1：调用unsafe类，分别专递主物理内存的值，原子类对象本身的值，当前对象内存地址的值，需要加上的值</p><p>2：拷贝主物理内存的值到当前线程内存</p><p>3：while循环，一直修改</p><h1 id="底层"><a href="#底层" class="headerlink" title="底层"></a>底层</h1><p>  Unsafe类：CAS的核心类，来自JVM的rt.jar下。因为java不能直接访问底层系统，需要本地（native）方法访问，基于该类可以直接操作特定内存的数据，类似于c语言的指针直接操作内存。Unsafe类中的方法都是直接调用操作系统底层资源执行相应任务</p><p>  变量valueOffset，表示变量值在内存中的偏移地址</p><p>  变量value被volatile修饰，保证多线程之间的可见性</p><p> unsafe类：compareAndSwapObject(Object var1, long var2, Object var4, Object var5)</p><p>​第一个：要修改的对象</p><p>​第二个：对象中要修改变量的偏移量</p><p>​   第三个：修改之前的值</p><p>​   第四个：预想修改之后的值</p><h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>循环时间开销很大：因为通常配合着循环使用，若失败则会一直尝试</p><p>只能保证一个共享变量的原子操作（多个共享变量，循环CAS就不能保证原子性，要用锁）</p><p><em><strong>引来ABA问题</strong></em></p><h2 id="ABA"><a href="#ABA" class="headerlink" title="ABA"></a>ABA</h2><p>线程1从内存位置V读取数据A，线程2也从地址V出读取A，线程2经过了一些操作将值别成了B，然后线程2又将V位置的数据变成A，此时，线程2进行CAS操作发现内存中仍然是A，进程1操作成功。但是整个过程中，地址V其实是已经被修改过的</p><p><em><strong>带有标记的原子引用类</strong></em>可以<em><strong>控制变量值的版本</strong></em>来保证CAS正确性。所以，解决ABA的话改用传统的互斥同步</p><p>原子类：某个线程进入方法，执行其中的指令时，不会被其他线程打断，别的线程一直等到该方法执行完成才由JVM从等待队列中选择一个另一个线程进入</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;比较并交换&lt;/p&gt;
+&lt;p&gt;  比较当前工作内存中的值和主内存中的值，如果相同则执行规定操作，否则继续比直到主内存和工作内存中的值一致&lt;/p&gt;</summary>
+      
+    
+    
+    
+    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="基础" scheme="http://example.com/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+  </entry>
   
   <entry>
     <title>MySQL简单优化</title>
@@ -498,31 +523,6 @@
     
     
     <category term="操作系统" scheme="http://example.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySQL基础</title>
-    <link href="http://example.com/2022/05/24/MySQL-1/"/>
-    <id>http://example.com/2022/05/24/MySQL-1/</id>
-    <published>2022-05-24T07:22:57.000Z</published>
-    <updated>2022-07-06T14:38:34.194Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h2><p> 连接池组件、管理服务和工具组件、SQL接口组件、查询分析器组件、缓冲组件、优化器组件、插件式存储引擎、物理文件</p><h2 id="三大范式和反模式"><a href="#三大范式和反模式" class="headerlink" title="三大范式和反模式"></a>三大范式和反模式</h2><p>第一：属性不可分割，原子项</p><p>第二：原子性，即非主属性必完全依赖主属性</p><p>第三：原子性，非主属性必完全主属性，且不存在传递依赖</p><p>反模式：解决了旧问题，又产生了新问题。实际开发中，不会严格遵守三范式</p><h2 id="三种引擎"><a href="#三种引擎" class="headerlink" title="三种引擎"></a>三种引擎</h2><p><img src="/2022/05/24/MySQL-1/yinqin.png" alt="引擎"></p><h2 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h2><p><a href="https://xiaoerbutingbu.github.io/2022/05/11/InnoDB-1/">详情请看</a></p><h3 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h3><p>内存存放，hash索引（默认）</p><p>所有数据存在内存汇总，数据的处理速度快，但安全性不高，因对表的大小有要求，不能建太大的表。适用于需要很快的读写速度、安全性要求较低的</p><h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><p>不支持事务，不支持外键，支持表锁，不支持行锁，访问速度快</p><p>若主要用于插入新记录和读出记录，该引擎就能实现处理的高效率。若应用的完整性、并发性要求较低，也可</p><p>每次查询具有原子性</p><p>B+树的索引结构</p><p>非聚集性索引，存储会有两个文件，一个索引文件，一个数据文件，其中索引文件的索引指向数据文件中的表数据</p><p>用一个变量保存了整个表的行数，而innodb是全表扫描</p><p>支持全文索引，innodb不支持全文索引（5.7以前）</p><p>可以被压缩后查询</p><p>所以MYISAM只缓存索引块，记录的直接是文件的OFFSET，定位比INNODB块。多以查询比较快</p><h2 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h2><p>多版本并发控制，是一种并发控制的方法，实现对数据库的并发访问，在编程语言中实现事务内存。</p><p><em><strong>就是为了实现读写冲突不加锁。</strong></em></p><p>MVCC多版本并发控制：维持一个数据的多个版本，让读写操作没有冲突</p><p>在InnoDB中的实现主要是为了提高数据库并发性能</p><p>使用RC和RR隔离级别的事务，在执行普通selsect操作时，访问记录版本链的过程；让不同事务的读写、写操作并发执行，提高体统性能</p><h3 id="益处"><a href="#益处" class="headerlink" title="益处"></a>益处</h3><p>解决读写冲突的无锁并发控制</p><p>在并发读写时，可在读操作时不用阻塞写操作，写操作不用阻塞读操作，提供读写性能；解决脏读，幻读，不可重复读等事务隔离问题，但不能解决更新丢失问题</p><h3 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h3><p>第一种：将数据记录的多个版本保存在数据库中，当这些版本数据不再需要时，垃圾回收器就回收这些记录</p><p>第二种：只在数据库中保存最新版本的数据，但是在使用undo时动态重构旧版本数据</p><h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><p>3个隐式字段：分别记录</p><p>​                 最近修改事务ID：记录创建这条记录&#x2F;最后一次修改该记录的事务ID</p><p>​                 指向这条记录的上一个版本；</p><p>​                 隐含自增ID，若数据表没有主键，就自动产生一个聚集索引</p><p>Undo日志：</p><p>​        Insert undo log：事务在insert新纪录时产生的undo log，只在事务回滚时需要，并且在事务提交后可以被立即丢弃</p><p>​        Update undo log：在update或delete时产生；事务回滚需要，快照读也需要；所以不能随便删除，只有在快速读或事务回滚不涉及该该日志，才会被统一清除</p><p>Read View：</p><p>​         事务进行快照读操作的时候生产的读视图</p><h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><p>适合索引的列是出现在where字句中的列或连接子句中指定的列</p><p>基础较小的类，索引效果差。</p><p>使用短索引：若对长字符串进行索引，应该指定要前缀长度，这样能够节省大量索引空间</p><p>不能过度索引，因为索引需要额外的磁盘空间，并降低写操作的性能。修改表的内容时，索引会进行更新甚至重构，索引的列越多，时间就越长。所以，只保持需要的索引有利于查询即可</p><p>存储引擎层实现，索引：帮助mysql高效获取数据的数据结构</p><p>提高数据库的性能，不用加内存，不用该程序，不同调sql</p><h3 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+ 树索引"></a>B+ 树索引</h3><h4 id="聚集索引"><a href="#聚集索引" class="headerlink" title="聚集索引"></a>聚集索引</h4><p>​每张表的主键构成一棵B+树，同时叶子节点存放的即为整张表的行记录数据，叶子节点也就是数据页</p><p>​将数据存储与索引放到一块，索引的叶子节点保存了行数据，&#x3D;&#x3D;必有且只有一个聚集索引&#x3D;&#x3D;。若有主键，主键即是；无主键用第一个唯一索引；若都没，会自动生成一个rowid作为隐藏的聚集索引。</p><p>​        结构：B+树：&#x3D;&#x3D;将所有数据都放在叶子节点&#x3D;&#x3D;，叶子节点形成一个列表；非叶子只存放键值，每个数据叶中的有效数据就多了，可以减少IO次数。按键值的大小顺序存放在同一层的叶子节点上</p><p>​    因为相对于二叉树（会有左倾右倾的情况），B+树层级更少，搜索效率高</p><p>​    因为B树：无论叶子节点还是非叶子，都保存数据，所以存储值减少，指针就减少，要同样保存大量数据，只能增加树的高度，导致性能降低，要查找就要遍历整个树</p><p>​    Hash索引只支持等值匹配，不支持排序操作</p><h4 id="辅助索引（非聚集索引）"><a href="#辅助索引（非聚集索引）" class="headerlink" title="辅助索引（非聚集索引）"></a>辅助索引（非聚集索引）</h4><p>与聚集索引不同的是，叶子节点不包含行记录的全部数据。叶子节点除了包含键值以外，每个叶子节点索引行中还包含一个书签（用来让Innodb知道哪里可以找到与之对应的行数据）</p><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>把无序的数据变成有序的查询</p><p>创建了索引的列的内容进行排序</p><p>对排序结果倒排索引</p><p>在倒排表内容上拼上数据地址链</p><p>查询时，先拿倒排表内容，再取出数据地址链，从而拿到数据</p><h3 id="主要分类"><a href="#主要分类" class="headerlink" title="主要分类"></a>主要分类</h3><p>普通索引、唯一索引（hash）、主键索引、组合索引、全文索引（full text），BTREE，RTREE</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h2 id=&quot;组成&quot;&gt;&lt;a href=&quot;#组成&quot; class=&quot;headerlink&quot; title=&quot;组成&quot;&gt;&lt;/a&gt;组成&lt;/h2&gt;&lt;p&gt; 连接池组件、管理服务和工具组件、SQL接口组件、查询分析器组件、缓冲组件、优化器组件、插件式存储引擎、物理文件&lt;/p&gt;
-&lt;h2 id=&quot;三</summary>
-      
-    
-    
-    
-    <category term="MySQL" scheme="http://example.com/categories/MySQL/"/>
-    
-    
-    <category term="MySQL" scheme="http://example.com/tags/MySQL/"/>
     
   </entry>
   

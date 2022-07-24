@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>CAS</title>
+      <link href="/2022/07/24/CAS/"/>
+      <url>/2022/07/24/CAS/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>比较并交换</p><p>  比较当前工作内存中的值和主内存中的值，如果相同则执行规定操作，否则继续比直到主内存和工作内存中的值一致</p><p>  多个线程使用CAS操作一个变量，只有一个线程会成功，并成功更新，其余会失败。失败的线程会重新尝试（自旋）或挂起</p><p>  <em><strong>是一条CPU并发原语，原子指令</strong></em>，不会造成数据不一致的问题</p><p>  乐观锁</p><h1 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h1><p>先从地址V地区值A：2；根据A计算目标值B：3；通过CAS以原子的方式将地址V的值从A修改为B</p><p>1：调用unsafe类，分别专递主物理内存的值，原子类对象本身的值，当前对象内存地址的值，需要加上的值</p><p>2：拷贝主物理内存的值到当前线程内存</p><p>3：while循环，一直修改</p><h1 id="底层"><a href="#底层" class="headerlink" title="底层"></a>底层</h1><p>  Unsafe类：CAS的核心类，来自JVM的rt.jar下。因为java不能直接访问底层系统，需要本地（native）方法访问，基于该类可以直接操作特定内存的数据，类似于c语言的指针直接操作内存。Unsafe类中的方法都是直接调用操作系统底层资源执行相应任务</p><p>  变量valueOffset，表示变量值在内存中的偏移地址</p><p>  变量value被volatile修饰，保证多线程之间的可见性</p><p> unsafe类：compareAndSwapObject(Object var1, long var2, Object var4, Object var5)</p><p>​第一个：要修改的对象</p><p>​第二个：对象中要修改变量的偏移量</p><p>​   第三个：修改之前的值</p><p>​   第四个：预想修改之后的值</p><h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>循环时间开销很大：因为通常配合着循环使用，若失败则会一直尝试</p><p>只能保证一个共享变量的原子操作（多个共享变量，循环CAS就不能保证原子性，要用锁）</p><p><em><strong>引来ABA问题</strong></em></p><h2 id="ABA"><a href="#ABA" class="headerlink" title="ABA"></a>ABA</h2><p>线程1从内存位置V读取数据A，线程2也从地址V出读取A，线程2经过了一些操作将值别成了B，然后线程2又将V位置的数据变成A，此时，线程2进行CAS操作发现内存中仍然是A，进程1操作成功。但是整个过程中，地址V其实是已经被修改过的</p><p><em><strong>带有标记的原子引用类</strong></em>可以<em><strong>控制变量值的版本</strong></em>来保证CAS正确性。所以，解决ABA的话改用传统的互斥同步</p><p>原子类：某个线程进入方法，执行其中的指令时，不会被其他线程打断，别的线程一直等到该方法执行完成才由JVM从等待队列中选择一个另一个线程进入</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 基础 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>MySQL简单优化</title>
       <link href="/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/"/>
       <url>/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/</url>
