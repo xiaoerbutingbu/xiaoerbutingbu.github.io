@@ -1,3 +1,4 @@
+http://example.com/2022/07/04/CopyOnWiteAayList/
 http://example.com/2022/05/19/redis_c/
 http://example.com/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/
 http://example.com/2022/05/05/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/
@@ -6,7 +7,6 @@ http://example.com/2022/05/04/redis%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84
 http://example.com/2022/05/06/redis%E5%9F%BA%E7%A1%80/
 http://example.com/2022/05/21/JVM-2/
 http://example.com/2022/07/12/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/
-http://example.com/2022/07/04/CopyOnWiteAayList/
 http://example.com/2022/05/18/http-1/
 http://example.com/2022/07/17/Http1-0-3-0/
 http://example.com/2022/05/17/TCP/
@@ -73,6 +73,7 @@ http://example.com/tags/Bean/
 http://example.com/tags/IP/
 http://example.com/tags/List/
 http://example.com/tags/Redis/
+http://example.com/tags/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/MySQL/
 http://example.com/categories/JVM/
