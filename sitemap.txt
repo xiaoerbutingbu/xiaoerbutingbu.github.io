@@ -1,3 +1,4 @@
+http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/
 http://example.com/2022/07/24/CAS/
 http://example.com/2022/07/04/CopyOnWiteAayList/
 http://example.com/2022/05/19/redis_c/
@@ -21,7 +22,6 @@ http://example.com/2022/07/02/Java%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%
 http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/06/16/Shiro/
 http://example.com/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/
-http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/
 http://example.com/2022/06/13/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/
 http://example.com/2022/05/09/springmvc-1/
 http://example.com/2022/06/09/concurrentHashMap/
