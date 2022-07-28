@@ -3182,16 +3182,7 @@ h1.page-title + .tag-cloud-list {
   background: #49b1f5;
   background-attachment: scroll;
   background-position: bottom;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
   background-size: cover;
-}
-#footer:before {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  content: '';
 }
 #footer-wrap {
   position: relative;
@@ -3219,8 +3210,6 @@ h1.page-title + .tag-cloud-list {
   width: 100%;
   background-color: #49b1f5;
   background-position: center center;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
   background-size: cover;
   background-repeat: no-repeat;
   -webkit-transition: all 0.5s;
@@ -4632,7 +4621,7 @@ h1.page-title + .tag-cloud-list {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 9999;
+  z-index: -1;
   pointer-events: none;
 }
 .medium-zoom-image--opened {
@@ -6042,7 +6031,7 @@ blockquote.pullquote.right {
   color: #49b1f5;
 }
 #local-search .search-dialog .local-search__hit-item .search-result {
-  margin: 0 0 8px;
+  margin: 0 8px 8px 0;
   word-break: break-all;
 }
 #local-search .search-dialog .local-search__hit-item .search-keyword {
