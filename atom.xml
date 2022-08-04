@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-08-01T10:04:58.807Z</updated>
+  <updated>2022-08-04T08:13:42.755Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>垃圾收集系统</title>
+    <link href="http://example.com/2022/08/04/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/"/>
+    <id>http://example.com/2022/08/04/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</id>
+    <published>2022-08-04T08:01:59.000Z</published>
+    <updated>2022-08-04T08:13:42.755Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>运行过程中，会产生大量内存垃圾，为确保程序运行时的性能，虚拟机在程序执行过程中药不断进行自动的垃圾回收</p><p> 收集 三个内存区域</p><h1 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h1><h2 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h2><p>历史最悠久的，单线程工作，垃圾收集时会暂停其他所有工程线程，直到收集结束（用户不可知）</p><h2 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h2><p>Serial收集器的多线程并发版本</p><h2 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h2><p>一款以<em><strong>最短回收停顿时间为目标</strong></em>的收集器。</p><p>基于标记-清除算法实现。四个步骤：初始标记、并发标记、重新标记、并发清除</p><p>优点：并发收集、低停顿</p><p>缺点：对处理器资源敏感、无法处理“浮动垃圾”、大量空间碎片</p><h2 id="ZGC收集器"><a href="#ZGC收集器" class="headerlink" title="ZGC收集器"></a>ZGC收集器</h2><p>低延迟的，<em><strong>染色指针技术</strong></em>：将少量额外的信息存储在指针上的技术。</p><p>步骤：并发标记、并发预备重分配、并发重分配、并发重映射</p><h1 id="判断是否可以回收"><a href="#判断是否可以回收" class="headerlink" title="判断是否可以回收"></a>判断是否可以回收</h1><h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p> 引用计数法：为每个对象创建一个引用计数，有对象引用时计数器+1，引用被释放时计数-1，当计数器为0时就可以被回收。原理简单，效率也很高。已被淘汰，它不能解决循环引用。</p><p>  可达性分析算法：从GC Roots作为根对象开始向下搜索，搜索所走过的路径被称为引用链。当一个对象到GC Roots没有任何引用链相连时，则证明此对象是可以被回收</p><p>可作为GC roots：栈帧中的本地变量表中引用的对象（比如：堆栈中用到的参数、局部变量、临时变量）；方法区中静态属性引用的对象（java类的引用类型静态变量）；方法区中常量引用的对象（字符串常量池的引用）；本地方法栈中native方法引用的对象；所有同步锁（synchronized）持有的对象</p><h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>当经过可达性分析算法判定为可以删除后，就只是对其进行一次标记，之后还要筛选，看该对象是否有必要执行finalize方法，如果没有覆盖finalize方法或者已经被虚拟机调用那就视为“没有必要执行”。</p><p>如果该对象判定为有必要执行方法，那该对象就被放置一个名为F-Queue的队列之中，之后在由虚拟机自动建立的、低调度优先级的Finalizer线程执行finalize方法（但虚拟机不一定会等待它运行结束），稍后收集器对F-Queue中的对象进行第二次标记，第二次标记成功就代表要被回收了。</p><p>如果对象要从F-Queue中逃脱，就要重新与引用链上的任一对象关联。</p><h1 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>标记无用对象，然后进行清除回收。效率不高，无法清理出垃圾碎片；执行效率不稳定。因为标记和清除的效率随着需清理对象的增长而降低</p><h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>按容量划分两个大小相等的内存区域，当一块用完的时候将活着的对象复制到另一块上，再把已使用的内存空间一次清理。适合对象较少的时候，即使用年轻代；会产生大量的内存间复制的开销</p><p>但对于多数对象要回收的情况，需要复制的对象就较少，也不用考虑空间碎片，只要移动堆顶的指针，按顺序分配即可。但因为内存对半分开，空间浪费</p><h2 id="标记-整理"><a href="#标记-整理" class="headerlink" title="标记-整理"></a>标记-整理</h2><p>标记无用对象，让所有存活的对象向一端移动，然后直接清除掉边界外的内存</p><p>分代收集算法：根据对象存活周期的不同将内存划分几块，一般是新生代（复制算法清除）和老年代（标记整理算法清除）</p><h1 id="GC"><a href="#GC" class="headerlink" title="GC"></a>GC</h1><p>Minor GC(Young GC):只是新生代的垃圾收集</p><p>​年轻代空间不足时，就触发，即Eden代满了，survivor满不会引发gc</p><p>​非常频繁，回收速度也快</p><p>Major GC(old gc)：只是老年代的垃圾收集，执行速度比Minor GC慢10倍以上</p><p>​只有CMS GC会有单独收集老年代的行为</p><p>Mixed GC：收集整个新生代以及部分老年代的垃圾收集</p><p>Full gc：回收这个堆和方法区的垃圾收集</p><h1 id="频繁发生Full-GC"><a href="#频繁发生Full-GC" class="headerlink" title="频繁发生Full GC"></a>频繁发生Full GC</h1><p>发生在system.gc()调用，老年代空间不足，永生区空间不足，堆分配了大对象</p><p>注意两种数据结构：linkedBlockingQueue：当数据量很大，就会无限放数据，就导致full gc；所以要使用有参构造函数并合理设置节点数量</p><p>线程池：消息量大造成内存消耗过快，是因为队列无限存放数据</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;简述&quot;&gt;&lt;a href=&quot;#简述&quot; class=&quot;headerlink&quot; title=&quot;简述&quot;&gt;&lt;/a&gt;简述&lt;/h1&gt;&lt;p&gt;运行过程中，会产生大量内存垃圾，为确保程序运行时的性能，虚拟机在程序执行过程中药不断进行自动的垃圾回收&lt;/p&gt;
+&lt;p&gt; 收集 三个内存区域&lt;</summary>
+      
+    
+    
+    
+    <category term="JVM" scheme="http://example.com/categories/JVM/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>LinkedList</title>
@@ -496,31 +519,6 @@
     
     
     <category term="Map" scheme="http://example.com/tags/Map/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>微服务</title>
-    <link href="http://example.com/2022/05/28/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
-    <id>http://example.com/2022/05/28/%E5%BE%AE%E6%9C%8D%E5%8A%A1/</id>
-    <published>2022-05-28T15:56:14.000Z</published>
-    <updated>2022-05-28T15:57:41.179Z</updated>
-    
-    <content type="html"><![CDATA[<p>微服务是一种架构风格，即将单体应用划分为小型的服务单元，微服务之间使用 HTTP 的 API 进行资源访问与操作。</p><p>在笔者看来，微服务架构的演变更像是一个公司的发展过程，从最开始的小公司，到后来的大集团。大集团可拆分出多个子公司，每个子公司的都有自己独立的业务、员工，各自发展，互不影响，合起来则是威力无穷。</p><p>臃肿的系统、重复的代码、超长的启动时间带给开发人员的只有无限的埋怨，丝毫没有那种很舒服的、很流畅的写代码的感觉。他们把大部分时间都花在解决问题和项目启动上面了。</p><h3 id="微服务架构的优势"><a href="#微服务架构的优势" class="headerlink" title="微服务架构的优势"></a>微服务架构的优势</h3><p>使用微服务架构能够为我们带来如下好处：</p><h4 id="1）服务的独立部署"><a href="#1）服务的独立部署" class="headerlink" title="1）服务的独立部署"></a>1）服务的独立部署</h4><p>每个服务都是一个独立的项目，可以独立部署，不依赖于其他服务，耦合性低。</p><h4 id="2）服务的快速启动"><a href="#2）服务的快速启动" class="headerlink" title="2）服务的快速启动"></a>2）服务的快速启动</h4><p>拆分之后服务启动的速度必然要比拆分之前快很多，因为依赖的库少了，代码量也少了。</p><h4 id="3）更加适合敏捷开发"><a href="#3）更加适合敏捷开发" class="headerlink" title="3）更加适合敏捷开发"></a>3）更加适合敏捷开发</h4><p>敏捷开发以用户的需求进化为核心，采用迭代、循序渐进的方法进行。服务拆分可以快速发布新版本，修改哪个服务只需要发布对应的服务即可，不用整体重新发布。</p><h4 id="4）职责专一，由专门的团队负责专门的服务"><a href="#4）职责专一，由专门的团队负责专门的服务" class="headerlink" title="4）职责专一，由专门的团队负责专门的服务"></a>4）职责专一，由专门的团队负责专门的服务</h4><p>业务发展迅速时，研发人员也会越来越多，每个团队可以负责对应的业务线，服务的拆分有利于团队之间的分工。</p><h4 id="5）服务可以按需动态扩容"><a href="#5）服务可以按需动态扩容" class="headerlink" title="5）服务可以按需动态扩容"></a>5）服务可以按需动态扩容</h4><p>当某个服务的访问量较大时，我们只需要将这个服务扩容即可。</p><h4 id="6）代码的复用"><a href="#6）代码的复用" class="headerlink" title="6）代码的复用"></a>6）代码的复用</h4><p>每个服务都提供 REST API，所有的基础服务都必须抽出来，很多的底层实现都可以以接口方式提供。</p><h3 id="微服务架构的劣势"><a href="#微服务架构的劣势" class="headerlink" title="微服务架构的劣势"></a>微服务架构的劣势</h3><p>微服务其实是一把双刃剑，有利有弊。下面我们来谈谈微服务有哪些弊端，以及能采取什么办法避免。</p><h4 id="1）分布式部署，调用的复杂性高"><a href="#1）分布式部署，调用的复杂性高" class="headerlink" title="1）分布式部署，调用的复杂性高"></a>1）分布式部署，调用的复杂性高</h4><p>单体应用的时候，所有模块之前的调用都是在本地进行的，在微服务中，每个模块都是独立部署的，通过 HTTP 来进行通信，这当中会产生很多问题，比如网络问题、容错问题、调用关系等。</p><h4 id="2）独立的数据库，分布式事务的挑战"><a href="#2）独立的数据库，分布式事务的挑战" class="headerlink" title="2）独立的数据库，分布式事务的挑战"></a>2）独立的数据库，分布式事务的挑战</h4><p>每个微服务都有自己的数据库，这就是所谓的去中心化的数据管理。这种模式的优点在于不同的服务，可以选择适合自身业务的数据，比如订单服务可以用 MySQL、评论服务可以用 MongoDB、商品搜索服务可以用 ElasticSearch。</p><p>缺点就是事务的问题了，目前最理想的解决方案就是柔性事务中的最终一致性，后面的章节会给大家做具体介绍。</p><h4 id="3）测试的难度提升"><a href="#3）测试的难度提升" class="headerlink" title="3）测试的难度提升"></a>3）测试的难度提升</h4><p>服务和服务之间通过接口来交互，当接口有改变的时候，对所有的调用方都是有影响的，这时自动化测试就显得非常重要了，如果要靠人工一个个接口去测试，那工作量就太大了。这里要强调一点，就是 API 文档的管理尤为重要。</p><h4 id="4）运维难度的提升"><a href="#4）运维难度的提升" class="headerlink" title="4）运维难度的提升"></a>4）运维难度的提升</h4><p>在采用传统的单体应用时，我们可能只需要关注一个 Tomcat 的集群、一个 MySQL 的集群就可以了，但这在微服务架构下是行不通的。当业务增加时，服务也将越来越多，服务的部署、监控将变得非常复杂，这个时候对于运维的要求就高了。</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;微服务是一种架构风格，即将单体应用划分为小型的服务单元，微服务之间使用 HTTP 的 API 进行资源访问与操作。&lt;/p&gt;
-&lt;p&gt;在笔者看来，微服务架构的演变更像是一个公司的发展过程，从最开始的小公司，到后来的大集团。大集团可拆分出多个子公司，每个子公司的都有自己独立的业务</summary>
-      
-    
-    
-    
-    <category term="微服务" scheme="http://example.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
-    
-    
-    <category term="微服务" scheme="http://example.com/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
     
   </entry>
   
