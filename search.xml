@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>基础题1</title>
+      <link href="/2022/08/09/%E5%B8%B8%E8%A7%81%E5%9F%BA%E7%A1%80%E9%A2%981/"/>
+      <url>/2022/08/09/%E5%B8%B8%E8%A7%81%E5%9F%BA%E7%A1%80%E9%A2%981/</url>
+      
+        <content type="html"><![CDATA[<h1 id="StringBuilder和StringBuffer"><a href="#StringBuilder和StringBuffer" class="headerlink" title="StringBuilder和StringBuffer"></a>StringBuilder和StringBuffer</h1><p>Java9之后就是通过byte[] value 实现</p><p><img src="/2022/08/09/%E5%B8%B8%E8%A7%81%E5%9F%BA%E7%A1%80%E9%A2%981/String.png"></p><h1 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h1><p>主要用在 变量、方法、类</p><p>修饰类对象的时候，属性值还是可以变化。</p><p>使用原因：把方法锁定，防止任何类修改它的含义；提升效率性能；多线程下保持了线程安全。</p><p>修饰基本类型值不变，<em><strong>修饰引用类型只是引用不可变，但是引用所指向的地址的内容可以改变</strong></em></p><p><strong>只被final修饰但是没给初始值的情况下的基本数据类型是可以通过反射改变值</strong></p><p>final修饰的属性的初始化可以在编译器、运行期，初始化后不能被改变</p><h2 id="了解"><a href="#了解" class="headerlink" title="了解"></a>了解</h2><p>当变量被static final修饰时，该变量的值是不能被改变且必须给初始值；</p><p>只被final修饰的变量在定义时没给初始值是能通过反射改变代码运行期间所赋予的值，而在定义时就给了初始值的通过反射也不能改变值</p><h1 id="为什么重写equals要重写hashcode"><a href="#为什么重写equals要重写hashcode" class="headerlink" title="为什么重写equals要重写hashcode"></a>为什么重写equals要重写hashcode</h1><p><img src="/2022/08/09/%E5%B8%B8%E8%A7%81%E5%9F%BA%E7%A1%80%E9%A2%981/hashcode.png"></p><p>首先hashCode是一个本地方法，不同虚拟机有不同实现，主要是为了给HashMap这样的哈希表的使用。</p><p>设计该方法的重要因素：对同一个对象调用该方法应该产生相同的值，所以需要快、不需要唯一性。</p><p>equals相等，hashcode一定相等：</p><p>equals不等，hashcode不一定不等：这是为了尽量减少哈希冲突，因为hashcode是int类型，有范围，难免冲突，此时hashmap通过拉链法解决冲突</p><p>hashcode不等，equals一定不等</p><p>hashcode相等，equals不一定相等</p><p>综上：</p><p>若重写equals，就一定要重写hashCode</p><p>提高效率：先进行hashcode比较，若不同就不用再比较，就提高了效率</p><h1 id="抽象类（JDK8）"><a href="#抽象类（JDK8）" class="headerlink" title="抽象类（JDK8）"></a>抽象类（JDK8）</h1><p>不一定要有抽象方法</p><p>不能用final修饰，因为final修饰了就不能被修改和继承了</p><h2 id="与接口的区别"><a href="#与接口的区别" class="headerlink" title="与接口的区别"></a>与接口的区别</h2><ul><li>抽象类可以提供成员方法的实现细节，而接口只能包含抽象方法、普通方法。</li><li>抽象类的成员变量可以是各种类型，接口中的成员变量只能是public static final</li><li>抽象类可有静态代码和静态静态方法，接口不能含有静态代码块和静态方法</li><li>抽象类可有构造器，接口不能有有构造器</li><li>一个子类只存在一个父类，一个子类可以存在多个接口</li></ul><h2 id="与普通类"><a href="#与普通类" class="headerlink" title="与普通类"></a>与普通类</h2><p>普通类：不能含有抽象方法，可以直接实例化</p><p>抽象类：可以有抽象方法，不能直接实例化</p><h1 id="x3D-x3D-和equals"><a href="#x3D-x3D-和equals" class="headerlink" title="&#x3D;&#x3D;和equals"></a>&#x3D;&#x3D;和equals</h1><table><thead><tr><th align="center">&#x3D;&#x3D;</th><th align="center">Equals</th></tr></thead><tbody><tr><td align="center">运算符</td><td align="center">方法</td></tr><tr><td align="center">若比较基本类型，则比较数值（即使数据类型不同，比如 int  i&#x3D;1,double k &#x3D;1.0）；若是引用数据类型，则比较内存地址值</td><td align="center">比较方法的两个对象内容是否相等  不能比较基本数据类型的变量；  若没有重写（也是默认情况），则比较的是引用数据类型的变量所指向的对象的地址</td></tr><tr><td align="center">比较浮点型数据时导致数据精度丢失</td><td align="center"></td></tr></tbody></table><h1 id="解决Hash冲突"><a href="#解决Hash冲突" class="headerlink" title="解决Hash冲突"></a>解决Hash冲突</h1><p>开放地址法：一旦发生了冲突，就寻找下一个空的散列地址。 H<del>i</del>&#x3D; (H(key) + d<del>i</del>)%m;  m为哈希表长，d<del>i</del>为增量序列</p><p>再哈希算法：一直调用哈希函数，计算地址，直到没有冲突。不易发生聚集，但增加了计算时间</p><p>链地址（HashMap所用）：每个哈希表节点都有一个next指针，多个哈希表节点可以用next指针构成单向链表，被分配到同一个索引上的多个节点可以用这个单向链表连接。</p><p>建立公共溢出区：将哈希表分为基本表和溢出表两个部分，凡是和基本表发生冲突的元素都填入溢出表</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 题 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>垃圾收集系统</title>
       <link href="/2022/08/04/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/"/>
       <url>/2022/08/04/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</url>
