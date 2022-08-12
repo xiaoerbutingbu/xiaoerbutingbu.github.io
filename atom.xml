@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-08-10T17:36:33.157Z</updated>
+  <updated>2022-08-12T20:24:46.098Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>数据链路层</title>
+    <link href="http://example.com/2022/08/13/MAC/"/>
+    <id>http://example.com/2022/08/13/MAC/</id>
+    <published>2022-08-12T20:15:17.000Z</published>
+    <updated>2022-08-12T20:24:46.098Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h1><p>MAC（数据链路层）是实现 直连 两个设备之间通信</p><h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>该层是负责通过一条链路从一个节点向另一个物理链路直接相连的相邻节点传送数据报</p><p>该层是在物理层提供服务的基础上向网络层提供服务，最基本的就是将原子网络层的数据可靠的传输到相邻节点的目标机网络层。作用是<em><strong>加强物理层传输原始比特流的功能</strong></em>，将物理层提供的可能出错的物理连续改造为***逻辑上无差错的数据</p><p>使用的信道有两种：点对点信道和广播信道</p><h1 id="三大特定"><a href="#三大特定" class="headerlink" title="三大特定"></a>三大特定</h1><h2 id="封装成帧"><a href="#封装成帧" class="headerlink" title="封装成帧"></a>封装成帧</h2><p>帧：链路层的协议数据单元，封装网络层数据报。<em><strong>只有数据链路层才能识别帧，物理层只是传输比特流</strong></em></p><p>因为物理层只是负责传输，无法控制和判断是否出错，且在传输过程中容易受到环境干扰，进行产生错误。于是数据链路层需要负责<em><strong>差错检测</strong></em>的工作</p><h3 id="帧的结构"><a href="#帧的结构" class="headerlink" title="帧的结构"></a>帧的结构</h3><p>网络层将IP数据报传送到数据链路层作为帧的数据部分，数据链表路层分别在前后增加了一个标记（SOH和EOT），作为数据开始和结束。帧在物理层就是一串01比特流。<em><strong>帧首部和尾部是特定的控制字符</strong></em></p><p>​||帧首部||帧数据部分||帧尾部||</p><h2 id="透明传输"><a href="#透明传输" class="headerlink" title="透明传输"></a>透明传输</h2><p>无论什么样的比特组合的数据能通过数据链路层。数据看不见链路层有什么阻碍数据传输的东西，所以对这些数据来说就是透明的。</p><p>解决：发送端的数据链路层在数据中出现控制字符（EOT或SOH）的前面插入一个转义字符（ESC）。字节填充或字符填充</p><p>方法有比特填充法和字符填充</p><p>&#x3D;&#x3D;帧采用零比特填充&#x3D;&#x3D;：发送端发现有连续的5个1，就填入1个0；接收端发现有5个连续的1就删除其后的0。</p><h2 id="差错检测"><a href="#差错检测" class="headerlink" title="差错检测"></a>差错检测</h2><p>在传输过程中可能出现比特差错：1和0可能变化。为了保证数据传输的可靠性，在计网传输数据时，必须采用各种差错检测措施。</p><p>奇偶校验码和循环冗余检验码CRC。</p><h1 id="ARP协议"><a href="#ARP协议" class="headerlink" title="ARP协议"></a>ARP协议</h1><p><img src="/2022/08/13/MAC/data.png"></p><p>根据IP地址寻找MAC地址</p><p>源MAC地址就是发送数据的计算机的MAC地址，很轻易获取</p><h2 id="公理"><a href="#公理" class="headerlink" title="公理"></a>公理</h2><p>每一个计算机或路由器都有一个<em><strong>ARP高速缓存表</strong></em>，也就是IP地址与MAC地址的映射表</p><p>ARP高速缓存表中只会存储<em><strong>当前局域网</strong></em>内的设备信息，包括不限于连接此局域网接口所对应的<em><strong>IP与MAC映射信息</strong></em></p><h2 id="执行原理"><a href="#执行原理" class="headerlink" title="执行原理"></a>执行原理</h2><p>首先计算机判断目的IP地址是否是同网段的IP</p><h3 id="源主机和目标主机在同一局域网"><a href="#源主机和目标主机在同一局域网" class="headerlink" title="源主机和目标主机在同一局域网"></a>源主机和目标主机在同一局域网</h3><p>计算机在ARP地址表中查询目的IP地址</p><p>若ARP地址表能查到，就会获取IP地址对应的MAC地址，将信息发送到这个MAC地址对应的计算机中。</p><p>若ARP地址表查不到，就以<em><strong>单播</strong></em>的方式，将自己的IP地址和MAC地址根据请求中的源IP地址响应给计算机；计算机将接收到到IP地址和MAC地址添加到自己的ARP地址表中，再根据MAC地址将数据发送给对方</p><h4 id="源主机和目标主机在不同局域网"><a href="#源主机和目标主机在不同局域网" class="headerlink" title="源主机和目标主机在不同局域网"></a>源主机和目标主机在不同局域网</h4><p>计算机通过路由器与局域网的连接口，先将数据发送给路由器（路由器的每个接口都有对应的IP地址和MAC地址），路由器通过算法选择最优路线将信息发给<em><strong>目标主机所在局域网的路由器上</strong></em></p><p>目标主机的路由器收到信息后，先检查自己的ARP地址表：若有目标IP地址，就直接发；若没有，在局域网内&#x3D;&#x3D;广播&#x3D;&#x3D;，目标主机收到广播后会返回自己的IP和MAC地址，路由器将收到IP地址和MAC地址并存储到自己的ARP地址表中，然后发主机过去</p><h2 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h2><p><img src="/2022/08/13/MAC/liucheng.png"></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;数据链路层&quot;&gt;&lt;a href=&quot;#数据链路层&quot; class=&quot;headerlink&quot; title=&quot;数据链路层&quot;&gt;&lt;/a&gt;数据链路层&lt;/h1&gt;&lt;p&gt;MAC（数据链路层）是实现 直连 两个设备之间通信&lt;/p&gt;
+&lt;h1 id=&quot;简述&quot;&gt;&lt;a href=&quot;#简述&quot; cl</summary>
+      
+    
+    
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>Redis数据结构</title>
@@ -494,31 +519,6 @@
     <category term="框架" scheme="http://example.com/tags/%E6%A1%86%E6%9E%B6/"/>
     
     <category term="微服务" scheme="http://example.com/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Bean的一生</title>
-    <link href="http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/"/>
-    <id>http://example.com/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</id>
-    <published>2022-06-14T05:21:37.000Z</published>
-    <updated>2022-07-24T11:36:29.376Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="配置Bean"><a href="#配置Bean" class="headerlink" title="配置Bean"></a>配置Bean</h1><p>两种方式：在xml中写<bean>标签，用@Bean注解</bean></p><p>两个方法都在sping的refresh方法中都会用loadBeanDefinitions加载到容器里面，通过BeanDefinitionRegistry.register方法，会包括一些后置处理</p><h1 id="BeanDefinition"><a href="#BeanDefinition" class="headerlink" title="BeanDefinition"></a>BeanDefinition</h1><p>配置bean之后就拿到了BeanDefinition，是配置bean的加载结果，也是下面步骤的原始数据。</p><p>Spring在启动时，会扫描到类的信息，将相关信息封装为BeanDefinition存入到beanDefinitionMap中，根据里面的扫描信息生成bean                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </p><p>注意：beanName、ClassType。</p><p>提前初始化：把那个没有配置的懒加载bean开始初始化</p><h1 id="实例化"><a href="#实例化" class="headerlink" title="实例化"></a>实例化</h1><p>入参实际上只有一个beanName，与beanDefinition的两个属性相对应，通过beanName然后找到beanType，找到type之后调用&#x3D;&#x3D;反射&#x3D;&#x3D;返回了一object。</p><p>反射的大致：获取class对象得到一个构造器，Constructor ctor&#x3D;clazz.getDeclaredConstructor()，Object obj &#x3D; ctor.newInstance()。</p><p>容器中按照使用者来分，可以把bean对象分为用户自定义对象、容器对象（比如：ApplicationContext、BeanFactory等等）</p><p>注意：InstantiationAwareBeanPostProcessor去生成代理类回来</p><h1 id="属性赋值"><a href="#属性赋值" class="headerlink" title="属性赋值"></a>属性赋值</h1><p>此处就需要解决循环依赖-三级缓存</p><p>给自定义属性赋值：核心在于populateBean里面的autowireByName、autowireByType两个方法（@Autowire，@Resource）</p><p>给容器对象属性赋值：invokeAwareMethods</p><h1 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h1><p>对象的拓展</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">BeanPostProcessor</span> &#123;</span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">default</span> Object <span class="title function_">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException &#123;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">default</span> Object <span class="title function_">postProcessAfterInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException &#123;</span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><img src="/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/image-20220614145857358.png" alt="image-20220614145857358"></p><p>在属性赋值阶段后，postProcessBeforeInitialization方法之前，会执行很多Aware类型的接口，这种接口类型作用就是加载到Spring容器中，Aware前面的名字就是对应哪种资源</p><p>aware：如果实现了某些接口，比如BeanNameAware、BeanFactoryAware、ApplicationContextAware，就把这些实例给set进去。</p><p>初始化的方式有三个：分别是Initialization的afterPropertiesSet方法；PostConstruct注解标注方法；配置的init-method</p><p>BeanPostProcessor实现了AOP，AOP就是在整个IOC处理流程中某一个拓展点的实现</p><p>执行完就是一个完成的对象</p><h1 id="销毁"><a href="#销毁" class="headerlink" title="销毁"></a>销毁</h1><p>要么去实现DisposableBean接口，要么去定义destory-method方法 </p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;配置Bean&quot;&gt;&lt;a href=&quot;#配置Bean&quot; class=&quot;headerlink&quot; title=&quot;配置Bean&quot;&gt;&lt;/a&gt;配置Bean&lt;/h1&gt;&lt;p&gt;两种方式：在xml中写&lt;bean&gt;标签，用@Bean注解&lt;/bean&gt;&lt;/p&gt;
-&lt;p&gt;两个方法都在sping</summary>
-      
-    
-    
-    
-    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
-    
-    
-    <category term="Bean" scheme="http://example.com/tags/Bean/"/>
     
   </entry>
   
