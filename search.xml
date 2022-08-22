@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>IOC和AOP</title>
+      <link href="/2022/08/22/IOC%E5%92%8CAOP/"/>
+      <url>/2022/08/22/IOC%E5%92%8CAOP/</url>
+      
+        <content type="html"><![CDATA[<h1 id="IOC"><a href="#IOC" class="headerlink" title="IOC"></a>IOC</h1><p>一种设计思想，控制反转，将设计好的对象交给容器控制。在调用某个类时，容器会实例化，即容器控制对象的创建。实际就是个BeanDefinitionMap，里面放的就是各种对象</p><p>IOC容器实例化过程中，一般不包含bean的依赖注入，bean的注册和依赖注入是两个过程，依赖注入一般发生在应用第一次索取bean的时候，但是也可以在xml中配置，在容器初始化的时候，这个bean就完成了初始化。</p><p>Bean是工厂模式创建；数据是通过反射注入，目的是降低耦合度</p><p><a href="https://xiaoerbutingbu.github.io/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">结合Bean的生命周期</a></p><h2 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h2><p>类比于：我自己找女朋友和我通过婚介公司找女朋友</p><p>控制反转，把我们写好的对象的控制权交给Spring框架，由框架来控制对象的生命周期（创建、销毁，这些对象之间的依赖关系），开发人员不用主动去new这些对象，IOC就是一个容器去创建这些对象，把所有的类都放到容器里面去登记，需要某个对象的时候告诉容器就行。</p><h1 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h1><p>  面向切面编程基于IOC。简单说就是将部分重复的代码抽取出来，需要执行的时候用动态代理价技术。不修改代码进行功能增强。<em><strong>解耦</strong></em></p><p>  降低了耦合度，提高了程序的可重用性，同时提高了开发效率</p><p>  底层使用动态代理</p><p>  实现业务和切入类的解耦</p><p>  与OOP相比，一个是横向一个纵向在</p><p>面向切面编程，使用了动态代理，两种实现方式：cglib和JDKProxy</p><h2 id="理解-1"><a href="#理解-1" class="headerlink" title="理解"></a>理解</h2><p>系统由不同的组件组成，不同组件负责不同的功能，会存在很多组件与业务无关（日志、事务、权限等等），而写组件经常融入具体的业务逻辑，若每个具体业务逻辑都添加这些代码，就代码冗余，所以需要将公共的代码逻辑抽象出来变成一个切面，然后注入到具体的业务中。</p><p>所以AOP基于该思路，采用动态代理的方式，将需要注入切面的对象进行代理，在进行调用时候只将公共逻辑添加进去，而不需要修改原有的逻辑代码，只需要在原来的业务逻辑基础上做一些增强功能即可。</p><h2 id="大致过程"><a href="#大致过程" class="headerlink" title="大致过程"></a>大致过程</h2><p>在bean进行初始化后，beanPostProcessor中有一个AnnotationAwareAspectjAutoProxyCreator的去生成bean对应的代理对象，然后通过getAdvicesAndAdvisorsForBean获取切面信息并返回所有通知的方法；再就是解析切面，通过beanName创建每个对应的Class，再通过遍历含有@Aspect注解类的每个方法，拿到含有@Before等标签的方法，方法即通知，为每个通知创建一个advisor对象并以List形式返回。再筛选作用域当前bean上的增强器；再通过ProxyFactory创建代理对象，返回的是AopProxy接口（cglib和JDK两个实现类）。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Spring </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Spring </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>IO多路复用模型</title>
       <link href="/2022/08/19/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/"/>
       <url>/2022/08/19/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/</url>

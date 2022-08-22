@@ -1,3 +1,4 @@
+http://example.com/2022/08/22/IOC%E5%92%8CAOP/
 http://example.com/about/index.html
 http://example.com/2022/05/22/IO/
 http://example.com/2022/08/19/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/

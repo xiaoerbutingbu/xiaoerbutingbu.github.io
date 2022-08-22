@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-08-18T21:53:59.633Z</updated>
+  <updated>2022-08-22T12:00:57.668Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>IOC和AOP</title>
+    <link href="http://example.com/2022/08/22/IOC%E5%92%8CAOP/"/>
+    <id>http://example.com/2022/08/22/IOC%E5%92%8CAOP/</id>
+    <published>2022-08-22T11:55:28.000Z</published>
+    <updated>2022-08-22T12:00:57.668Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="IOC"><a href="#IOC" class="headerlink" title="IOC"></a>IOC</h1><p>一种设计思想，控制反转，将设计好的对象交给容器控制。在调用某个类时，容器会实例化，即容器控制对象的创建。实际就是个BeanDefinitionMap，里面放的就是各种对象</p><p>IOC容器实例化过程中，一般不包含bean的依赖注入，bean的注册和依赖注入是两个过程，依赖注入一般发生在应用第一次索取bean的时候，但是也可以在xml中配置，在容器初始化的时候，这个bean就完成了初始化。</p><p>Bean是工厂模式创建；数据是通过反射注入，目的是降低耦合度</p><p><a href="https://xiaoerbutingbu.github.io/2022/06/14/Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">结合Bean的生命周期</a></p><h2 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h2><p>类比于：我自己找女朋友和我通过婚介公司找女朋友</p><p>控制反转，把我们写好的对象的控制权交给Spring框架，由框架来控制对象的生命周期（创建、销毁，这些对象之间的依赖关系），开发人员不用主动去new这些对象，IOC就是一个容器去创建这些对象，把所有的类都放到容器里面去登记，需要某个对象的时候告诉容器就行。</p><h1 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h1><p>  面向切面编程基于IOC。简单说就是将部分重复的代码抽取出来，需要执行的时候用动态代理价技术。不修改代码进行功能增强。<em><strong>解耦</strong></em></p><p>  降低了耦合度，提高了程序的可重用性，同时提高了开发效率</p><p>  底层使用动态代理</p><p>  实现业务和切入类的解耦</p><p>  与OOP相比，一个是横向一个纵向在</p><p>面向切面编程，使用了动态代理，两种实现方式：cglib和JDKProxy</p><h2 id="理解-1"><a href="#理解-1" class="headerlink" title="理解"></a>理解</h2><p>系统由不同的组件组成，不同组件负责不同的功能，会存在很多组件与业务无关（日志、事务、权限等等），而写组件经常融入具体的业务逻辑，若每个具体业务逻辑都添加这些代码，就代码冗余，所以需要将公共的代码逻辑抽象出来变成一个切面，然后注入到具体的业务中。</p><p>所以AOP基于该思路，采用动态代理的方式，将需要注入切面的对象进行代理，在进行调用时候只将公共逻辑添加进去，而不需要修改原有的逻辑代码，只需要在原来的业务逻辑基础上做一些增强功能即可。</p><h2 id="大致过程"><a href="#大致过程" class="headerlink" title="大致过程"></a>大致过程</h2><p>在bean进行初始化后，beanPostProcessor中有一个AnnotationAwareAspectjAutoProxyCreator的去生成bean对应的代理对象，然后通过getAdvicesAndAdvisorsForBean获取切面信息并返回所有通知的方法；再就是解析切面，通过beanName创建每个对应的Class，再通过遍历含有@Aspect注解类的每个方法，拿到含有@Before等标签的方法，方法即通知，为每个通知创建一个advisor对象并以List形式返回。再筛选作用域当前bean上的增强器；再通过ProxyFactory创建代理对象，返回的是AopProxy接口（cglib和JDK两个实现类）。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;IOC&quot;&gt;&lt;a href=&quot;#IOC&quot; class=&quot;headerlink&quot; title=&quot;IOC&quot;&gt;&lt;/a&gt;IOC&lt;/h1&gt;&lt;p&gt;一种设计思想，控制反转，将设计好的对象交给容器控制。在调用某个类时，容器会实例化，即容器控制对象的创建。实际就是个BeanDefin</summary>
+      
+    
+    
+    
+    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
+    
+    
+    <category term="Spring" scheme="http://example.com/tags/Spring/"/>
+    
+  </entry>
   
   <entry>
     <title>IO多路复用模型</title>
@@ -487,33 +511,6 @@
     
     
     <category term="多线程" scheme="http://example.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Autowired和Resource</title>
-    <link href="http://example.com/2022/06/25/Autowired%E5%92%8CResource/"/>
-    <id>http://example.com/2022/06/25/Autowired%E5%92%8CResource/</id>
-    <published>2022-06-25T13:40:50.000Z</published>
-    <updated>2022-06-25T14:34:00.368Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>@Auwired：</p><p>对成员变量、方法及构造函数进行标注，完成自动装配的工作</p><p>@Resource：</p><p>​官方定义：在语义上被定义为通过其唯一的名称来标识特定的目标组件，其中声明的类型与匹配过程无关</p><p>​若没有明确指定名称，则默认名称是从字段名称或设置方法（get、set方法）派生的。若用在字段上，则采用字段名称；如果用在setter方法，它采用其属性名称（例如setProperty()方法，取property作为属性名称）    </p><h1 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h1><p>包含的属性不同：</p><p>​Autowired只包含一个参数：required，表示是否开启自动注入，默认是true</p><p>​Resource有七个参数，其中最重要的两个参数：name和type</p><p>注解使用的地方不同：</p><p>​Autowired可以用在构造方法、方法、参数、成员变量和注解上</p><p>​Resource可以用在类、成员变量、方法上</p><p>出处不同：</p><p>​Autowired是Spring定义的注解，所以只能用在Spring框架下</p><p>​Resource是JSR-250定义的注解，所以可以与其他框架一起使用</p><p>自动装配的方式不同：</p><p>​Autowired默认按byType，如果要使用byName，需要结合@Qualifier注解配合使用</p><p>​Resource默认byName自动装配，如果指定了name，则用byName自动装配，如果指定了type，则用byType自动装配</p><p>自动装配的顺序：</p><p>​Autowired：默认先按byTpe进行匹配，若发现找到多个bean则又按照byName方式进行匹配，如果还有多个，则抛出异常</p><p>​<img src="/2022/06/25/Autowired%E5%92%8CResource/A.png" alt="image-20220625222414253"></p><p>​Resource：</p><p>​若同时指定了name和type：会从容器中查找name和type唯一匹配bean，若找到则自动装配，找不到则抛出异常</p><p>​只指定了name：则按name后的名字去bean元素里查找有与之相等的name属性的bean，若找到则自动装配，找不到则抛出异常</p><p>​只指定了type：则从上下文汇总找到类型匹配的<em><strong>唯一</strong></em>bean进行装配，找不到或者找到多个，都会抛出异常</p><p>​都没有指定：自动按照byName方式找，若没有找到符合的bean，则回退为一个原始类型进行查找，如果找到就注入，没找到或者找到多个则抛出异常</p><p>​</p><p>​</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;@Auwired：&lt;/p&gt;
-&lt;p&gt;对成员变量、方法及构造函数进行标注，完成自动装配的工作&lt;/p&gt;
-&lt;p&gt;@Resource：&lt;/p&gt;
-&lt;p&gt;</summary>
-      
-    
-    
-    
-    <category term="Spring" scheme="http://example.com/categories/Spring/"/>
-    
-    
-    <category term="Spring" scheme="http://example.com/tags/Spring/"/>
     
   </entry>
   
