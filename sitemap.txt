@@ -1,3 +1,4 @@
+http://example.com/2022/08/31/as-if-serial%E5%92%8Chappens-before/
 http://example.com/2022/08/27/Eureka%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/
 http://example.com/2022/08/22/IOC%E5%92%8CAOP/
 http://example.com/about/index.html

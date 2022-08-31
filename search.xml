@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>as-if-serial和happens-before</title>
+      <link href="/2022/08/31/as-if-serial%E5%92%8Chappens-before/"/>
+      <url>/2022/08/31/as-if-serial%E5%92%8Chappens-before/</url>
+      
+        <content type="html"><![CDATA[<p>我们知道为了提高并行度，优化程序性能，编译器和处理器会对代码进行指令重排序。但为了不改变程序的执行结果，尽可能地提高程序执行的并行度，我们需要了解as-if-serial规则和happens-before规则。</p><h3 id="as-if-serial规则"><a href="#as-if-serial规则" class="headerlink" title="as-if-serial规则"></a>as-if-serial规则</h3><p>as-if-serial语义的意思指：<strong>不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。</strong> 编译器、runtime和处理器都必须遵守as-if-serial语义。<br>为了遵守as-if-serial语义，<strong>编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。</strong> 但是，如果操作之间不存在数据依赖关系，这些操作可能被编译器和处理器重排序。示例代码如下：</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">COPYint a=<span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b=<span class="number">2</span>;</span><br><span class="line"><span class="type">int</span> c=a+b;</span><br></pre></td></tr></table></figure><p>a和c之间存在数据依赖关系，同时b和c之间也存在数据依赖关系。因此在最终执行的指令序列中，c不能被重排序到A和B的前面（c排到a和b的前面，程序的结果将会被改变）。但a和b之间没有数据依赖关系，编译器和处理器可以重排序a和b之间的执行顺序。</p><h3 id="happens-before（先行发生）规则"><a href="#happens-before（先行发生）规则" class="headerlink" title="happens-before（先行发生）规则"></a>happens-before（先行发生）规则</h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>JMM可以通过happens-before关系向程序员提供跨线程的内存可见性保证（如果A线程的写操作a与B线程的读操作b之间存在happens-before关系，尽管a操作和b操作在不同的线程中执行，但JMM向程序员保证a操作将对b操作可见）。具体的定义为：</p><ol><li><strong>如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见，而且第一个操作的执行顺序排在第二个操作之前。</strong></li><li>两个操作之间存在happens-before关系，并不意味着Java平台的具体实现必须要按照happens-before关系指定的顺序来执行。<strong>如果重排序之后的执行结果，与按happens-before关系来执行的结果一致，那么JMM允许这种重排序。</strong></li></ol><h4 id="八大规则"><a href="#八大规则" class="headerlink" title="八大规则"></a>八大规则</h4><table><thead><tr><th>规则</th><th>解释</th></tr></thead><tbody><tr><td>程序次序规则</td><td>在一个线程内，代码按照书写的控制流顺序执行</td></tr><tr><td>管程锁定规则</td><td>一个 unlock 操作先行发生于后面对同一个锁的 lock 操作</td></tr><tr><td>volatile 变量规则</td><td>volatile 变量的写操作先行发生于后面对这个变量的读操作</td></tr><tr><td>线程启动规则</td><td>Thread 对象的 start() 方法先行发生于此线程的每一个动作</td></tr><tr><td>线程终止规则</td><td>线程中所有的操作都先行发生于对此线程的终止检测(通过 Thread.join() 方法结束、 Thread.isAlive() 的返回值检测)</td></tr><tr><td>线程中断规则</td><td>对线程 interrupt() 方法调用优先发生于被中断线程的代码检测到中断事件的发生 (通过 Thread.interrupted() 方法检测)</td></tr><tr><td>对象终结规则</td><td>一个对象的初始化完成(构造函数执行结束)先行发生于它的 finalize() 方法的开始</td></tr><tr><td>传递性</td><td>如果操作 A 先于 操作 B 发生，操作 B 先于 操作 C 发生，那么操作 A 先于 操作 C</td></tr></tbody></table><h3 id="as-if-serial规则和happens-before规则的区别"><a href="#as-if-serial规则和happens-before规则的区别" class="headerlink" title="as-if-serial规则和happens-before规则的区别"></a>as-if-serial规则和happens-before规则的区别</h3><ol><li>as-if-serial语义保证单线程内程序的执行结果不被改变，happens-before关系保证<strong>正确同步的多线程</strong>程序的执行结果不被改变。</li><li>as-if-serial语义给编写单线程程序的程序员创造了一个幻觉：单线程程序是按程序的顺序来执行的。happens-before关系给编写正确同步的多线程程序的程序员创造了一个幻觉：正确同步的多线程程序是按happens-before指定的顺序来执行的。</li><li>as-if-serial语义和happens-before这么做的目的，都是为了在不改变程序执行结果的前提下，尽可能地提高程序执行的并行度。</li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 基础 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Eureka部分源码</title>
       <link href="/2022/08/27/Eureka%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/"/>
       <url>/2022/08/27/Eureka%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/</url>
