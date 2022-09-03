@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Kafka生产者 | 小二小二不停步</title><meta name="keywords" content="Kafka"><meta name="author" content="小二小二不停步"><meta name="copyright" content="小二小二不停步"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="生产者消息生产者，把消息投递到Kafka中 当创建真正的生产者实例前需要配置相应的参数。比如连接的Kafka集群地址。 &#x3D;&#x3D;producer线程安全&#x3D;&#x3D;，可以在多个线程中共享单个producer实例，也可以将实例进行池化来供其他线程调用 发送消息的三种模式：发后即忘（发送消息不管是否到达，在某些时候会造成消息丢失，性能最高可靠性最差）、同步、异步。 两种异常">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka生产者">
+<meta property="og:url" content="http://example.com/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/index.html">
+<meta property="og:site_name" content="小二小二不停步">
+<meta property="og:description" content="生产者消息生产者，把消息投递到Kafka中 当创建真正的生产者实例前需要配置相应的参数。比如连接的Kafka集群地址。 &#x3D;&#x3D;producer线程安全&#x3D;&#x3D;，可以在多个线程中共享单个producer实例，也可以将实例进行池化来供其他线程调用 发送消息的三种模式：发后即忘（发送消息不管是否到达，在某些时候会造成消息丢失，性能最高可靠性最差）、同步、异步。 两种异常">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/7.jpeg">
+<meta property="article:published_time" content="2022-09-03T16:15:57.000Z">
+<meta property="article:modified_time" content="2022-09-03T16:21:39.149Z">
+<meta property="article:author" content="小二小二不停步">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/7.jpeg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Kafka生产者',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-04 00:21:39'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="小二小二不停步" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/7.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">小二小二不停步</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Kafka生产者</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-09-03T16:15:57.000Z" title="发表于 2022-09-04 00:15:57">2022-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-03T16:21:39.149Z" title="更新于 2022-09-04 00:21:39">2022-09-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Kafka生产者"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h1><p>消息生产者，把消息投递到Kafka中</p>
+<p>当创建真正的生产者实例前需要配置相应的参数。比如连接的Kafka集群地址。</p>
+<p>&#x3D;&#x3D;producer线程安全&#x3D;&#x3D;，可以在多个线程中共享单个producer实例，也可以将实例进行池化来供其他线程调用</p>
+<p>发送消息的三种模式：发后即忘（发送消息不管是否到达，在某些时候会造成消息丢失，性能最高可靠性最差）、同步、异步。</p>
+<p>两种异常：可重试异常和不可重试的异常</p>
+<p>生产者需要用序列化器把对象转成字节数组才能通过网络发给Kafka。相对的，消费者需要反序列化器把字节数组转换成相应的对象。两者需要一一对应。</p>
+<p>消息通过send方法发往broker的过程，可能要拦截器（非必须）、序列化器（必须）、分区器的系列作用之后才能发往broker。若没有指定partition字段，就需要依赖分区器，根据key计算partition的值。</p>
+<p>生产者拦截器：在消息发送前做一些准备工作，比如按某个规则过滤消息等等。producer在序列化和计算分区之前调用拦截器的onsend()方法对消息进行定制化操作</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p>生产者客户端整体架构</p>
+<p><img src="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/liucheng.png"></p>
+<p>整个生产者客户端由两个线程协调运行（主线程和sender线程）。发送线程负责从RecordAccumulator中获取消息并将其发送到Kafka中。</p>
+<p><em><strong>RecordAccumulator主要是用来缓存消息，让sender线程可以批量发送，以减少网络传输的资源消耗以提升性能</strong></em>。（默认32MB）。若生产者发送消息的速度超过发送到服务器的速度，生产者空间就会不足，此时的send()方法会被阻塞或抛异常。内部为每个分区都维护一个双端队列（producerBatch，一个消息批次）；消息在网络上是以字节的形式传输，发送前要创建一块内存区域来保存对应的消息，内部还有一个BufferPool，以实现ByteBuffer的复用，实现缓存高效利用。</p>
+<p>主线程发送的消息会追加到RecordAccumulator的某个双端队列中，sender读取消息时从队列的头部读取消息，从缓存中获取消息，会改变原本的保存形式&lt;Node,List<ProducerBatch>&gt;，node就是Kafka集群中的broker节点。对于网络连接，生产者客户端是与具体的broker节点建立连接和发送消息，而不关心消息属于哪个分区；而producer的应用逻辑而言，只关注向哪个分区中发送哪些消息。</ProducerBatch></p>
+<p>&lt;Node,List<ProducerBatch>&gt;还会封装成&lt;Node,Request&gt;，就可以将request请求发往各个node。Request是Kafka的各种协议请求。</ProducerBatch></p>
+<p>请求从sender发往Kafka之前还会保存在InFlightRequests中。InFlightRequests中对象形式是Map&lt;NodeId,Deque<Request>&gt;就是<em><strong>缓存了已经发出去但没有收到响应的请求</strong></em>（NodeId是节点的id编号，String类型）；还提供了管理类的方法，可通过参数限制每个连接最多缓存的请求数</Request></p>
+<h2 id="元数据更新"><a href="#元数据更新" class="headerlink" title="元数据更新"></a>元数据更新</h2><p>InFlightRequests可以获得leastLoadedNode，即所有Node节点中负载最小的（比如上图的node2）。选择该节点可以让它尽快发出，避免因网络阻塞等异常而影响整体的进度。</p>
+<p>producer需要将消息追加到指定主题的某个分区所对应的leader副本之前，要知道主题的分区数量，再计算出目标分区，之后producer需要leader副本所在broker节点的地址、端口等信息才能建立连接，最终才能发送到Kafka。该过程中所需要的信息都是元数据信息。</p>
+<p>元数据指Kafka集群的元数据，记录了集群中有哪些主题，主题有哪些分区，每个分区的leader副本、follow副本分配在哪个节点上，哪些副本在AR、ISR等集合中，集群中有哪些节点，控制器节点又是哪一个等信息。元数据的更新操作是在客户端内部进行，对客户端的外部使用者不可见。需要更新时，先选leastLoadedNode，再向该Node发送请求获取具体的元数据信息（sender线程发起），请求同样会存入InFightRequests。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">小二小二不停步</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/">http://example.com/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">小二小二不停步</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kafka/">Kafka</a></div><div class="post_share"><div class="social-share" data-image="/img/7.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/08/31/as-if-serial%E5%92%8Chappens-before/"><img class="next-cover" src="/img/6.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">as-if-serial和happens-before</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">小二小二不停步</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xiaoerbutingbu"><i class="fab fa-github"></i><span>github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xiaoerbutingbu" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="http://wpa.qq.com/msgrd?v=3&amp;uin=370951771&amp;site=qq&amp;menu=yes" target="_blank" title="QQ"><i class="fab fa-qq"></i></a><a class="social-icon" href="mailto:370951771@2019.cqut.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到小二小二不停步的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-number">1.</span> <span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">整体架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0"><span class="toc-number">2.2.</span> <span class="toc-text">元数据更新</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/" title="Kafka生产者"><img src="/img/7.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kafka生产者"/></a><div class="content"><a class="title" href="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/" title="Kafka生产者">Kafka生产者</a><time datetime="2022-09-03T16:15:57.000Z" title="发表于 2022-09-04 00:15:57">2022-09-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/31/as-if-serial%E5%92%8Chappens-before/" title="as-if-serial和happens-before"><img src="/img/6.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="as-if-serial和happens-before"/></a><div class="content"><a class="title" href="/2022/08/31/as-if-serial%E5%92%8Chappens-before/" title="as-if-serial和happens-before">as-if-serial和happens-before</a><time datetime="2022-08-31T15:48:18.000Z" title="发表于 2022-08-31 23:48:18">2022-08-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/27/Eureka%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/" title="Eureka部分源码"><img src="/img/5.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Eureka部分源码"/></a><div class="content"><a class="title" href="/2022/08/27/Eureka%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/" title="Eureka部分源码">Eureka部分源码</a><time datetime="2022-08-27T13:35:29.000Z" title="发表于 2022-08-27 21:35:29">2022-08-27</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By 小二小二不停步</div><div class="footer_custom_text">大切な人といつかまた巡り会えますように</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

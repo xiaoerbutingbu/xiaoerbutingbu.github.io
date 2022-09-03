@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Kafka生产者</title>
+      <link href="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/"/>
+      <url>/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/</url>
+      
+        <content type="html"><![CDATA[<h1 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h1><p>消息生产者，把消息投递到Kafka中</p><p>当创建真正的生产者实例前需要配置相应的参数。比如连接的Kafka集群地址。</p><p>&#x3D;&#x3D;producer线程安全&#x3D;&#x3D;，可以在多个线程中共享单个producer实例，也可以将实例进行池化来供其他线程调用</p><p>发送消息的三种模式：发后即忘（发送消息不管是否到达，在某些时候会造成消息丢失，性能最高可靠性最差）、同步、异步。</p><p>两种异常：可重试异常和不可重试的异常</p><p>生产者需要用序列化器把对象转成字节数组才能通过网络发给Kafka。相对的，消费者需要反序列化器把字节数组转换成相应的对象。两者需要一一对应。</p><p>消息通过send方法发往broker的过程，可能要拦截器（非必须）、序列化器（必须）、分区器的系列作用之后才能发往broker。若没有指定partition字段，就需要依赖分区器，根据key计算partition的值。</p><p>生产者拦截器：在消息发送前做一些准备工作，比如按某个规则过滤消息等等。producer在序列化和计算分区之前调用拦截器的onsend()方法对消息进行定制化操作</p><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p>生产者客户端整体架构</p><p><img src="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/liucheng.png"></p><p>整个生产者客户端由两个线程协调运行（主线程和sender线程）。发送线程负责从RecordAccumulator中获取消息并将其发送到Kafka中。</p><p><em><strong>RecordAccumulator主要是用来缓存消息，让sender线程可以批量发送，以减少网络传输的资源消耗以提升性能</strong></em>。（默认32MB）。若生产者发送消息的速度超过发送到服务器的速度，生产者空间就会不足，此时的send()方法会被阻塞或抛异常。内部为每个分区都维护一个双端队列（producerBatch，一个消息批次）；消息在网络上是以字节的形式传输，发送前要创建一块内存区域来保存对应的消息，内部还有一个BufferPool，以实现ByteBuffer的复用，实现缓存高效利用。</p><p>主线程发送的消息会追加到RecordAccumulator的某个双端队列中，sender读取消息时从队列的头部读取消息，从缓存中获取消息，会改变原本的保存形式&lt;Node,List<ProducerBatch>&gt;，node就是Kafka集群中的broker节点。对于网络连接，生产者客户端是与具体的broker节点建立连接和发送消息，而不关心消息属于哪个分区；而producer的应用逻辑而言，只关注向哪个分区中发送哪些消息。</ProducerBatch></p><p>&lt;Node,List<ProducerBatch>&gt;还会封装成&lt;Node,Request&gt;，就可以将request请求发往各个node。Request是Kafka的各种协议请求。</ProducerBatch></p><p>请求从sender发往Kafka之前还会保存在InFlightRequests中。InFlightRequests中对象形式是Map&lt;NodeId,Deque<Request>&gt;就是<em><strong>缓存了已经发出去但没有收到响应的请求</strong></em>（NodeId是节点的id编号，String类型）；还提供了管理类的方法，可通过参数限制每个连接最多缓存的请求数</Request></p><h2 id="元数据更新"><a href="#元数据更新" class="headerlink" title="元数据更新"></a>元数据更新</h2><p>InFlightRequests可以获得leastLoadedNode，即所有Node节点中负载最小的（比如上图的node2）。选择该节点可以让它尽快发出，避免因网络阻塞等异常而影响整体的进度。</p><p>producer需要将消息追加到指定主题的某个分区所对应的leader副本之前，要知道主题的分区数量，再计算出目标分区，之后producer需要leader副本所在broker节点的地址、端口等信息才能建立连接，最终才能发送到Kafka。该过程中所需要的信息都是元数据信息。</p><p>元数据指Kafka集群的元数据，记录了集群中有哪些主题，主题有哪些分区，每个分区的leader副本、follow副本分配在哪个节点上，哪些副本在AR、ISR等集合中，集群中有哪些节点，控制器节点又是哪一个等信息。元数据的更新操作是在客户端内部进行，对客户端的外部使用者不可见。需要更新时，先选leastLoadedNode，再向该Node发送请求获取具体的元数据信息（sender线程发起），请求同样会存入InFightRequests。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 消息队列 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kafka </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>as-if-serial和happens-before</title>
       <link href="/2022/08/31/as-if-serial%E5%92%8Chappens-before/"/>
       <url>/2022/08/31/as-if-serial%E5%92%8Chappens-before/</url>
