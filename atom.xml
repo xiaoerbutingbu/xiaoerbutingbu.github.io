@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-09-05T17:16:27.603Z</updated>
+  <updated>2022-09-07T15:38:08.520Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Kafka主题和分区</title>
+    <link href="http://example.com/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/"/>
+    <id>http://example.com/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/</id>
+    <published>2022-09-07T15:35:31.000Z</published>
+    <updated>2022-09-07T15:38:08.520Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>主题作为消息的归类，可以再细分为一个或多个分区，分区可以看做对消息的第二次归类。分区提高了Kafka可伸缩性、水平拓展的功能。</p><p>从Kafka底层实现看，主题和分区都是逻辑概念，分区可以有一至多个副本，每个副本对应一个日志文件，每个日志文件对应一至多个日志分段，每个日志分段还可以细分为索引文件、日志存储文件和快照文件。</p><h1 id="主题的管理"><a href="#主题的管理" class="headerlink" title="主题的管理"></a>主题的管理</h1><p>主题、分区、副本和Log的关系。主题和分区是提供给上层用户的抽象，副本层面或Log层面才是实际物理上的存在。同一个分区中的多个副本必须分布在不同的broker中，才能提供有效的数据冗余</p><p><img src="/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/guanxi.png"></p><ul><li>创建主题：broker端配置了auto.create.topics.enable参数为true时，当生产者向一个尚未创建的主题发送消息时，会自动创建一个分区数位num.partitiions，副本因子为default.replication.factor的主题。当一个消费者开始从未知主题读取消息时或任意一个客户端向未知主题发送元数据都会根据这两个参数创建一对对应的主题。但因为行为非预期，不建议使用。</li><li>分区副本的分配：生产者的分区分配是每条消息指定其所要发往的分区，消费者的分区分配是值为消费者指定其可以消费信息的分区。此处的分区分配指为集群指定创建主题时分区副本分配方案，即在哪个broker中创建哪些分区的副本</li><li>修改主题：当一个主题被创建后，可能需要修改分区个数、修改配置等</li></ul><h1 id="分区的管理"><a href="#分区的管理" class="headerlink" title="分区的管理"></a>分区的管理</h1><p>分区使用多副本机制提升可靠性，但<em><strong>只有leader副本对外提供读写服务</strong></em>，而follower副本只负责在<em><strong>内部进行消息的同步</strong></em>。若一个分区的leader副本不可用，那么整个分区就不可用，此时Kafka会从follower副本选举一个新的leader副本来对外服务。创建主题的时候，该主题的分区及副本会尽可能均匀分布在各个broker节点上，对应的leader副本的分配也较均匀</p><p>为了治理负载失衡的情况，Kafka引入了优先副本的概念。优先副本是指在AR集合列表中的第一个副本，理想情况，优先副本就是该分区的leader副本。Kafka要确保所有主题的优先副本在Kafka集群中均匀分布，这样就保证了所有分区的leader均衡分布，若leader分布过于集中就会集群负载不均衡。</p><p>分区重分配：当集群中的一个节点宕机下线，若节点上的分区是单副本，那该分区就变得不可用，在恢复前，相应的数据是丢失的；若节点上的分区是多副本，那么位于该节点上的leader副本会转交到集群其他follower副本中。总之，该节点上的分区副本已功能失效，Kafka不会将这些失效的分区副本自动迁移到集群中升序的可用broker节点上，但不管会影响集群的均衡负载。当要对集群的一个节点下线时，需要将该节点上的分区副本迁移到其他可用节点上。本质：数据复制，先增加新副本，再数据同步，最后删除旧副本</p><p>复制限流：分区重分配过程中，数据复制会占用额外资源，若重分配的量太大会影响性能。所以，减少重分配粒度，以小批次的方式操作。若某个主题或某个分区的流量在某段时间过大，只靠减小粒度还是不行，这时就需要一个限流的机制</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;主题作为消息的归类，可以再细分为一个或多个分区，分区可以看做对消息的第二次归类。分区提高了Kafka可伸缩性、水平拓展的功能。&lt;/p&gt;
+&lt;p</summary>
+      
+    
+    
+    
+    <category term="消息队列" scheme="http://example.com/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
+    
+    
+    <category term="Kafka" scheme="http://example.com/tags/Kafka/"/>
+    
+  </entry>
   
   <entry>
     <title>Kafka消费者</title>
@@ -473,33 +498,6 @@
       
       
     <summary type="html">&lt;h1 id=&quot;主要流程&quot;&gt;&lt;a href=&quot;#主要流程&quot; class=&quot;headerlink&quot; title=&quot;主要流程&quot;&gt;&lt;/a&gt;主要流程&lt;/h1&gt;&lt;p&gt;客户端发起中断连接请求，就是发FIN报文（FIN位置置位1）客户端就进入FIN_WAIT_1状态，等待服务器发FIN报文；&lt;</summary>
-      
-    
-    
-    
-    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-    
-    <category term="TCP" scheme="http://example.com/tags/TCP/"/>
-    
-    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>TCP怎么保证可靠传输</title>
-    <link href="http://example.com/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/"/>
-    <id>http://example.com/2022/07/13/TCP%E4%BF%9D%E8%AF%81%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93/</id>
-    <published>2022-07-13T12:17:56.000Z</published>
-    <updated>2022-07-13T12:30:36.453Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="普通处理"><a href="#普通处理" class="headerlink" title="普通处理"></a>普通处理</h1><p>应用数据都被分割成TCP认为最适合发送的数据包</p><p>  给发送的每一个包进行编号，接收方对数据包排序，把有序数据传送</p><p>  校验和：保持首部和数据的校验和，检测数据是否有变化</p><h1 id="重传机制"><a href="#重传机制" class="headerlink" title="重传机制"></a>重传机制</h1><h2 id="超时重传"><a href="#超时重传" class="headerlink" title="超时重传"></a>超时重传</h2><p>TCP发出一个段后，启动一个定时器，若不能及时收到确认，就重新发这个报文；</p><p>TCP会在<strong>数据包丢失和确认应答丢失后发生超时重传</strong></p><p>设置的时间RTO：RTO太大，重发慢，没效率，性能差；太短，可能没有丢就重发了，会增加网络拥塞，导致更多超时。所以，设置的RTO应该略大于报文忘返RTT的值</p><h2 id="快速重传"><a href="#快速重传" class="headerlink" title="快速重传"></a>快速重传</h2><p>以<em><strong>数据驱动重传</strong></em>。收到三个相同ACK报文时，会在定时器过期之前，重传文段。</p><p>只解决了超时时间的问题，有另一个问题：重传的时候，是重传一个，还是重传之前的所有，所以就有了SACK方法</p><h2 id="SACK"><a href="#SACK" class="headerlink" title="SACK"></a>SACK</h2><p>在TCP头部的“选项”字段中添加一个SACK，<em><strong>将缓存的地图发送给发送方</strong></em>，发送方就知道哪些数据收到了，哪些没有，就可以<em><strong>只传丢失的数据</strong></em>、</p><h2 id="D-SACK"><a href="#D-SACK" class="headerlink" title="D-SACK"></a>D-SACK</h2><p>使用了SACK告诉 发送方，有哪些数据被重复接收了。</p><p>可以让发送方知道，是发出去的包丢了；可以知道是不是发送方的数据包被网略延时了；可以知道网络中是不是把发送方的数据包给复制了</p><h1 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h1><p>TCP是每发一个数据，收到回应后再发下一个，数据包忘返时间长，通信效率低。</p><p>发送方会定时发送窗口大小探测报文，及时知道接收方窗口大小辩护</p><p>窗口大小就是指<em><strong>无需等待确认应答，可以继续发送数据的最大值</strong></em></p><p>大小在TCP头部，该字段是接收端告诉发送端自己有多少缓冲区可接收数据，发送端根据这个发送数据</p><p>接收窗口和发送窗口大小不完全相等：接收窗口大小约等于发送窗口大小。因为滑动窗口大小不是一成不变，若接收方的程序读取数据很快，接收的滑动窗口就会空出来。那么新的接收窗口大小，是通过TCP头部的窗口大小字段告诉发送方，传输存在时延，所以两者是约等于的关系</p><h1 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h1><p>控制协议是可变大小的滑动窗口协议（防止发送方无脑的发送），以控制发送方发送效率，根据接收方的实际接收能力变化</p><p>窗口关闭：窗口大小为0，就会阻止发送方传递数据，直到窗口非0。当窗口关闭时，接收方处理完数据后会发送一个窗口非0的ACK报文，若该报文丢失，那会出现问题</p><p>​解决窗口关闭时潜在的死锁现象：TCP为每一个连接设置定时器，只要TCP连接一方收到对方的零窗口通知，就启动持续计时器。该计时器若超时，就发送窗口探测报文，对方在确认该探测报文时会给出自己的窗口大小</p><h1 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h1><p>目的是<em><strong>避免发送方的数据填满整个网络</strong></em></p><p>拥塞窗口是发送方维护的一个状态变量，根据网络的拥塞程度动画变化。</p><p>发送了超时重传，就认为网络出现拥塞</p><h2 id="控制算法"><a href="#控制算法" class="headerlink" title="控制算法"></a>控制算法</h2><p>慢启动：当发送方每收到一个ACK，拥塞窗口CWND的大小就加1。当没启动到ssthresh就使用拥塞避免算法</p><p>拥塞避免：每收到一个ACK时，CWND增加1&#x2F;CWND</p><p>拥塞发生：就出现数据包重传</p><p>​超时重传：ssthresh设为CWND&#x2F;2，CWND重置为1</p><p>​快速重传：CWND为原来的一半，ssthresh&#x3D;CWND，进入快速恢复算法</p><p>快速恢复：拥塞窗口CWND&#x3D;ssthresh+1；重传丢失的数据包；若重复收到ACK，CWND+1；收到新的ACK后，CWND就设置为第一步中的ssthresh的值，恢复到之前的状态</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;普通处理&quot;&gt;&lt;a href=&quot;#普通处理&quot; class=&quot;headerlink&quot; title=&quot;普通处理&quot;&gt;&lt;/a&gt;普通处理&lt;/h1&gt;&lt;p&gt;应用数据都被分割成TCP认为最适合发送的数据包&lt;/p&gt;
-&lt;p&gt;  给发送的每一个包进行编号，接收方对数据包排序，把有序数据传</summary>
       
     
     
