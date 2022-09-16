@@ -1,0 +1,238 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Kafka服务端 | 小二小二不停步</title><meta name="keywords" content="Kafka"><meta name="author" content="小二小二不停步"><meta name="copyright" content="小二小二不停步"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="协议设计自定义了一组基于TCP的二进制协议，遵守该组协议的格式，就可以向Kafka发送消息、拉取消息。 在Kafka2.0中，共43种协议类型，每种协议类型都有对应的请求和响应，都遵守特定的协议模式。每种类型的Request都包含相同结构的协议请求头和不同结构的协议请求体。  协议请求头      域 描述    api_key API标识，   api_version API版本号   corr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka服务端">
+<meta property="og:url" content="http://example.com/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/index.html">
+<meta property="og:site_name" content="小二小二不停步">
+<meta property="og:description" content="协议设计自定义了一组基于TCP的二进制协议，遵守该组协议的格式，就可以向Kafka发送消息、拉取消息。 在Kafka2.0中，共43种协议类型，每种协议类型都有对应的请求和响应，都遵守特定的协议模式。每种类型的Request都包含相同结构的协议请求头和不同结构的协议请求体。  协议请求头      域 描述    api_key API标识，   api_version API版本号   corr">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/4.jpeg">
+<meta property="article:published_time" content="2022-09-16T20:33:33.000Z">
+<meta property="article:modified_time" content="2022-09-16T20:39:45.958Z">
+<meta property="article:author" content="小二小二不停步">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/4.jpeg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Kafka服务端',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-17 04:39:45'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="小二小二不停步" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">60</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/4.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">小二小二不停步</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Kafka服务端</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-09-16T20:33:33.000Z" title="发表于 2022-09-17 04:33:33">2022-09-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-16T20:39:45.958Z" title="更新于 2022-09-17 04:39:45">2022-09-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Kafka服务端"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="协议设计"><a href="#协议设计" class="headerlink" title="协议设计"></a>协议设计</h1><p>自定义了一组<em><strong>基于TCP的二进制</strong></em>协议，遵守该组协议的格式，就可以向Kafka发送消息、拉取消息。</p>
+<p>在Kafka2.0中，共43种协议类型，每种协议类型都有对应的请求和响应，都遵守特定的协议模式。每种类型的Request都包含相同结构的协议请求头和不同结构的协议请求体。</p>
+<ul>
+<li>协议请求头</li>
+</ul>
+<p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/qingqiutou.png"></p>
+<table>
+<thead>
+<tr>
+<th align="center">域</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">api_key</td>
+<td align="center">API标识，</td>
+</tr>
+<tr>
+<td align="center">api_version</td>
+<td align="center">API版本号</td>
+</tr>
+<tr>
+<td align="center">correlation_id</td>
+<td align="center">由客户端指定的一个数字来唯一标识此次请求的id，服务端在处理完请求后也把相同的coorelation_id写到Response中。如此，客户端就能把某个请求和响应对应</td>
+</tr>
+<tr>
+<td align="center">client_id</td>
+<td align="center">客户端id</td>
+</tr>
+</tbody></table>
+<ul>
+<li>协议响应头</li>
+</ul>
+<p>每种类型的Response也包含相同结构的协议响应头和不同结构的响应体</p>
+<p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/xiangyingtou.png"></p>
+<h1 id="时间轮"><a href="#时间轮" class="headerlink" title="时间轮"></a>时间轮</h1><p>Kafka中存在大量的延时操作（延时生产、延时拉取、延时删除等等），没有使用JDK自带的Timer或DelayQueue以实现延时功能，而是使用基于时间轮的概念实现了<em><strong>用于延时功能的定时器</strong></em>。</p>
+<p>时间轮由多个时间格组成，每个时间格代表当前轮的基本时间跨度。时间格个数固定，整个时间轮的总体跨度不变</p>
+<p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/shijianlun.png"></p>
+<p>时间轮的轮转是靠“收割机”线程驱动，由延时操作管理器启动。“收割机”线程还会定期清理监听池中已完成的延时操作。</p>
+<h1 id="延时操作"><a href="#延时操作" class="headerlink" title="延时操作"></a>延时操作</h1><p>若生产者客户端发消息时将acks参数设置为-1，那么久需要等待ISR集合中所有副本都确认收到消息后才能收到响应的结果或捕获超时异常。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">比如：某个分区有三个副本leader1、follower1、follower2且都在ISR集合中，Kafka在收到客户端生产请求后，消息3和4写入leader副本的本地日志文件后，需要等到follower1和follower2两个副本都收到消息3和4后才能告知客户端正确地接收了所发送的消息，若超时则抛异常。此处，在消息写入leader副本的本地日志文件后，Kafka会创建一个延时的生产操作来处理消息正常写入所有副本或超时情况，以返回相应的响应结果给客户端。</span><br></pre></td></tr></table></figure>
+
+<p>Kafka有多个延时操作，需要延时返回响应结果，首先就要有超时时间，超时就要强制完成以响应结果；其次延时不同于定时操作，定时操作是在特定时间后执行的操作，延时操作可以在设定的时间之前完成，于是&#x3D;&#x3D;延时操作能支持外部事件的触发&#x3D;&#x3D;。</p>
+<p>延时操作创建后会被加入延时操作管理器做专门的处理，延时操作可能超时，每个延时操作管理器都会配备一个定时器做超时管理，定时器的底层就是用的时间轮。因为需要支持外部事件，所以还配备一个监听池来监听每个分区的外部事件（查看是否有分区的HW增长）</p>
+<p>而对于延时拉取，Kafka会先读取一次日志文件，若收集不到足够多的消息，就会创建一个延时拉取操作以等待拉取到足够数量的消息。当延时拉取操作执行时，会再读一次日志文件，再将拉取结果返回给follower副本。延时拉取操作也会有专门的延时操作管理器负载，与上述相同。若拉取进度一直没有赶上leader副本，那么在拉取laeader副本的消息时一般拉取的消息大小会不小于某个值，这样Kafka不会创建延时操作，而是直接返回拉取结果。</p>
+<h1 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h1><p>Kafka集群中会有一个或多个broker，其中一个 broker会被选为控制器，负责管理整个集群中所有分区和副本的状态。当某个leader副本有问题，由控制器负载该分区选举新的leader副本；当检测当某个分区的ISR集合发生变化，由控制器通知所有broker更新其元数据信息；为某个topic增加分区数量时负责分区的重新分配</p>
+<p>Kafka中控制器选举依赖于ZooKeeper，成功竞选的broker会在ZK中创建&#x2F;controller这个临时节点。</p>
+<p>具备控制器身份的broker会比其他普通的broker多一些作用</p>
+<ul>
+<li>监听分区的变化</li>
+<li>监听主题相关的变化</li>
+<li>监听broker相关的变化</li>
+<li>从ZK中读取获取当前所有与主题、分区及broker有关信息并进行相应管理</li>
+<li>启动并管理分区状态机和副本状态机</li>
+<li>更新集群元数据信息</li>
+<li>若参数auto.leader.rebalance.enable设置为true，则会开启一个定时任务维护分区的优先副本均衡</li>
+</ul>
+<p>控制器选举成功后会读取ZK中各节点的数据来初始化上下文信息，并管理。</p>
+<p>控制器节点数据发生变化，每个broekr都会更新自身内存中保存的activeControllerId，若broker在数据变更前是控制器，在数据变更后自身的brokerid值与新的activeControllerId值不同，那就关闭相关的资源。</p>
+<p>控制器节点被删除时，每个broekr会开始选举。</p>
+<p>分区leader副本的选举由控制器负责。当创建分区或分区上线的时候都需要leader选举。对应的策略是按照AR集合中副本的顺序查找第一个存活的副本并且该副本在ISR集合中。</p>
+<h1 id="两个参数"><a href="#两个参数" class="headerlink" title="两个参数"></a>两个参数</h1><table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">broker.id</td>
+<td align="center">broekr启动之前就必须设定的，每个broker都有的唯一id值用来区分，启动时会在ZK中&#x2F;brokers&#x2F;ids路径下创建以brokerid为名称的节点。当broker下线，该虚节点会自动删除，其他节点或客户端就通过路径下是否有该brokerid来确定健康状态。</td>
+</tr>
+<tr>
+<td align="left">bootstrap.servers</td>
+<td align="center">生产者和消费者君必备的。一般可简单认为是指定将要连接的Kafka集群的broker地址列表。深层意义是Kafka集群元数据信息的服务地址</td>
+</tr>
+</tbody></table>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">小二小二不停步</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/">http://example.com/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">小二小二不停步</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kafka/">Kafka</a></div><div class="post_share"><div class="social-share" data-image="/img/4.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/09/13/Kafka%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8/"><img class="next-cover" src="/img/3.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Kafka日志存储</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/09/04/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/" title="Kafka生产者"><img class="cover" src="/img/7.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-04</div><div class="title">Kafka生产者</div></div></a></div><div><a href="/2022/09/06/Kafka%E6%B6%88%E8%B4%B9%E8%80%85/" title="Kafka消费者"><img class="cover" src="/img/1.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-06</div><div class="title">Kafka消费者</div></div></a></div><div><a href="/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/" title="Kafka主题和分区"><img class="cover" src="/img/2.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-07</div><div class="title">Kafka主题和分区</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">小二小二不停步</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">60</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xiaoerbutingbu"><i class="fab fa-github"></i><span>github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xiaoerbutingbu" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="http://wpa.qq.com/msgrd?v=3&amp;uin=370951771&amp;site=qq&amp;menu=yes" target="_blank" title="QQ"><i class="fab fa-qq"></i></a><a class="social-icon" href="mailto:370951771@2019.cqut.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到小二小二不停步的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%8F%E8%AE%AE%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">协议设计</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E8%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">时间轮</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BB%B6%E6%97%B6%E6%93%8D%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">延时操作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">控制器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E5%8F%82%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">两个参数</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/" title="Kafka服务端"><img src="/img/4.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kafka服务端"/></a><div class="content"><a class="title" href="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/" title="Kafka服务端">Kafka服务端</a><time datetime="2022-09-16T20:33:33.000Z" title="发表于 2022-09-17 04:33:33">2022-09-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/13/Kafka%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8/" title="Kafka日志存储"><img src="/img/3.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kafka日志存储"/></a><div class="content"><a class="title" href="/2022/09/13/Kafka%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8/" title="Kafka日志存储">Kafka日志存储</a><time datetime="2022-09-13T14:59:44.000Z" title="发表于 2022-09-13 22:59:44">2022-09-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/" title="Kafka主题和分区"><img src="/img/2.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kafka主题和分区"/></a><div class="content"><a class="title" href="/2022/09/07/Kafka%E4%B8%BB%E9%A2%98%E5%92%8C%E5%88%86%E5%8C%BA/" title="Kafka主题和分区">Kafka主题和分区</a><time datetime="2022-09-07T15:35:31.000Z" title="发表于 2022-09-07 23:35:31">2022-09-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By 小二小二不停步</div><div class="footer_custom_text">大切な人といつかまた巡り会えますように</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

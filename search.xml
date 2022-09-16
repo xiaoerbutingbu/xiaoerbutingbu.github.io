@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Kafka服务端</title>
+      <link href="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/"/>
+      <url>/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/</url>
+      
+        <content type="html"><![CDATA[<h1 id="协议设计"><a href="#协议设计" class="headerlink" title="协议设计"></a>协议设计</h1><p>自定义了一组<em><strong>基于TCP的二进制</strong></em>协议，遵守该组协议的格式，就可以向Kafka发送消息、拉取消息。</p><p>在Kafka2.0中，共43种协议类型，每种协议类型都有对应的请求和响应，都遵守特定的协议模式。每种类型的Request都包含相同结构的协议请求头和不同结构的协议请求体。</p><ul><li>协议请求头</li></ul><p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/qingqiutou.png"></p><table><thead><tr><th align="center">域</th><th align="center">描述</th></tr></thead><tbody><tr><td align="center">api_key</td><td align="center">API标识，</td></tr><tr><td align="center">api_version</td><td align="center">API版本号</td></tr><tr><td align="center">correlation_id</td><td align="center">由客户端指定的一个数字来唯一标识此次请求的id，服务端在处理完请求后也把相同的coorelation_id写到Response中。如此，客户端就能把某个请求和响应对应</td></tr><tr><td align="center">client_id</td><td align="center">客户端id</td></tr></tbody></table><ul><li>协议响应头</li></ul><p>每种类型的Response也包含相同结构的协议响应头和不同结构的响应体</p><p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/xiangyingtou.png"></p><h1 id="时间轮"><a href="#时间轮" class="headerlink" title="时间轮"></a>时间轮</h1><p>Kafka中存在大量的延时操作（延时生产、延时拉取、延时删除等等），没有使用JDK自带的Timer或DelayQueue以实现延时功能，而是使用基于时间轮的概念实现了<em><strong>用于延时功能的定时器</strong></em>。</p><p>时间轮由多个时间格组成，每个时间格代表当前轮的基本时间跨度。时间格个数固定，整个时间轮的总体跨度不变</p><p><img src="/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/shijianlun.png"></p><p>时间轮的轮转是靠“收割机”线程驱动，由延时操作管理器启动。“收割机”线程还会定期清理监听池中已完成的延时操作。</p><h1 id="延时操作"><a href="#延时操作" class="headerlink" title="延时操作"></a>延时操作</h1><p>若生产者客户端发消息时将acks参数设置为-1，那么久需要等待ISR集合中所有副本都确认收到消息后才能收到响应的结果或捕获超时异常。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">比如：某个分区有三个副本leader1、follower1、follower2且都在ISR集合中，Kafka在收到客户端生产请求后，消息3和4写入leader副本的本地日志文件后，需要等到follower1和follower2两个副本都收到消息3和4后才能告知客户端正确地接收了所发送的消息，若超时则抛异常。此处，在消息写入leader副本的本地日志文件后，Kafka会创建一个延时的生产操作来处理消息正常写入所有副本或超时情况，以返回相应的响应结果给客户端。</span><br></pre></td></tr></table></figure><p>Kafka有多个延时操作，需要延时返回响应结果，首先就要有超时时间，超时就要强制完成以响应结果；其次延时不同于定时操作，定时操作是在特定时间后执行的操作，延时操作可以在设定的时间之前完成，于是&#x3D;&#x3D;延时操作能支持外部事件的触发&#x3D;&#x3D;。</p><p>延时操作创建后会被加入延时操作管理器做专门的处理，延时操作可能超时，每个延时操作管理器都会配备一个定时器做超时管理，定时器的底层就是用的时间轮。因为需要支持外部事件，所以还配备一个监听池来监听每个分区的外部事件（查看是否有分区的HW增长）</p><p>而对于延时拉取，Kafka会先读取一次日志文件，若收集不到足够多的消息，就会创建一个延时拉取操作以等待拉取到足够数量的消息。当延时拉取操作执行时，会再读一次日志文件，再将拉取结果返回给follower副本。延时拉取操作也会有专门的延时操作管理器负载，与上述相同。若拉取进度一直没有赶上leader副本，那么在拉取laeader副本的消息时一般拉取的消息大小会不小于某个值，这样Kafka不会创建延时操作，而是直接返回拉取结果。</p><h1 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h1><p>Kafka集群中会有一个或多个broker，其中一个 broker会被选为控制器，负责管理整个集群中所有分区和副本的状态。当某个leader副本有问题，由控制器负载该分区选举新的leader副本；当检测当某个分区的ISR集合发生变化，由控制器通知所有broker更新其元数据信息；为某个topic增加分区数量时负责分区的重新分配</p><p>Kafka中控制器选举依赖于ZooKeeper，成功竞选的broker会在ZK中创建&#x2F;controller这个临时节点。</p><p>具备控制器身份的broker会比其他普通的broker多一些作用</p><ul><li>监听分区的变化</li><li>监听主题相关的变化</li><li>监听broker相关的变化</li><li>从ZK中读取获取当前所有与主题、分区及broker有关信息并进行相应管理</li><li>启动并管理分区状态机和副本状态机</li><li>更新集群元数据信息</li><li>若参数auto.leader.rebalance.enable设置为true，则会开启一个定时任务维护分区的优先副本均衡</li></ul><p>控制器选举成功后会读取ZK中各节点的数据来初始化上下文信息，并管理。</p><p>控制器节点数据发生变化，每个broekr都会更新自身内存中保存的activeControllerId，若broker在数据变更前是控制器，在数据变更后自身的brokerid值与新的activeControllerId值不同，那就关闭相关的资源。</p><p>控制器节点被删除时，每个broekr会开始选举。</p><p>分区leader副本的选举由控制器负责。当创建分区或分区上线的时候都需要leader选举。对应的策略是按照AR集合中副本的顺序查找第一个存活的副本并且该副本在ISR集合中。</p><h1 id="两个参数"><a href="#两个参数" class="headerlink" title="两个参数"></a>两个参数</h1><table><thead><tr><th align="left">参数</th><th align="center">说明</th></tr></thead><tbody><tr><td align="left">broker.id</td><td align="center">broekr启动之前就必须设定的，每个broker都有的唯一id值用来区分，启动时会在ZK中&#x2F;brokers&#x2F;ids路径下创建以brokerid为名称的节点。当broker下线，该虚节点会自动删除，其他节点或客户端就通过路径下是否有该brokerid来确定健康状态。</td></tr><tr><td align="left">bootstrap.servers</td><td align="center">生产者和消费者君必备的。一般可简单认为是指定将要连接的Kafka集群的broker地址列表。深层意义是Kafka集群元数据信息的服务地址</td></tr></tbody></table>]]></content>
+      
+      
+      <categories>
+          
+          <category> 消息队列 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kafka </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Kafka日志存储</title>
       <link href="/2022/09/13/Kafka%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8/"/>
       <url>/2022/09/13/Kafka%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8/</url>
