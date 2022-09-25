@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-09-20T11:52:46.760Z</updated>
+  <updated>2022-09-25T08:55:25.666Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Kafka可靠性</title>
+    <link href="http://example.com/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/"/>
+    <id>http://example.com/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/</id>
+    <published>2022-09-25T08:51:00.000Z</published>
+    <updated>2022-09-25T08:55:25.666Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Kafka可靠性简述"><a href="#Kafka可靠性简述" class="headerlink" title="Kafka可靠性简述"></a>Kafka可靠性简述</h1><p>Kafka<em><strong>采用了多副本的机制</strong></em>，也是大多分布式系统中惯用收发，以实现水平拓展、提供容灾能力、提升可用性和可靠性。</p><h1 id="副本剖析"><a href="#副本剖析" class="headerlink" title="副本剖析"></a>副本剖析</h1><p>副本是分布式系统常见的概念之一，是分布式系统对数据和服务提供的一种冗余方式。<em><strong>数据副本</strong></em>是在不同的节点上持久化同一份数据，当某一个节点上存储的数据丢失时，可以从副本上读取该数据，是解决分布式系统数据源丢失问题的最有效的手段。另一类副本是<em><strong>服务副本</strong></em>，指多个节点提供同样的服务，每个节点都有能力接收来自外部请求并进行相应的处理。</p><p>Kafka引入多副本机制，增加副本数量提升数据容灾能力；多副本也实现故障自动转移，在某个broekr节点失效时候仍然保证服务可用。</p><ul><li>副本是相对于分区而言，副本是特定分区的副本。</li><li>一个分区中包含一个或多个副本，其中一个为leader副本，其余为follower副本，各个副本位于不同的broker节点。只有leader副本提供服务，follower副本只负责数据同步。</li><li>分区所有副本统称为AR，ISR是值与leader副本保持同步状态的副本集合，leader副本本身也是该集合中的一个。</li><li>LEO标识每个分区中最后一条消息的下一个位置，分区的每个副本都有自己的LEO，ISR中最小的LEO即为HW，俗称高水位，消费者只能拉取到HW之前的消息。</li></ul><p>从生产者发出的一条消息首先会被分区写入leader副本，不过需要等待ISR集合中的所有follower副本都同步完成后才能为认为是已提交，之后才会更新分区的HW，进而消费者可以消费到该消息</p><h2 id="副本失效"><a href="#副本失效" class="headerlink" title="副本失效"></a>副本失效</h2><p>正常情况下，分区的所有副本都是在ISR集合中，当出现异常情况某些副本就被剥离出ISR集合中。在ISR集合中，也就是处于同步失效或功能失效的副本称为失效副本，失效副本对应的分区称为同步失效分区。</p><p>失效副本不仅是指处于功能失效状态的副本，处于同步失效状态的副本也可看做失效副本。</p><p>典型情况：当leader副本中消息的流入速度比foloower副本拉取速度快，follower副本一直拉也不能与leader副本同步，若follower副本还在ISR集合中，那在leader副本下线而选取此follower副本为新的leader副本时会造成消息的严重丢失</p><p>会导致副本失效的一般情况：</p><ul><li>follower副本进程卡住，在一段时间内没有向leader副本发起同步请求。比如频繁的Full GC</li><li>follower副本进程同步太慢，在一段时间内无法追赶上leader副本。比如I&#x2F;O开销太大</li></ul><h2 id="ISR伸缩"><a href="#ISR伸缩" class="headerlink" title="ISR伸缩"></a>ISR伸缩</h2><p>Kafka启动的时候会开启两个与ISR相关的定时任务</p><ul><li>“isr-expiration”定时任务：会周期性地检测每个分区是否需要缩减其ISR集合。该周期为replica.lag.time.max.ms参数大小的一半，默认值是5000ms。当检测到ISR集合中有失效副本时，就会收缩ISR集合。若某个分区的ISR集合变更，就将变更后的数据记录到ZK中。</li><li>“isr-change-propagation”定时任务：会周期性的检查isrChangeSet，若发现其有ISR集合的变更记录，就会在ZK的路径下创建一个以isr_change_开头的持久顺序节点，并isrChangeSet中的信息保存到该节点中；Kafka为该定时任务添加了一个watcher，当该节点中有子节点发生变化时会触发watcher的动作，以此通知控制器更新相关元数据信息并向它管理的broker节点发送更新元数据的请求，最后删除已处理过的节点信息。当然，若频繁触发watcher会影响性能，所以添加了限定条件，当检测到分区的ISR集合发生变化时需要检测：上一次ISR集合发生变化的时间间隔已经超过5s、上一次写入ZK的时间间隔已超过60s，满足两者之一才可以将ISR集合写入目标节点；</li></ul><p>随着follower副本同步消息，follower副本的LEO会逐渐后移，并追赶上leader副本（追赶的标准是此副本的LEO是否不小于leader副本的HW），此时该follower副本就有资格进入ISR集合。</p><h2 id="LEO和HW"><a href="#LEO和HW" class="headerlink" title="LEO和HW"></a>LEO和HW</h2><p>本地副本：对应的Log分配在当前的broker节点上。远程副本：对应的Log分配在其他的broker节点上。</p><p>Kafka中，同一个分区的信息会存在多个broker节点上，并被其上的副本管理器所管理，在逻辑层面每个broker节点上的分区就有了多个副本，但唯有本地副本才有对应的日志</p><p>在一个分区中，leader副本所在的节点会记录所有副本的LEO，follower副本所在的节点只会记录自身的LEO。各个副本所在的节点都只记录自身的HW。</p><h2 id="不支持读写分离"><a href="#不支持读写分离" class="headerlink" title="不支持读写分离"></a>不支持读写分离</h2><p>Kafka中，生产者写入消息、消费者读取消息都是与leader副本进行交互，实现的是主写主读的生产消费模型，<em><strong>且不支持读写分离</strong></em>。而数据库、Redis都具备主写主读功能、也支持主写从读（读写分离）。</p><p>读写分离的缺点：</p><ul><li>数据一致性问题：数据从主节点到从节点必有一个延时的时间窗口，该窗口会导致主从节点之间的数据不一致。</li><li>延时问题：类似Redis该类的组件，数据从写入主节点到同步到从节点的过程都要经过 网络-主节点内存-网络-从节点内存，整个过程比较耗时。而Kafka中主从同步会更耗时，网络-主节点内存-主节点磁盘-网络-从节点内存-从节点内存-从节点磁盘。对延时敏感的情况，主从功能就不适用</li></ul><p>主读从写可以均摊一定的负载却不能做到完全的负载均衡。Kafka可以大程度负载均衡</p><p>主写主读的优点：</p><ul><li>简化代码的实现逻辑，减少出错的可能</li><li>负载粒度细化均摊，与主写从读相比，负载更好且对用户可控</li><li>没有延时的影响</li><li>副本稳定的情况下，不会出现数据不一致的情况</li></ul><h1 id="日志同步机制"><a href="#日志同步机制" class="headerlink" title="日志同步机制"></a>日志同步机制</h1><p>分布式系统中，日志同步机制<em><strong>需要保证数据一致性、数据的顺序性</strong></em>，最简单高效的方法是从集群中选出一个leader来负责处理数据写入的顺序性，只要leader活着，follower就根据leader写入顺序进行同步。</p><p>但是当leader宕机后，follower中就会选出一个新的leader。follower同步状态可能落后leader很多，甚至可能还是宕机的，所以要确保<em><strong>选择具有最新日志消息的follower作为新leader</strong></em>。</p><p>日志同步机制的一个基本原则：若告知客户端已成功提交某条消息，那么即使leader宕机，也要保证新选举出的leader中能包含这条消息。这里就有权衡的地方，若leader在消息被提交前需要等更多follower确认，那么在它宕机后就可以找到follower的替代，虽然这样性能会下降。</p><p>Kafka选举不采用常见的“少数服从多数”。采用该方式，系统的延迟取决于最快的几个节点，但是为了保证leader选举的正常运行那么能容忍的失败follower数也就少，也就是要保证较高的容错率，必须要有大量副本，也正因为大量性能就会下降。</p><p>Kafka使用的是PacificA算法。Kafka动态维护着一个ISR集合，处于ISR集合内的节点保持与leader相同的高水位，只有位列其中的副本才有资格成为leader。写入消息只有所有ISR集合中的副本都确认收到后才能被认为已提交；位于ISR集合的任何副本节点都有资格成为leader，选举过程简单，开销低。leader副本的均衡保证了整体负载的均衡</p><h1 id="可靠性分析"><a href="#可靠性分析" class="headerlink" title="可靠性分析"></a>可靠性分析</h1><p>就Kafka而言，越多的副本数（在创建主题时配置也可后期修改）能保证数据的可靠性，但太多也会引起磁盘、网络带宽的浪费，性能才会下降。</p><p>生产者客户端参数ack可以提高消息的可靠性。</p><ul><li>1（默认）：生产者发送消息后，分区的leader副本成功写入就可以收到来自服务端的成功响应。若无法写入leader副本，生产者就会收到错误响应，此时可以重发消息</li><li>0：生产者发完消息不需要等待服务端的响应。消息会丢失，但可以达到最大吞吐量</li><li>-1或all：生产者发送后，需要等待所有ISR集合中所有副本都成功写入消息后才能收到响应成功。能达到最强的可靠性，但不意味着消息一定可靠，因为ISR中可能只有leader副本。</li></ul><p>broker端有两个参数可以调整同步刷盘的策略。同步刷盘是增加可靠性的方式，但是及其消耗性能。</p><p>手动位移提交也是一种方式，但有一个原则：若消息没有被成功消息，那么久不能提交所对应的消费位移。宁愿重复消费也不能因异常而消息丢失</p><p>消费端，Kafka提供了<em><strong>回溯消费</strong></em>功能来兜底，有机会对漏掉的消息进行回补，提高可靠性</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Kafka可靠性简述&quot;&gt;&lt;a href=&quot;#Kafka可靠性简述&quot; class=&quot;headerlink&quot; title=&quot;Kafka可靠性简述&quot;&gt;&lt;/a&gt;Kafka可靠性简述&lt;/h1&gt;&lt;p&gt;Kafka&lt;em&gt;&lt;strong&gt;采用了多副本的机制&lt;/strong&gt;&lt;/e</summary>
+      
+    
+    
+    
+    <category term="消息队列" scheme="http://example.com/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
+    
+    
+    <category term="Kafka" scheme="http://example.com/tags/Kafka/"/>
+    
+  </entry>
   
   <entry>
     <title>Kafka客户端</title>
@@ -477,31 +501,6 @@
     
     
     <category term="基础" scheme="http://example.com/tags/%E5%9F%BA%E7%A1%80/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySQL简单优化</title>
-    <link href="http://example.com/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/"/>
-    <id>http://example.com/2022/07/21/MySQL%E7%AE%80%E5%8D%95%E4%BC%98%E5%8C%96/</id>
-    <published>2022-07-21T15:55:56.000Z</published>
-    <updated>2022-07-21T15:59:42.368Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Explain"><a href="#Explain" class="headerlink" title="Explain"></a>Explain</h1><p>对于所执行的SQL语句，通过“explain”查看相关信息进行调节</p><p>可以获取表的读取顺序，数据读取操作的操作类型，哪些索引可用，哪些索引实际被使用，表之间的引用，每张表有多少行被优化器查询</p><p>使用方法： EXPLCAIN + SQL语句</p><p>Id：id相同：执行顺序由上至下</p><p>​    Id不同：若是子查询，id的序号会递增，id的值越大优先级越高，越先执行</p><p>​    id不同，同时存在，可以认为从上往下顺序执行。</p><p>Select_type：</p><p>​    SIMPLE：简单的select查询，查询中不包含子查询或UNION</p><p>​    PRIMARY：若包含任何复杂的子部分，最外层查询则被标记为PRIMARY</p><p>​    SUBQUERY：在select或where列表中包含子查询</p><p>​    DERIVEN：在from列表中包含的子查询被标记为DERIVER（衍生），mysql会递归执行这些子查询，把结果放在临时表中</p><p>​    UNION：若第二个SELECT出现在UNION之后，则被标记为UNION；若UNION包含在from子句的子查询中，外层select将被标记为：DERIVED</p><p>​    UNION RESULT：从UNION表获取结果的SELECT</p><p>Table：就是执行的表</p><p><em><strong>Type</strong></em>:显示查询使用了哪些类型</p><p>​    包含：ALL、index、range、ref、eq_ref、const&#x2F;system、NULL</p><p>从好到差：system&gt;const&gt;eq_ref&gt;ref&gt;range&gt;index&gt;all</p><p>​    System:表里只有一行记录，const的特例</p><p>​    Const：通过索引，一次就找到，用于比较primary key或者union索引</p><p>​    Eq_ref：唯一索引扫描，对每个索引键，表中只有一条记录匹配。主键或唯一索引扫描</p><p>​    Ref：非唯一性索引扫描，返回某个单独值的所有行</p><p>​    Reange：值检索给定范围的行</p><p>​    Index：与all的区别是index只遍历索引树。通常比all块</p><p>​    All：将遍历全表以找到匹配的行</p><p>Possible_keys：显示可能应用在这张表中的索引，一个或多个，但不一定被查询实际使用</p><p>Key_len：表示索引中使用的字节数，通过该列计算查询中使用的索引长度</p><p>Ref：显示索引的那一列被使用了</p><p>row： 根据表统计信息及索引选用情况，大致估算出找到所需要读取的行数</p><p>Extra：包含不适合在其他列中显示但很重要的额外信息</p><h1 id="SQL语句优化"><a href="#SQL语句优化" class="headerlink" title="SQL语句优化"></a>SQL语句优化</h1><p>查询尽量不用select * ，而是具体字段：只取需要的，节省资源、减少开销；select * 时很可能不会用到索引，就会造成全表扫描 </p><p>​    避免在where子句中用or连接条件（用union all，或两条sql）：or可能让索引失效，而全局扫描；</p><p>​         Select * from student where id&#x3D;1 or salary&#x3D;3000</p><p>​         Select * from student where id&#x3D;1 union all select * from student where salary</p><p>​    Varchar代替char：因为是根据实际长度存储，存储空间小，节省空间；char按声明大小存储，不足补空格；在一个相对小的字段内搜索，效率更高</p><p>​    尽量使用数值代替字符串</p><p>​    查询时尽量避免返回大量数据：若返回的数据量大，就查询时间过长，网络传输时间过长。太多了也没意义，用户不好看。通常采用分页的形式</p><p>​    创建name字段的索引：提高查询速度的最简单最佳方式</p><p>​         Alter table student add index index_name(NAME)</p><p>​    优化like语句：like可能让索引失效</p><p>​    Where限定查询的数据</p><p>尽量避免全表的扫描，在where、order by等列上建立索引。在字句中尽量避免使用 !&#x3D; &gt; &lt; 等操作符，否则引擎会放弃使用索引去全表扫描了</p><p>尽量使用数字型的字段，不然会降低连接的性能，也会增加存储开销（因为引擎在处理查询和连接的时候会逐个去比较字符串中的每个字符），数字就只需要比较一次</p><h2 id="大表"><a href="#大表" class="headerlink" title="大表"></a>大表</h2><p>限定数据范围：比如将查看订单历史记录，控制在一定的时间范围</p><p>读写分离：数据库拆分，主库负责写，从库负责读</p><p>垂直分区：根据数据库里面数据表的相关性拆分。简单说，就是把一张列较多的表拆分成多个表</p><p>水平分区：将一片数据分散到不同表或者库中</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;Explain&quot;&gt;&lt;a href=&quot;#Explain&quot; class=&quot;headerlink&quot; title=&quot;Explain&quot;&gt;&lt;/a&gt;Explain&lt;/h1&gt;&lt;p&gt;对于所执行的SQL语句，通过“explain”查看相关信息进行调节&lt;/p&gt;
-&lt;p&gt;可以获取表的读取顺</summary>
-      
-    
-    
-    
-    <category term="MySQL" scheme="http://example.com/categories/MySQL/"/>
-    
-    
-    <category term="MySQL" scheme="http://example.com/tags/MySQL/"/>
     
   </entry>
   
