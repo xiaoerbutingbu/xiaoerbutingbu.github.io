@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-09-25T08:55:25.666Z</updated>
+  <updated>2022-09-26T12:03:52.263Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JDK19</title>
+    <link href="http://example.com/2022/09/26/JDK19/"/>
+    <id>http://example.com/2022/09/26/JDK19/</id>
+    <published>2022-09-26T11:47:43.000Z</published>
+    <updated>2022-09-26T12:03:52.263Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>JDK19于2022-09-20发布GA版本。是一个非LTS版本，将以结构化并发、虚拟线程、切换表达模式匹配、向量API和Linux&#x2F;RISC-V端口为特色</p><p>JDK 19的早期访问版本可以从JDK.java.net&#x2F;19访问。JDK 19功能包括：</p><ul><li>在孵化器阶段，结构化并发旨在通过结构化并发API简化多线程编程。这种并发性将在不同线程中运行的多个任务视为单个工作单元，以简化错误处理和取消。提高了可靠性和可观测性。</li><li>记录模式record的预览，用于解构record记录值。记录模式和类型模式可以嵌套，以实现声明性、强大且可组合的数据导航和处理形式。该提案的目标包括扩展模式匹配以表达更复杂、可组合的数据查询，同时不改变类型模式的语法或语义。该提案以 instanceof 的模式匹配为基础，于2021在JDK 16中交付。未来的计划可能要求使用阵列模式和 vararg 模式等功能扩展记录模式。记录模式是Amber项目的一部分，该项目旨在探索和培育更小的、面向生产力的Java特性。</li><li>一个外部函数和内存API的预览，它将引入一个API，通过该API，Java程序可以与Java运行时之外的代码和数据进行互操作。通过有效地调用外部函数（即JVM外部的代码）和安全地访问外部内存（即未由JVM管理的内存），API使Java程序能够调用本机库并处理本机数据，而不会出现Java本机接口（ JNI ）的危险和脆弱性。外部函数和内存API结合了两个早期的孵化API：外部内存访问API和外部链接器API。外部函数和内存API之前在JDK 17中孵化，并在JDK 18中重新计算。该提案的目标包括易用性、性能、通用性和安全性。</li><li>虚拟线程的预览，这是一种轻量级线程，可以显著减少编写、维护和观察高吞吐量并发应用程序的工作量。目标包括使以简单的请求线程风格编写的服务器应用程序能够以接近最佳的硬件利用率进行扩展，并启用使用java的现有代码java.lang Thread API以最小的变化采用虚拟线程，并使用现有JDK工具对虚拟线程进行故障排除、调试和评测。本提案的目标不是改变Java中的基本并发模型，也不是在Java语言或Java库中提供新的数据并行结构。删除线程的传统实现或静默地将现有应用程序迁移到虚拟线程也不是目标。</li><li>switch 表达式和语句模式匹配的第三个预览，将模式匹配扩展到 switch ，允许针对多个模式测试表达式，每个模式都有一个特定的操作，因此可以简洁安全地表达复杂的面向数据的查询。此功能以前在JDK 17和JDK 18中进行了预览。第三次预览将添加一些改进，包括在开关块中用when子句替换受保护的模式。此外，当选择器表达式的值为null时，模式开关的运行时语义与传统开关语义更加一致。该计划的目标包括通过允许模式出现在 case 标签中，扩展switch表达式和语句的表达能力和适用性。其他目标包括允许开发人员在需要时放松 switch 的历史性零敌意，提高 switch 语句的安全性，并确保现有的 switch 表达式和语句继续编译而不发生更改，并以相同的语义执行。</li><li>第四种是vector 矢量API，它将矢量计算表示为在运行时可靠编译为支持的CPU架构上的最优矢量指令，从而实现优于等效标量计算的性能。使用API的开发人员获得了一种用Java编写复杂向量算法的方法，使用了热点自动向量器，但用户模型使向量化更加可预测和健壮。之前将载体API培养到JDK 16、JDK 17和JDK 19中。</li><li>对JDK 19提出的API的改进包括增强了向MemorySegment加载和存储向量，这是由外部函数和内存API预览定义的。JDK 19还将添加两个交叉车道矢量操作，压缩和扩展，以及互补矢量掩码压缩操作。压缩向量操作将由掩码选择的源向量的车道按车道顺序映射到目标向量，而展开操作则相反。压缩操作在过滤查询结果时很有用。除了矢量API之外，还将扩展逐位积分lanewise操作，包括计算一位的数量、反转位的顺序以及压缩和扩展位等操作。API的目标包括简洁明了、不依赖平台、在x64和AArch64体系结构上具有可靠的运行时和编译性能，以及在向量计算无法在运行时完全表示为向量操作序列的情况下实现“优雅”降级。</li><li>通过Linux&#x2F;RISC-V端口，Java将获得对硬件指令集的支持，这种硬件指令集已经得到了各种语言工具链的支持。RISC-V实际上是一个相关ISA家族。Linux&#x2F;RISC-V端口将仅支持RISC-V的RV64GV配置，这是一种包含矢量指令的通用64位ISA。Java开发人员将来可能会考虑其他RISC-V配置。</li></ul><h1 id="虚拟线程"><a href="#虚拟线程" class="headerlink" title="虚拟线程"></a>虚拟线程</h1><h2 id="Java线程与虚拟线程"><a href="#Java线程与虚拟线程" class="headerlink" title="Java线程与虚拟线程"></a>Java线程与虚拟线程</h2><p>常用的java线程与系统内核线程是一一对应的，系统内核的线程调度程序负载调度java线程。为了增加应用程序的性能，我们会增加java线程，所以在调度java线程的时候会占据不少资源去处理线程的上下文切换。</p><p>提高系统的吞吐量，就增加线程数量，但机器的线程昂贵、可用线程有限，即使是使用了线程池来最大化线程的性价比，但CPU、网络或内存资源还是程序性能的瓶颈。于是JDK19引入了虚拟线程，在19中，之前常用的平台线程与系统内核线程还是一一对应。</p><h2 id="新增线程相关API"><a href="#新增线程相关API" class="headerlink" title="新增线程相关API"></a>新增线程相关API</h2><p><code>Thread.ofVirtual()和Thread.ofPlatform()</code>是创建虚拟和平台线程的新API</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//输出线程ID 包括虚拟线程和系统线程 Thread.getId() 从jdk19废弃</span></span><br><span class="line"><span class="type">Runnable</span> <span class="variable">runnable</span> <span class="operator">=</span> () -&gt; System.out.println(Thread.currentThread().threadId());</span><br><span class="line"><span class="comment">//创建虚拟线程</span></span><br><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> Thread.ofVirtual().name(<span class="string">&quot;testVT&quot;</span>).unstarted(runnable);</span><br><span class="line">testVT.start();</span><br><span class="line"><span class="comment">//创建虚平台线程</span></span><br><span class="line"><span class="type">Thread</span> <span class="variable">testPT</span> <span class="operator">=</span> Thread.ofPlatform().name(<span class="string">&quot;testPT&quot;</span>).unstarted(runnable);</span><br><span class="line">testPT.start();</span><br></pre></td></tr></table></figure><p><code>Thread.startVirtualThread(Runnable)</code>快速创建虚拟线程并启动</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//输出线程ID 包括虚拟线程和系统线程</span></span><br><span class="line"><span class="type">Runnable</span> <span class="variable">runnable</span> <span class="operator">=</span> () -&gt; System.out.println(Thread.currentThread().threadId());</span><br><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> Thread.startVirtualThread(runnable);</span><br></pre></td></tr></table></figure><p><code>Thread.isVirtual()</code> 判断线程是否为虚拟线程：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//输出线程ID 包括虚拟线程和系统线程</span></span><br><span class="line"><span class="type">Runnable</span> <span class="variable">runnable</span> <span class="operator">=</span> () -&gt; System.out.println(Thread.currentThread().isVirtual());</span><br><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> Thread.startVirtualThread(runnable);</span><br></pre></td></tr></table></figure><p><code>Thread.join</code> 和 <code>Thread.sleep</code> 等待虚拟线程结束、使虚拟线程 sleep：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Runnable</span> <span class="variable">runnable</span> <span class="operator">=</span> () -&gt; System.out.println(Thread.sleep(<span class="number">10</span>));</span><br><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> Thread.startVirtualThread(runnable);</span><br><span class="line"><span class="comment">//等待虚拟线程结束</span></span><br><span class="line">thread.join();</span><br></pre></td></tr></table></figure><p><code>Executors.newVirtualThreadPerTaskExecutor()</code> 创建一个 ExecutorService，该 ExecutorService 为每个任务创建一个新的虚拟线程</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (<span class="type">var</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newVirtualThreadPerTaskExecutor()) &#123;</span><br><span class="line">  executor.submit(() -&gt; System.out.println(<span class="string">&quot;hello&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>支持与使用线程池和ExecutorService 的现有代码互相替换、迁移。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;JDK19于2022-09-20发布GA版本。是一个非LTS版本，将以结构化并发、虚拟线程、切换表达模式匹配、向量API和Linux&amp;#x2</summary>
+      
+    
+    
+    
+    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="JDK" scheme="http://example.com/tags/JDK/"/>
+    
+  </entry>
   
   <entry>
     <title>Kafka可靠性</title>
@@ -476,31 +500,6 @@
     
     
     <category term="List" scheme="http://example.com/tags/List/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>CAS</title>
-    <link href="http://example.com/2022/07/24/CAS/"/>
-    <id>http://example.com/2022/07/24/CAS/</id>
-    <published>2022-07-24T08:14:24.000Z</published>
-    <updated>2022-07-24T08:17:27.045Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>比较并交换</p><p>  比较当前工作内存中的值和主内存中的值，如果相同则执行规定操作，否则继续比直到主内存和工作内存中的值一致</p><p>  多个线程使用CAS操作一个变量，只有一个线程会成功，并成功更新，其余会失败。失败的线程会重新尝试（自旋）或挂起</p><p>  <em><strong>是一条CPU并发原语，原子指令</strong></em>，不会造成数据不一致的问题</p><p>  乐观锁</p><h1 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h1><p>先从地址V地区值A：2；根据A计算目标值B：3；通过CAS以原子的方式将地址V的值从A修改为B</p><p>1：调用unsafe类，分别专递主物理内存的值，原子类对象本身的值，当前对象内存地址的值，需要加上的值</p><p>2：拷贝主物理内存的值到当前线程内存</p><p>3：while循环，一直修改</p><h1 id="底层"><a href="#底层" class="headerlink" title="底层"></a>底层</h1><p>  Unsafe类：CAS的核心类，来自JVM的rt.jar下。因为java不能直接访问底层系统，需要本地（native）方法访问，基于该类可以直接操作特定内存的数据，类似于c语言的指针直接操作内存。Unsafe类中的方法都是直接调用操作系统底层资源执行相应任务</p><p>  变量valueOffset，表示变量值在内存中的偏移地址</p><p>  变量value被volatile修饰，保证多线程之间的可见性</p><p> unsafe类：compareAndSwapObject(Object var1, long var2, Object var4, Object var5)</p><p>​第一个：要修改的对象</p><p>​第二个：对象中要修改变量的偏移量</p><p>​   第三个：修改之前的值</p><p>​   第四个：预想修改之后的值</p><h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>循环时间开销很大：因为通常配合着循环使用，若失败则会一直尝试</p><p>只能保证一个共享变量的原子操作（多个共享变量，循环CAS就不能保证原子性，要用锁）</p><p><em><strong>引来ABA问题</strong></em></p><h2 id="ABA"><a href="#ABA" class="headerlink" title="ABA"></a>ABA</h2><p>线程1从内存位置V读取数据A，线程2也从地址V出读取A，线程2经过了一些操作将值别成了B，然后线程2又将V位置的数据变成A，此时，线程2进行CAS操作发现内存中仍然是A，进程1操作成功。但是整个过程中，地址V其实是已经被修改过的</p><p><em><strong>带有标记的原子引用类</strong></em>可以<em><strong>控制变量值的版本</strong></em>来保证CAS正确性。所以，解决ABA的话改用传统的互斥同步</p><p>原子类：某个线程进入方法，执行其中的指令时，不会被其他线程打断，别的线程一直等到该方法执行完成才由JVM从等待队列中选择一个另一个线程进入</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;比较并交换&lt;/p&gt;
-&lt;p&gt;  比较当前工作内存中的值和主内存中的值，如果相同则执行规定操作，否则继续比直到主内存和工作内存中的值一致&lt;/p&gt;</summary>
-      
-    
-    
-    
-    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
-    
-    
-    <category term="基础" scheme="http://example.com/tags/%E5%9F%BA%E7%A1%80/"/>
     
   </entry>
   

@@ -1,3 +1,4 @@
+http://example.com/2022/09/26/JDK19/
 http://example.com/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/
 http://example.com/2022/09/19/Kafka%E5%AE%A2%E6%88%B7%E7%AB%AF/
 http://example.com/2022/09/17/Kafka%E6%9C%8D%E5%8A%A1%E7%AB%AF/
@@ -100,6 +101,7 @@ http://example.com/tags/%E9%A2%98/
 http://example.com/tags/Mybatis/
 http://example.com/tags/Eureka/
 http://example.com/tags/Kafka/
+http://example.com/tags/JDK/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/Spring/
 http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/
