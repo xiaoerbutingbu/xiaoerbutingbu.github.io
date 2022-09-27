@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>ElasticSearch简介 | 小二小二不停步</title><meta name="keywords" content="ElasticSearch"><meta name="author" content="小二小二不停步"><meta name="copyright" content="小二小二不停步"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Apache Lucene总体结构 文档：索引与搜索的主要数据载体，它包含一个或多个字段。存放将要写入索引或将从索引搜索出来的数据 字段：文档的一个片段，包括两个部分：字段的名称和内容 词项：搜索时的一个单位，代表文本中的某个词 词条：词项在字段中的一次出现，包括词项的文本、开始和结束的位移以及类型  Lucene将写入索引的所有信息自支撑一种名为倒排索引的结构。该结构是一种将词项映射到文档的数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch简介">
+<meta property="og:url" content="http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="小二小二不停步">
+<meta property="og:description" content="Apache Lucene总体结构 文档：索引与搜索的主要数据载体，它包含一个或多个字段。存放将要写入索引或将从索引搜索出来的数据 字段：文档的一个片段，包括两个部分：字段的名称和内容 词项：搜索时的一个单位，代表文本中的某个词 词条：词项在字段中的一次出现，包括词项的文本、开始和结束的位移以及类型  Lucene将写入索引的所有信息自支撑一种名为倒排索引的结构。该结构是一种将词项映射到文档的数据">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/1.jpeg">
+<meta property="article:published_time" content="2022-09-27T08:45:21.000Z">
+<meta property="article:modified_time" content="2022-09-27T08:47:20.807Z">
+<meta property="article:author" content="小二小二不停步">
+<meta property="article:tag" content="ElasticSearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/1.jpeg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ElasticSearch简介',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-27 16:47:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"><link rel="alternate" href="/atom.xml" title="小二小二不停步" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">64</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/1.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">小二小二不停步</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/interview/"><i class="fa-fw fa  fa-bell"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ElasticSearch简介</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-09-27T08:45:21.000Z" title="发表于 2022-09-27 16:45:21">2022-09-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-27T08:47:20.807Z" title="更新于 2022-09-27 16:47:20">2022-09-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/">搜索引擎</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="ElasticSearch简介"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Apache-Lucene"><a href="#Apache-Lucene" class="headerlink" title="Apache Lucene"></a>Apache Lucene</h1><h2 id="总体结构"><a href="#总体结构" class="headerlink" title="总体结构"></a>总体结构</h2><ul>
+<li>文档：索引与搜索的主要数据载体，它包含一个或多个字段。存放将要写入索引或将从索引搜索出来的数据</li>
+<li>字段：文档的一个片段，包括两个部分：字段的名称和内容</li>
+<li>词项：搜索时的一个单位，代表文本中的某个词</li>
+<li>词条：词项在字段中的一次出现，包括词项的文本、开始和结束的位移以及类型</li>
+</ul>
+<p>Lucene将写入索引的所有信息自支撑一种名为倒排索引的结构。该结构是一种将词项映射到文档的数据结构，工作方式与传统的关系型数据库不同，倒排索引是面向词项而不是文档。</p>
+<p>索引存储了很多信息，比如词向量、各字段的原始信息、文档删除标记等。不用管存了什么，只需要了解索引中数据是如何组织的即可。</p>
+<p>每个索引由多个段组成，每个段只会被创建一次但会被查询多次。索引期间，段在创建后就不会被修改。多个段会在<code>段合并</code>的的阶段合并在一起，而且是要么强制执行要么由Lucene的内在机制决定的某个时刻执行，合并后的段数量更少、更大。<em><strong>段合并很消耗I&#x2F;O</strong></em>，合并期间有些不会被使用的信息也会被清理</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>分析：文档中的数据是如何转化为倒排索引的，查询串又是怎么转换为可用于搜索的词项</p>
+<p>文本分析由分析器执行，分析器由分词器、过滤器、字符映射器组成。</p>
+<ul>
+<li>分词器：分词器将文本切割成词条，其中有各种额外信息的词项，信息包括：词项在原始文本中的位置、词项的长度。分词器的工作成果称为词条流，因为这些词条会被一个一个推送给过滤器。</li>
+<li>过滤器：Lucene提供了很多现成的，也可以自定义实现心得。比如：小写过滤器（所有词条转化为小写）、ASCII过滤器（移除词条中所有非ASCII字符）。会逐个经过过滤器处理</li>
+<li>字符映射器：用于调用分词之前的文本预处理操作。</li>
+</ul>
+<p>在索引期，Lucene会使用我们选择的分析器来处理文档的内容，可以对不同的字段使用不同的分析器。</p>
+<h1 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h1><p>是一个可用于构建搜索应用的成品软件。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><ul>
+<li>索引：将数据存储在一个或多个索引中。索引就好比数据库，可以向索引写入文档或者从索引读取文档，并通过在ES内部使用Lucene将数据写入索引或从索引中检索数据。ES中的索引可能由一个或多个Lucene索引构成，具体细节由ES的索引分片、复制机制及其配置决定</li>
+<li>文档：是ES的主要实体，由字段组成，每个字段都有它的字段名以及一个或多个字段值（有多个同名字段）。文档之间可能有各自不同的字段集合，且文档没有固定的模式或强制的结构。</li>
+<li>类型：每个文档都有阈值对应的类型定义。允许用户在一个索引中存储多种文档类型，并未不同的文档类型提供不同的映射</li>
+<li>节点：单个ES服务实例称为节点。大多时候一个ES节点足矣应付大多数简单的应用，但考虑到荣凑性或在数据膨胀到单击无法应付，会倾向使用多节点的ES集群</li>
+<li>集群：数据量或查询压力超过单击负载时，需要多个节点来协同处理，所有节点组成的系统就是集群。集群同时是无间断提供服务的一种解决方案</li>
+<li>分片：集群允许系统存储的数据总量超过单击容量。为了满足该需求，ES将数据散步到多个物理Lucene索引上，这些Lucene索引就是分片，散步分片的过程就是分片处理。ES会自动完成分片处理，并让该分片呈现出一个大索引。</li>
+<li>副本：分片处理允许用户向ES集群推送超过单击容量的数据。副本就解决了访问压力过大时单击无法处理所有请求的问题。思路就是 为每个分片创建冗余的副本，处理查询时可以把这些副本用作最初的主分片。即使某个分片所在的节点宕机，ES可以使用其副本，数据就不会丢失，且可以在任意时间添加或移除副本。</li>
+<li>网关：ES工作中，关于集群的状态，索引设置的各种信息都会被收集器来，并在网关中被持久化。</li>
+</ul>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p>启动过程：当ES节点启动时，它使用广播（可配置为单播）来发现同一个集群中的其他节点并与他们连接。集群中会有一个节点选为管理节点（负载集群的状态管理以及在集群拓扑变化时做出变化，分发索引分片至集群的相应节点上），管理节点读取集群的状态信息，并在必要时恢复处理。该阶段，管理节点会检查所有索引分片并决定哪些分片将用于主分片，然后整个集群进入黄色状态；</p>
+<p>故障检测：集群正常工作时，管理节点会检测所有可用节点，检测是否正在工作。若任何节点再预定义的超时时间内没有响应，则认为该节点断开，然后开始启动错误处理过程。这要在集群-分片之间重新做平衡，因为之前已断开节点上的那些分片不可用，剩下的节点要负相应的责任。</p>
+<p>与ES通信：ES假设数据由URL携带或者以JSON，文档的形式由HTTP消息携带。ES在内部使用Java API进行节点间通信</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">小二小二不停步</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/">http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">小二小二不停步</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ElasticSearch/">ElasticSearch</a></div><div class="post_share"><div class="social-share" data-image="/img/1.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/09/26/JDK19/"><img class="next-cover" src="/img/7.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">JDK19</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">小二小二不停步</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">64</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xiaoerbutingbu"><i class="fab fa-github"></i><span>github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xiaoerbutingbu" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="http://wpa.qq.com/msgrd?v=3&amp;uin=370951771&amp;site=qq&amp;menu=yes" target="_blank" title="QQ"><i class="fab fa-qq"></i></a><a class="social-icon" href="mailto:370951771@2019.cqut.edu.cn" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到小二小二不停步的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Apache-Lucene"><span class="toc-number">1.</span> <span class="toc-text">Apache Lucene</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.</span> <span class="toc-text">总体结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ElasticSearch"><span class="toc-number">2.</span> <span class="toc-text">ElasticSearch</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">2.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.</span> <span class="toc-text">工作流程</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/" title="ElasticSearch简介"><img src="/img/1.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ElasticSearch简介"/></a><div class="content"><a class="title" href="/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/" title="ElasticSearch简介">ElasticSearch简介</a><time datetime="2022-09-27T08:45:21.000Z" title="发表于 2022-09-27 16:45:21">2022-09-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/26/JDK19/" title="JDK19"><img src="/img/7.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="JDK19"/></a><div class="content"><a class="title" href="/2022/09/26/JDK19/" title="JDK19">JDK19</a><time datetime="2022-09-26T11:47:43.000Z" title="发表于 2022-09-26 19:47:43">2022-09-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/" title="Kafka可靠性"><img src="/img/6.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kafka可靠性"/></a><div class="content"><a class="title" href="/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/" title="Kafka可靠性">Kafka可靠性</a><time datetime="2022-09-25T08:51:00.000Z" title="发表于 2022-09-25 16:51:00">2022-09-25</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By 小二小二不停步</div><div class="footer_custom_text">大切な人といつかまた巡り会えますように</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

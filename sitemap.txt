@@ -1,3 +1,4 @@
+http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/
 http://example.com/2022/09/26/JDK19/
 http://example.com/2022/09/25/Kafka%E5%8F%AF%E9%9D%A0%E6%80%A7/
 http://example.com/2022/09/19/Kafka%E5%AE%A2%E6%88%B7%E7%AB%AF/
@@ -102,6 +103,7 @@ http://example.com/tags/Mybatis/
 http://example.com/tags/Eureka/
 http://example.com/tags/Kafka/
 http://example.com/tags/JDK/
+http://example.com/tags/ElasticSearch/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/Spring/
 http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/
@@ -114,3 +116,4 @@ http://example.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/
 http://example.com/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/
 http://example.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/
 http://example.com/categories/Mybatis/
+http://example.com/categories/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/
