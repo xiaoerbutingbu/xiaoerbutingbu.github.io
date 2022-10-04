@@ -1,3 +1,4 @@
+http://example.com/2022/10/03/LinkedHashMap/
 http://example.com/2022/09/30/TreeMap/
 http://example.com/2022/09/27/ElasticSearch%E7%AE%80%E4%BB%8B/
 http://example.com/2022/09/26/JDK19/
