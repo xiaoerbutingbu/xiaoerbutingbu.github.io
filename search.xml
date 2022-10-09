@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Netty-IO</title>
+      <link href="/2022/10/06/Netty-IO/"/>
+      <url>/2022/10/06/Netty-IO/</url>
+      
+        <content type="html"><![CDATA[<h1 id="传统BIO"><a href="#传统BIO" class="headerlink" title="传统BIO"></a>传统BIO</h1><p>网络编程的基本模型是Client&#x2F;Server模型，就是两个进程之间相互通信，服务端提供位置信息（绑定的IP地址和监听端口），客户端通过连接操作向服务端监听的地址发起连接请求，通过三次握手建立连接，若建立成功就通过网络套接字通信</p><p>同步阻塞I&#x2F;O服务端通信模型（一客户端一线程）：</p><p><img src="/2022/10/06/Netty-IO/BIO.png"></p><p>采用BIO通信模型的服务端，通常由一个Acceptor线程负责监听客户端的连接，它接收到客户端连接请求后给每个客户端创建一个新线程进行链路处理，处理完成后通过输出流返回应答给客户端，线程销毁。一请求一应答通信类型。</p><p>该模型最大的问题就是<strong>缺乏弹性伸缩力</strong>：当客户端并发量增加，服务端的线程个数和客户端并发访问量呈正比关系，线程数的膨胀会让系统性能下降，并发访问量的持续增大，系统也会线程堆栈溢出、创建新线程失败等问题，最终进程会宕机或僵死，不能提供服务。</p><p>综上：每当一个新的客户端请求接入时，服务端必须创建一个新的线程处理新接入的客户端链路，一个线程只能处理一个客户端连接。在实际中，却常常有成千上万个客户端的并发连接，该模型显然不能满足场景。</p><h1 id="伪异步I-x2F-O"><a href="#伪异步I-x2F-O" class="headerlink" title="伪异步I&#x2F;O"></a>伪异步I&#x2F;O</h1><p>同步阻塞I&#x2F;O的一个链路需要一个线程处理，所以可以通过一个线程池处理多个客户端的请求接入，形成客户端个数M，线程池最大线程数N，M可以远大于N。线程池可以灵活调配线程资源，设置线程的最大值，防止由于海量并发接入导致线程耗尽。</p><p>伪异步I&#x2F;O服务端通信模型：</p><p><img src="/2022/10/06/Netty-IO/WIO.png"></p><p>当有新客户端接入，将客户端的socket封装成一个Task投递到后斗你的线程池中处理，JDK的线程池维护一个消息嘟列和N个活跃线程，对消息队列中的任务进行处理。由于线程池可以设置消息队列的大小和最大线程数，所以它占用的资源可控，不会让资源耗尽或宕机。</p><p>伪异步I&#x2F;O实际上只是对之前的I&#x2F;O模型的一个简单优化，无法从根本上解决同步I&#x2F;O导致的通信线程阻塞问题；如果所有可用线程都被服务器阻塞，那么后续所有I&#x2F;O消息都会在消息队列中排队；因为线程池采用阻塞队列实现，当队列挤满，后续接入队列的操作也会被阻塞；因为前端只有一个Accptor线程接收客户端接入，它被阻塞在线程池的同步阻塞队列后，新客户端请求消息会被拒绝，客户端会发生大量的连接超时；</p><h1 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h1><p>NIO提供了SocketChannel和ServerSocketChannel两种套接字通道实现，阻塞和非阻塞两种。</p><p>相关概念：</p><ul><li>缓冲区Buffer：一个对象，包含一些要写入或者要读出的数据。在面向流的I&#x2F;O中，可以将数据直接写入或者直接读到Stream对象中。NIO库中，<em><strong>所有数据都是用缓冲区处理</strong></em>。Buffer实质上是一个数组（最常见的就是ByteBuffer，所以它还提供了特有的一些操作），当然还提供了对数据的结构化访问以及维护读写位置等信息</li><li>通道Channel：就好比自来水管，网络数据通过Channel读取和写入；<strong>通道与流不同就在于通道是双向的，流只在一个方向上移动，而通道可用于读、写或同时进行</strong>；&#x3D;&#x3D;全双工&#x3D;&#x3D;，所以比流更好映射操作系统的API；可以分为两大类：对网略读写的SelectableChannel和对文件操作的FileChannel</li><li>多路复用器Selector：是NIO的基础，它会不断轮询注册在其上Channel，若某个Channel发生读或写，这个Channel就处于就绪状态，会被Selector轮询出来，再通过SelectionKey获取就绪Channel集合，进行后续的I&#x2F;O操作；</li></ul><p>NIO服务端通信序列图</p><p><img src="/2022/10/06/Netty-IO/NIOS.png"></p><p>NIO客户端序列图:</p><p><img src="/2022/10/06/Netty-IO/NIOC.png"></p><p>NIO优点：</p><ul><li>客户端发起的连接是异步，可通过在多路复用器注册OP_CONNECT等后续结果，不像之前的客户端被同步阻塞</li><li>SocketChannel的读写都是异步，没有可读写的数据可以直接返回，这样I&#x2F;O通信线程就可以处理其他的链路</li><li>线程模型的优化：因为JDK的Selector在Linux等操作系统上通过epoll实现，它没有连接句柄数的限制，这样一个Selector线程可以同时处理大量客户端连接，性能也不会因客户端增加而线性下降，所以非常适合高性能、高负载的网络服务器</li></ul><h1 id="AIO"><a href="#AIO" class="headerlink" title="AIO"></a>AIO</h1><p>NIO2.0引入的新的异步通道，不需要通过多路复用器对注册的通道进行轮询操作即可实现异步读写，从而简化了NIO的编程模型。提供了异步文件通道和异步套接字的实现，异步通道提供两种方式获取操作结果：java.util.concurrent.Future类来表示异步操作的结果；在执行异步操作的时候穿衣个Java.nio.channels。</p><h1 id="对比I-x2F-O"><a href="#对比I-x2F-O" class="headerlink" title="对比I&#x2F;O"></a>对比I&#x2F;O</h1><p>异步非阻塞I&#x2F;O：只能被称为非阻塞I&#x2F;O，不能交异步非阻塞I&#x2F;O。JDK1.4的Selector基于select&#x2F;poll模型实现，是基于I&#x2F;O复用技术的非阻塞I&#x2F;O；JDK1.5优化了Selector，在底层使用epoll替换了select&#x2F;poll，上层的API不变，没有改变I&#x2F;O的模型；JDK1.7提供NIO2.0新增了异步的套接字通道，才会真的异步I&#x2F;O，在异步I&#x2F;O操作的时候可以传递信号变量，当操作完成后会回调相关方法，异步I&#x2F;O才是AIO</p><p>多路复用器：NIO的关键是I&#x2F;O多路复用技术，技术核心就是通过Selector轮询注册在其上的Channel，当发现某个或多个Channel处于就绪状态，返回就绪态的Channel选择键集合，进行I&#x2F;O操作。</p><p>伪异步I&#x2F;O：NIO没有流行前，为了Tomcat通信线程同步I&#x2F;O导致业务线程被挂住的问题。所以就在通信线程和业务线程之前做个缓冲区，缓冲区用于隔离I&#x2F;O线程和业务线程间的直接访问</p><h1 id="不用Java-NIO而用Netty"><a href="#不用Java-NIO而用Netty" class="headerlink" title="不用Java NIO而用Netty"></a>不用Java NIO而用Netty</h1><p>不用NIO的原因</p><ul><li>NIO的类库和API繁杂，使用麻烦，要熟练使用相关API。Selector、ServerSocketChannel、SocketChannel、ByteBuffer</li><li>需要具备其他的额外技能。比如java多线程编程</li><li>可靠性能力补齐，工作量和难度都打</li><li>JDK NIO的BUG。比如：epoll 会导致Selector空轮序，而让CPU消耗100%，只是概率降低</li></ul><p>选Netty：</p><ul><li>API使用简单，开发门槛低</li><li>功能强大，预设置了多种编码解码功能，支持多种主流协议</li><li>定制能力强，可通过ChannelHandler对通信框架灵活的拓展</li><li>性能高，对比其他NIO框架，Netty综合性能优</li><li>社区活跃，版本迭代周期短，有BUG可及时修复</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网络编程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Netty </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>LinkedHashMap</title>
       <link href="/2022/10/03/LinkedHashMap/"/>
       <url>/2022/10/03/LinkedHashMap/</url>
