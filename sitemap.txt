@@ -1,4 +1,4 @@
-http://example.com/2022/10/12/transient/
+http://example.com/2022/10/10/transient/
 http://example.com/2022/10/06/Netty-IO/
 http://example.com/2022/09/30/TreeMap/
 http://example.com/2022/10/03/LinkedHashMap/

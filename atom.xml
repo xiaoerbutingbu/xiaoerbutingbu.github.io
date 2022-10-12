@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-10-12T04:08:14.991Z</updated>
+  <updated>2022-10-12T04:09:50.409Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>transient</title>
-    <link href="http://example.com/2022/10/12/transient/"/>
-    <id>http://example.com/2022/10/12/transient/</id>
-    <published>2022-10-12T04:05:39.000Z</published>
-    <updated>2022-10-12T04:08:14.991Z</updated>
+    <link href="http://example.com/2022/10/10/transient/"/>
+    <id>http://example.com/2022/10/10/transient/</id>
+    <published>2022-10-10T04:05:39.000Z</published>
+    <updated>2022-10-12T04:09:50.409Z</updated>
     
     <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><p>对于transient修饰的成员变量，在类的实例对象的序列化处理过程中会被忽略。因此，<em><strong>transient变量不会贯穿对象的序列化和反序列化。生命周期仅存于调用者的内存中而不会也到磁盘进行持久化</strong></em></p><p>序列化：Java中对象序列化指的是将对象转为成以字节序列的形式表示，这些字节包含了对象的数据和信息，一个序列化后的对象可以被写到数据库或文件中，也可以用于网络传输。一般使用cache或远程调用RPC的时候，经常实现Serializable接口，目的就是让其可序列化。序列化本身的目的就是为了可以反序列化，恢复成原本的Java对象的实例</p><p>小结</p><ul><li>一旦变量被transient修饰，变量就不再是对象持久化的一部分，该变量内容在序列化后无法被访问</li><li>transient关键字只能修饰变量，不能修饰方法和类。本地变量不能被transient修饰。变量若是用户自定义类变量，则该类需要实现serializable接口</li><li>一个静态变量不管是否被transient修饰，均不能序列化（若反序列化后类中static变量还有值，则值为当前JVM中对应static变量的值）序列化保存的是对象状态，静态变量保存的是类状态，所以序列化不能保存静态变量</li></ul><p>使用场景：</p><ul><li>类中字段值可以根据其他字段推导出</li><li>一些安全性的信息，一般情况是不能离开JVM的</li><li>若类中使用Logger实例，那么Logger实例不需要实例化</li></ul><p>例：在List接口下的ArrayList类中，底层的elementData就是被transient修饰，此处的目的不是为了不被实例化，而是不使用默认的serializable接口实例化，且实现自定义的实例化规则。它会复写writeObject和readObject方法，让实际真正写入的元素被实例化，剩余没有被写入元素的空间不被实例化，以免造成空间浪费</p>]]></content>
     
