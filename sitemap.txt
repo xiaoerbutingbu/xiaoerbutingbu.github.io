@@ -1,3 +1,4 @@
+http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/10/10/transient/
 http://example.com/2022/10/06/Netty-IO/
 http://example.com/2022/09/30/TreeMap/
@@ -47,7 +48,6 @@ http://example.com/2022/07/08/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B
 http://example.com/2022/05/24/MySQL-1/
 http://example.com/2022/05/11/InnoDB-1/
 http://example.com/2022/07/02/Java%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E9%9B%86%E5%90%88%E7%B1%BB/
-http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/06/16/Shiro/
 http://example.com/2022/06/15/SpringCloudAlibaba%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/
 http://example.com/2022/06/13/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/
