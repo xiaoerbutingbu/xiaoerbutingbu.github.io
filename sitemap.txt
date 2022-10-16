@@ -1,3 +1,4 @@
+http://example.com/2022/10/16/Ribbon-1/
 http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/10/10/transient/
 http://example.com/2022/10/06/Netty-IO/
@@ -110,6 +111,7 @@ http://example.com/tags/JDK/
 http://example.com/tags/ElasticSearch/
 http://example.com/tags/Netty/
 http://example.com/tags/transient/
+http://example.com/tags/Ribbon/
 http://example.com/categories/%E5%9F%BA%E7%A1%80/
 http://example.com/categories/Spring/
 http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/
