@@ -1,4 +1,4 @@
-http://example.com/2022/10/16/Ribbon-1/
+http://example.com/2022/10/13/Ribbon-1/
 http://example.com/2022/06/25/Autowired%E5%92%8CResource/
 http://example.com/2022/10/10/transient/
 http://example.com/2022/10/06/Netty-IO/
