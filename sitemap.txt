@@ -1,3 +1,4 @@
+http://example.com/2022/10/22/Mybatis%E6%8F%92%E4%BB%B6/
 http://example.com/2022/10/18/Feign-1/
 http://example.com/2022/10/13/Ribbon-1/
 http://example.com/2022/10/15/Ribbon-2/
