@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>编码</title>
+      <link href="/2022/10/28/%E7%BC%96%E7%A0%81/"/>
+      <url>/2022/10/28/%E7%BC%96%E7%A0%81/</url>
+      
+        <content type="html"><![CDATA[<h1 id="常规字符集"><a href="#常规字符集" class="headerlink" title="常规字符集"></a>常规字符集</h1><p>标准的ASCII字符本身就是美国人在电脑上保存英文字母、数字、标点符号等定制的字符集，一个字符对应一个码点，编码后就转为相应的二进制。ASCII字符集使用了<strong>一个字节存储一个字符，首位是0</strong></p><p>中国在此基础上，设计了GBK编码，包含2W多汉字字符，<em><strong>GBK中一个中文字符编码成两个字节形式存储</strong></em>。GBK兼容了ASCII字符集，且GBK规定<strong>汉字的第一个字节必须是1</strong></p><p>Unicode字符集是国际组织制定，容纳世界上所有文字、符号的字符集。比如：UTF-32就4个字节表示一个字符。</p><h1 id="UTF-8"><a href="#UTF-8" class="headerlink" title="UTF-8"></a>UTF-8</h1><p>Unicode下的一种编码方案，采取可变长编码方案，共分四个长度区，1个字节、2个字节、3个字节、4个字节。</p><p><em><strong>英文字符、数字占1个字节（兼容标准ASCII编码），汉字占3个字节</strong></em>。该编码方案制定了一张编码表，一个字节要求首位必须是0；两个字节要求第一个字节首位是110，第二个字节首位是10；三个字节开头分别是1110、10、10；四个字节开头分别是11110、10、10、10。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 操作系统 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 操作系统 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>instanceof</title>
       <link href="/2022/10/25/instanceof/"/>
       <url>/2022/10/25/instanceof/</url>
