@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-10-30T08:06:49.073Z</updated>
+  <updated>2022-11-05T04:40:44.638Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>内存溢出和内存泄露</title>
+    <link href="http://example.com/2022/10/31/%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%92%8C%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/"/>
+    <id>http://example.com/2022/10/31/%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%92%8C%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/</id>
+    <published>2022-10-31T04:36:42.000Z</published>
+    <updated>2022-11-05T04:40:44.638Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><ul><li>内存泄露：是指程序在申请内存后，无法释放已申请的内存空间，一次内存泄漏似乎不会有大的影响，但内存泄漏堆积后的后果就是内存溢出</li><li>内存溢出：指程序申请内存时，没有足够的内存供申请者使用，或者说，给了你一块存储int类型数据的存储空间，但是你却存储long类型的数据，那么结果就是内存不够用，此时就会报错OOM,即所谓的内存溢出。</li></ul><p>二者的关系</p><p><strong>内存泄漏的堆积最终会导致内存溢出内存溢出</strong><br>就是你要的内存空间超过了系统实际分配给你的空间，此时系统相当于没法满足你的需求，就会报内存溢出的错误。</p><ul><li><strong>内存泄漏</strong>是指你向系统申请分配内存进行使用(new)，可是使用完了以后却不归还(delete)，结果你申请到的那块内存你自己也不能再访问（也许你把它的地址给弄丢了），而系统也不能再次将它分配给需要的程序。就相当于你租了个带钥匙的柜子，你存完东西之后把柜子锁上之后，把钥匙丢了或者没有将钥匙还回去，那么结果就是这个柜子将无法供给任何人使用，也无法被垃圾回收器回收，因为找不到他的任何信息。</li><li><strong>内存溢出：</strong> 一个盘子用尽各种方法只能装4个果子，你装了5个，结果掉倒地上不能吃了。这就是溢出。<strong>比方说栈，栈满时再做进栈必定产生空间溢出，叫上溢，栈空时再做退栈也产生空间溢出，称为下溢。</strong> 就是分配的内存不足以放下数据项序列,称为内存溢出。说白了就是我承受不了那么多，那我就报错。</li></ul><h1 id="内存泄露分类"><a href="#内存泄露分类" class="headerlink" title="内存泄露分类"></a>内存泄露分类</h1><ul><li>**常发性内存泄漏:**发生内存泄漏的代码会被多次执行到，每次被执行的时候都会导致一块内存泄漏。</li><li>**偶发性内存泄漏:**发生内存泄漏的代码只有在某些特定环境或操作过程下才会发生。常发性和偶发性是相对的。对于特定的环境，偶发性的也许就变成了常发性的。所以测试环境和测试方法对检测内存泄漏至关重要。</li><li>**一次性内存泄漏:**发生内存泄漏的代码只会被执行一次，或者由于算法上的缺陷，导致总会有一块仅且一块内存发生泄漏。比如，在类的构造函数中分配内存，在析构函数中却没有释放该内存，所以内存泄漏只会发生一次。</li><li>**隐式内存泄漏:**程序在运行过程中不停的分配内存，但是直到结束的时候才释放内存。严格的说这里并没有发生内存泄漏，因为最终程序释放了所有申请的内存。但是对于一个服务器程序，需要运行几天，几周甚至几个月，不及时释放内存也可能导致最终耗尽系统的所有内存。所以，我们称这类内存泄漏为隐式内存泄漏</li></ul><h1 id="内存溢出的原因及解决"><a href="#内存溢出的原因及解决" class="headerlink" title="内存溢出的原因及解决"></a>内存溢出的原因及解决</h1><h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><ul><li>内存中加载的数据量过于庞大，如一次从数据库取出过多数据；</li><li>集合类中有对对象的引用，使用完后未清空，使得JVM不能回收；</li><li>代码中存在死循环或循环产生过多重复的对象实体；</li><li>使用的第三方软件中的BUG；</li><li>启动参数内存值设定的过小</li></ul><h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p><strong>第一步</strong>，修改JVM启动参数，直接增加内存。(-Xms，-Xmx参数一定不要忘记加。)</p><p><strong>第二步</strong>，检查错误日志，查看“OutOfMemory”错误前是否有其 它异常或错误。</p><p><strong>第三步</strong>，对代码进行走查和分析，找出可能发生内存溢出的位置。</p><p>重点排查以下几点：</p><ol><li>检查对数据库查询中，是否有一次获得全部数据的查询。一般来说，如果一次取十万条记录到内存，就可能引起内存溢出。这个问题比较隐蔽，在上线前，数据库中数据较少，不容易出问题，上线后，数据库中数据多了，一次查询就有可能引起内存溢出。因此对于数据库查询尽量采用分页的方式查询。</li><li>检查代码中是否有死循环或递归调用。</li><li>检查是否有大循环重复产生新对象实体。</li><li>检查对数据库查询中，是否有一次获得全部数据的查询。一般来说，如果一次取十万条记录到内存，就可能引起内存溢出。这个问题比较隐蔽，在上线前，数据库中数据较少，不容易出问题，上线后，数据库中数据多了，一次查询就有可能引起内存溢出。因此对于数据库查询尽量采用分页的方式查询。</li><li>检查List、Map等集合对象是否有使用完后，未清除的问题。List、Map等集合对象会始终存有对对象的引用，使得这些对象不能被GC回收</li></ol><p><strong>第四步</strong>，使用内存查看工具动态查看内存使用情况（jvisualvm）</p><h1 id="其他内存泄露"><a href="#其他内存泄露" class="headerlink" title="其他内存泄露"></a>其他内存泄露</h1><p>由于Java的JVM引入了垃圾回收机制，垃圾回收器会自动回收不再使用的对象，了解JVM回收机制的都知道JVM是使用引用计数法和可达性分析算法来判断对象是否是不再使用的对象，本质都是判断一个对象是否还被引用。那么对于这种情况下，由于代码的实现不同就会出现很多种内存泄漏问题（让JVM误以为此对象还在引用中，无法回收，造成内存泄漏）。</p><p>1、静态集合类，如HashMap、LinkedList等等。如果这些容器为静态的，那么它们的生命周期与程序一致，则容器中的对象在程序结束之前将不能被释放，从而造成内存泄漏。简单而言，长生命周期的对象持有短生命周期对象的引用，尽管短生命周期的对象不再使用，但是因为长生命周期对象持有它的引用而导致不能被回收。</p><p>2、各种连接，如数据库连接、网络连接和IO连接等。在对数据库进行操作的过程中，首先需要建立与数据库的连接，当不再使用时，需要调用close方法来释放与数据库的连接。只有连接被关闭后，垃圾回收器才会回收对应的对象。否则，如果在访问数据库的过程中，对Connection、Statement或ResultSet不显性地关闭，将会造成大量的对象无法被回收，从而引起内存泄漏。</p><p>3、变量不合理的作用域。一般而言，一个变量的定义的作用范围大于其使用范围，很有可能会造成内存泄漏。另一方面，如果没有及时地把对象设置为null，很有可能导致内存泄漏的发生。<br>如上面这个伪代码，通过readFromNet方法把接受的消息保存在变量msg中，然后调用saveDB方法把msg的内容保存到数据库中，此时msg已经就没用了，由于msg的生命周期与对象的生命周期相同，此时msg还不能回收，因此造成了内存泄漏。</p><p>实际上这个msg变量可以放在receiveMsg方法内部，当方法使用完，那么msg的生命周期也就结束，此时就可以回收了。还有一种方法，在使用完msg后，把msg设置为null，这样垃圾回收器也会回收msg的内存空间。</p><p>4、内部类持有外部类，如果一个外部类的实例对象的方法返回了一个内部类的实例对象，这个内部类对象被长期引用了，即使那个外部类实例对象不再被使用，但由于内部类持有外部类的实例对象，这个外部类对象将不会被垃圾回收，这也会造成内存泄露。</p><p>5、改变哈希值，当一个对象被存储进HashSet集合中以后，就不能修改这个对象中的那些参与计算哈希值的字段了，否则，对象修改后的哈希值与最初存储进HashSet集合中时的哈希值就不同了，在这种情况下，即使在contains方法使用该对象的当前引用作为的参数去HashSet集合中检索对象，也将返回找不到对象的结果，这也会导致无法从HashSet集合中单独删除当前对象，造成内存泄露</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;简述&quot;&gt;&lt;a href=&quot;#简述&quot; class=&quot;headerlink&quot; title=&quot;简述&quot;&gt;&lt;/a&gt;简述&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;内存泄露：是指程序在申请内存后，无法释放已申请的内存空间，一次内存泄漏似乎不会有大的影响，但内存泄漏堆积后的后果就是内存溢出&lt;/</summary>
+      
+    
+    
+    
+    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="基础" scheme="http://example.com/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+  </entry>
   
   <entry>
     <title>编码</title>
@@ -478,31 +503,6 @@
     
     
     <category term="Kafka" scheme="http://example.com/tags/Kafka/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>as-if-serial和happens-before</title>
-    <link href="http://example.com/2022/08/31/as-if-serial%E5%92%8Chappens-before/"/>
-    <id>http://example.com/2022/08/31/as-if-serial%E5%92%8Chappens-before/</id>
-    <published>2022-08-31T15:48:18.000Z</published>
-    <updated>2022-08-31T15:52:04.646Z</updated>
-    
-    <content type="html"><![CDATA[<p>我们知道为了提高并行度，优化程序性能，编译器和处理器会对代码进行指令重排序。但为了不改变程序的执行结果，尽可能地提高程序执行的并行度，我们需要了解as-if-serial规则和happens-before规则。</p><h3 id="as-if-serial规则"><a href="#as-if-serial规则" class="headerlink" title="as-if-serial规则"></a>as-if-serial规则</h3><p>as-if-serial语义的意思指：<strong>不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。</strong> 编译器、runtime和处理器都必须遵守as-if-serial语义。<br>为了遵守as-if-serial语义，<strong>编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。</strong> 但是，如果操作之间不存在数据依赖关系，这些操作可能被编译器和处理器重排序。示例代码如下：</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">COPYint a=<span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> b=<span class="number">2</span>;</span><br><span class="line"><span class="type">int</span> c=a+b;</span><br></pre></td></tr></table></figure><p>a和c之间存在数据依赖关系，同时b和c之间也存在数据依赖关系。因此在最终执行的指令序列中，c不能被重排序到A和B的前面（c排到a和b的前面，程序的结果将会被改变）。但a和b之间没有数据依赖关系，编译器和处理器可以重排序a和b之间的执行顺序。</p><h3 id="happens-before（先行发生）规则"><a href="#happens-before（先行发生）规则" class="headerlink" title="happens-before（先行发生）规则"></a>happens-before（先行发生）规则</h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>JMM可以通过happens-before关系向程序员提供跨线程的内存可见性保证（如果A线程的写操作a与B线程的读操作b之间存在happens-before关系，尽管a操作和b操作在不同的线程中执行，但JMM向程序员保证a操作将对b操作可见）。具体的定义为：</p><ol><li><strong>如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见，而且第一个操作的执行顺序排在第二个操作之前。</strong></li><li>两个操作之间存在happens-before关系，并不意味着Java平台的具体实现必须要按照happens-before关系指定的顺序来执行。<strong>如果重排序之后的执行结果，与按happens-before关系来执行的结果一致，那么JMM允许这种重排序。</strong></li></ol><h4 id="八大规则"><a href="#八大规则" class="headerlink" title="八大规则"></a>八大规则</h4><table><thead><tr><th>规则</th><th>解释</th></tr></thead><tbody><tr><td>程序次序规则</td><td>在一个线程内，代码按照书写的控制流顺序执行</td></tr><tr><td>管程锁定规则</td><td>一个 unlock 操作先行发生于后面对同一个锁的 lock 操作</td></tr><tr><td>volatile 变量规则</td><td>volatile 变量的写操作先行发生于后面对这个变量的读操作</td></tr><tr><td>线程启动规则</td><td>Thread 对象的 start() 方法先行发生于此线程的每一个动作</td></tr><tr><td>线程终止规则</td><td>线程中所有的操作都先行发生于对此线程的终止检测(通过 Thread.join() 方法结束、 Thread.isAlive() 的返回值检测)</td></tr><tr><td>线程中断规则</td><td>对线程 interrupt() 方法调用优先发生于被中断线程的代码检测到中断事件的发生 (通过 Thread.interrupted() 方法检测)</td></tr><tr><td>对象终结规则</td><td>一个对象的初始化完成(构造函数执行结束)先行发生于它的 finalize() 方法的开始</td></tr><tr><td>传递性</td><td>如果操作 A 先于 操作 B 发生，操作 B 先于 操作 C 发生，那么操作 A 先于 操作 C</td></tr></tbody></table><h3 id="as-if-serial规则和happens-before规则的区别"><a href="#as-if-serial规则和happens-before规则的区别" class="headerlink" title="as-if-serial规则和happens-before规则的区别"></a>as-if-serial规则和happens-before规则的区别</h3><ol><li>as-if-serial语义保证单线程内程序的执行结果不被改变，happens-before关系保证<strong>正确同步的多线程</strong>程序的执行结果不被改变。</li><li>as-if-serial语义给编写单线程程序的程序员创造了一个幻觉：单线程程序是按程序的顺序来执行的。happens-before关系给编写正确同步的多线程程序的程序员创造了一个幻觉：正确同步的多线程程序是按happens-before指定的顺序来执行的。</li><li>as-if-serial语义和happens-before这么做的目的，都是为了在不改变程序执行结果的前提下，尽可能地提高程序执行的并行度。</li></ol>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;我们知道为了提高并行度，优化程序性能，编译器和处理器会对代码进行指令重排序。但为了不改变程序的执行结果，尽可能地提高程序执行的并行度，我们需要了解as-if-serial规则和happens-before规则。&lt;/p&gt;
-&lt;h3 id=&quot;as-if-serial规则&quot;&gt;&lt;a </summary>
-      
-    
-    
-    
-    <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
-    
-    
-    <category term="基础" scheme="http://example.com/tags/%E5%9F%BA%E7%A1%80/"/>
     
   </entry>
   
